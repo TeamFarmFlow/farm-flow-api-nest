@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 
 import { Configuration } from '@app/config';
+import { CookieModule } from '@app/core';
 
 import { UserModule } from '../user';
 
@@ -11,6 +12,7 @@ import { AuthController } from './presentation/auth.controller';
 
 @Module({
   imports: [
+    CookieModule,
     UserModule,
     JwtModule.registerAsync({
       inject: [Configuration],

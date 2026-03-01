@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtModuleOptions } from '@nestjs/jwt';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
+import { CookieOptions } from 'express';
 import { utilities, WinstonModuleOptions } from 'nest-winston';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import winston from 'winston';
@@ -79,6 +80,17 @@ export class Configuration extends ConfigService {
   get jwtModuleOptions(): JwtModuleOptions {
     return {
       secret: this.getOrThrow<string>('JWT_SECRET'),
+    };
+  }
+
+  get cookieOptions(): CookieOptions {
+    const isLocal = this.nodeEnv === NodeEnv.Local;
+
+    return {
+      httpOnly: true,
+      secure: isLocal ? false : true,
+      sameSite: isLocal ? 'lax' : 'none',
+      path: 'api/v1/auth',
     };
   }
 }
