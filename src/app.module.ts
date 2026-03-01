@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { Configuration, ConfigurationModule } from '@app/config';
-import { ContextModule } from '@app/core';
+import { ContextModule, GlobalExceptionFilterProvider, GlobalValidationPipeProvider } from '@app/core';
 import { WinstonModule } from 'nest-winston';
 
 @Module({
@@ -22,5 +22,6 @@ import { WinstonModule } from 'nest-winston';
       },
     }),
   ],
+  providers: [GlobalValidationPipeProvider, GlobalExceptionFilterProvider],
 })
 export class AppModule {}
