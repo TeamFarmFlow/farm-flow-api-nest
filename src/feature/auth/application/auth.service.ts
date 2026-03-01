@@ -2,10 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { compareSync, hashSync } from 'bcrypt';
+import { isUUID } from 'class-validator';
+import { Request, Response } from 'express';
 
+import { CookieService } from '@app/core';
 import { User, UserRepository } from '@app/feature/user';
 
-import { DuplicatedEmailEXception, RefreshToken, RefreshTokenRepository, WrongEmailOrPasswordException } from '../domain';
+import { DuplicatedEmailEXception, InvalidRefreshTokenException, RefreshToken, RefreshTokenRepository, WrongEmailOrPasswordException } from '../domain';
 import { JwtClaims } from '../infrastructure/jwt';
 
 import { LoginCommand, RegisterCommand } from './command';
@@ -16,6 +19,7 @@ export class AuthService {
   constructor(
     private readonly refreshTokenRepository: RefreshTokenRepository,
     private readonly userRepository: UserRepository,
+    private readonly cookieService: CookieService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -35,26 +39,22 @@ export class AuthService {
     return refreshTokenEntity.id;
   }
 
-  async register(command: RegisterCommand): Promise<AuthResult> {
+  async register(command: RegisterCommand, res: Response): Promise<AuthResult> {
     if (await this.userRepository.hasOneByEmail(command.email)) {
       throw new DuplicatedEmailEXception();
     }
 
     const user = await this.userRepository.save(User.ownerOf({ ...command, password: hashSync(command.password, 10) }));
 
-    const accessToken = await this.issueAccessToken(user);
+    const { accessToken, expiresIn, expiresAt } = await this.issueAccessToken(user);
     const refreshToken = await this.issueRefreshToken(user);
 
-    return {
-      refreshToken,
-      accessToken: accessToken.accessToken,
-      expiresIn: accessToken.expiresIn,
-      expiresAt: accessToken.expiresAt,
-      user,
-    };
+    this.cookieService.setRefreshToken(res, refreshToken);
+
+    return { accessToken, expiresIn, expiresAt, user };
   }
 
-  async login(command: LoginCommand): Promise<AuthResult> {
+  async login(command: LoginCommand, res: Response): Promise<AuthResult> {
     const user = await this.userRepository.findOneByEmail(command.email);
 
     if (!user) {
@@ -65,15 +65,41 @@ export class AuthService {
       throw new WrongEmailOrPasswordException();
     }
 
-    const accessToken = await this.issueAccessToken(user);
+    const { accessToken, expiresIn, expiresAt } = await this.issueAccessToken(user);
     const refreshToken = await this.issueRefreshToken(user);
 
-    return {
-      refreshToken,
-      accessToken: accessToken.accessToken,
-      expiresIn: accessToken.expiresIn,
-      expiresAt: accessToken.expiresAt,
-      user,
-    };
+    this.cookieService.setRefreshToken(res, refreshToken);
+
+    return { accessToken, expiresIn, expiresAt, user };
+  }
+
+  async refresh(req: Request, res: Response): Promise<AuthResult> {
+    const refreshTokenValue = this.cookieService.parseRefreshToken(req);
+
+    if (!isUUID(refreshTokenValue, 4)) {
+      this.cookieService.clearRefreshToken(res);
+      throw new InvalidRefreshTokenException();
+    }
+
+    const refreshToken = await this.refreshTokenRepository
+      .createQueryBuilder('r')
+      .innerJoinAndMapOne('r.user', 'r.user', 'u')
+      .where('r.id = :id', { id: refreshTokenValue })
+      .andWhere('r.expiredAt > NOW()')
+      .getOne();
+
+    if (!refreshToken) {
+      this.cookieService.clearRefreshToken(res);
+      throw new InvalidRefreshTokenException();
+    }
+
+    await this.refreshTokenRepository.delete({ id: refreshTokenValue });
+
+    const { accessToken, expiresIn, expiresAt } = await this.issueAccessToken(refreshToken.user);
+    const newRefreshToken = await this.issueRefreshToken(refreshToken.user);
+
+    this.cookieService.setRefreshToken(res, newRefreshToken);
+
+    return { accessToken, expiresIn, expiresAt, user: refreshToken.user };
   }
 }
