@@ -8,8 +8,8 @@ import { Request, Response } from 'express';
 import { CookieService } from '@app/core';
 import { User, UserRepository } from '@app/feature/user';
 
-import { DuplicatedEmailEXception, InvalidRefreshTokenException, RefreshToken, RefreshTokenRepository, WrongEmailOrPasswordException } from '../domain';
-import { JwtClaims } from '../infrastructure/jwt';
+import { DuplicatedEmailEXception, InvalidTokenException, RefreshToken, RefreshTokenRepository, WrongEmailOrPasswordException } from '../domain';
+import { JwtClaims } from '../vo';
 
 import { LoginCommand, RegisterCommand } from './command';
 import { AuthResult } from './result';
@@ -78,7 +78,7 @@ export class AuthService {
 
     if (!isUUID(refreshTokenValue, 4)) {
       this.cookieService.clearRefreshToken(res);
-      throw new InvalidRefreshTokenException();
+      throw new InvalidTokenException();
     }
 
     const refreshToken = await this.refreshTokenRepository
@@ -90,7 +90,7 @@ export class AuthService {
 
     if (!refreshToken) {
       this.cookieService.clearRefreshToken(res);
-      throw new InvalidRefreshTokenException();
+      throw new InvalidTokenException();
     }
 
     await this.refreshTokenRepository.delete({ id: refreshTokenValue });

@@ -8,6 +8,7 @@ import { UserModule } from '../user';
 
 import { AuthService } from './application/auth.service';
 import { RefreshTokenRepositoryProvider } from './domain';
+import { JwtAuthGuardProvider, JwtStrategy } from './guards';
 import { AuthController } from './presentation/auth.controller';
 
 @Module({
@@ -22,6 +23,6 @@ import { AuthController } from './presentation/auth.controller';
     }),
   ],
   controllers: [AuthController],
-  providers: [RefreshTokenRepositoryProvider, AuthService],
+  providers: [RefreshTokenRepositoryProvider, AuthService, JwtStrategy, JwtAuthGuardProvider],
 })
 export class AuthModule {}

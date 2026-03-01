@@ -3,18 +3,14 @@ import { instanceToPlain } from 'class-transformer';
 import { User, UserType } from '@app/feature/user';
 
 export class JwtClaims {
-  id: string;
-  type: UserType;
-  email: string;
+  constructor(
+    readonly id: string,
+    readonly type: UserType,
+    readonly email: string,
+  ) {}
 
   public static fromUser(user: User) {
-    const claims = new JwtClaims();
-
-    claims.id = user.id;
-    claims.type = user.type;
-    claims.email = user.email;
-
-    return claims;
+    return new JwtClaims(user.id, user.type, user.email);
   }
 
   toObject() {

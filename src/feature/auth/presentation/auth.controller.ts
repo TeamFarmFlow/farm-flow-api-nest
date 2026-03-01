@@ -4,11 +4,13 @@ import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { type Request, type Response } from 'express';
 
 import { AuthService } from '../application/auth.service';
+import { Public } from '../decorators';
 
 import { LoginRequest, RegisterRequest } from './dto/request';
 import { AuthResponse } from './dto/response';
 
 @ApiTags('인증')
+@Public()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

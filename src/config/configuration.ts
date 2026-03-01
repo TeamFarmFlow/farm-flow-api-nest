@@ -6,6 +6,7 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 import { CookieOptions } from 'express';
 import { utilities, WinstonModuleOptions } from 'nest-winston';
+import { ExtractJwt, WithSecretOrKey } from 'passport-jwt';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import winston from 'winston';
 
@@ -80,6 +81,13 @@ export class Configuration extends ConfigService {
   get jwtModuleOptions(): JwtModuleOptions {
     return {
       secret: this.getOrThrow<string>('JWT_SECRET'),
+    };
+  }
+
+  get passportJwtStrategyOptions(): WithSecretOrKey {
+    return {
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: this.getOrThrow<string>('JWT_SECRET'),
     };
   }
 
