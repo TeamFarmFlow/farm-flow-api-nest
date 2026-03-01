@@ -1,4 +1,5 @@
 export * from './context';
 export * from './exceptions';
-export * from './pipes';
+export * from './interceptors';
 export * from './filters';
+export * from './pipes';
