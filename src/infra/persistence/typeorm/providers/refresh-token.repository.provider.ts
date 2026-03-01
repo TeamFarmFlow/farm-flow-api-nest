@@ -2,7 +2,7 @@ import { Provider } from '@nestjs/common';
 
 import { DataSource } from 'typeorm';
 
-import { RefreshTokenRepository } from './refresh-token.repository';
+import { RefreshTokenRepository } from '../repositories';
 
 export const RefreshTokenRepositoryProvider: Provider = {
   inject: [DataSource],

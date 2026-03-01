@@ -2,7 +2,7 @@ import { Provider } from '@nestjs/common';
 
 import { DataSource } from 'typeorm';
 
-import { UserRepository } from './user.repository';
+import { UserRepository } from '../repositories';
 
 export const UserRepositoryProvider: Provider = {
   inject: [DataSource],

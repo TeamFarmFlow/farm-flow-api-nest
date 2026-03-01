@@ -1,4 +1,4 @@
-import { User } from '@app/feature/user';
+import { User } from '@app/infra/persistence/typeorm';
 
 export type AuthResult = {
   accessToken: string;

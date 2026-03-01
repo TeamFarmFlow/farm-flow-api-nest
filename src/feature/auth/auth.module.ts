@@ -3,11 +3,11 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { Configuration } from '@app/config';
 import { CookieModule } from '@app/core';
+import { RefreshTokenRepositoryProvider } from '@app/infra/persistence/typeorm';
 
 import { UserModule } from '../user';
 
 import { AuthService } from './application/auth.service';
-import { RefreshTokenRepositoryProvider } from './domain';
 import { JwtAuthGuardProvider, JwtStrategy } from './guards';
 import { AuthController } from './presentation/auth.controller';
 

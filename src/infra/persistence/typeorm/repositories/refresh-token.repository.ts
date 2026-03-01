@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { DataSource, Repository } from 'typeorm';
 
-import { RefreshToken } from './refresh-token.entity';
+import { RefreshToken } from '@app/infra/persistence/typeorm';
 
 @Injectable()
 export class RefreshTokenRepository extends Repository<RefreshToken> {

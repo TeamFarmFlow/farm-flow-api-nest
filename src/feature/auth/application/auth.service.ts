@@ -6,9 +6,9 @@ import { isUUID } from 'class-validator';
 import { Request, Response } from 'express';
 
 import { CookieService } from '@app/core';
-import { User, UserRepository } from '@app/feature/user';
+import { RefreshToken, RefreshTokenRepository, User, UserRepository } from '@app/infra/persistence/typeorm';
 
-import { DuplicatedEmailEXception, InvalidTokenException, RefreshToken, RefreshTokenRepository, WrongEmailOrPasswordException } from '../domain';
+import { DuplicatedEmailEXception, InvalidTokenException, WrongEmailOrPasswordException } from '../domain';
 import { JwtClaims } from '../vo';
 
 import { LoginCommand, RegisterCommand } from './command';

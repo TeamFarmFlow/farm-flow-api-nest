@@ -26,6 +26,8 @@
       "@app/config/*": ["src/config/*"],
       "@app/core": ["src/core"],
       "@app/core/*": ["src/core/*"],
+      "@app/infra": ["src/infra"],
+      "@app/infra/*": ["src/infra/*"],
       "@app/feature": ["src/feature"],
       "@app/feature/*": ["src/feature/*"]
     }

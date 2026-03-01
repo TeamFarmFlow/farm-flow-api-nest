@@ -1,6 +1,6 @@
 import { instanceToPlain } from 'class-transformer';
 
-import { User, UserType } from '@app/feature/user';
+import { User, UserType } from '@app/infra/persistence/typeorm';
 
 export class JwtClaims {
   constructor(
