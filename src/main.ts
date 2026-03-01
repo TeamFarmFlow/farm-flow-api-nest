@@ -6,6 +6,7 @@ import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 import { AppModule } from './app.module';
 import { Configuration } from './config';
+import { setupDocumet } from './document';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
@@ -16,6 +17,8 @@ async function bootstrap() {
   app.enableVersioning({ defaultVersion: '1', type: VersioningType.URI });
   app.enableCors(configuration.corsOptions);
   app.use(cookieParser());
+
+  setupDocumet(app);
 
   await app.listen(configuration.listenPort);
 }

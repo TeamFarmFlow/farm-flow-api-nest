@@ -3,8 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { WinstonModule } from 'nest-winston';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { Configuration, ConfigurationModule } from './config';
 
 @Module({
@@ -23,7 +21,5 @@ import { Configuration, ConfigurationModule } from './config';
       },
     }),
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
