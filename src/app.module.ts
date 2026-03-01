@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { Configuration, ConfigurationModule } from '@app/config';
-import { ContextModule, GlobalClassSerializerInterceptorProvider, GlobalExceptionFilterProvider, GlobalValidationPipeProvider } from '@app/core';
 import { WinstonModule } from 'nest-winston';
 
-import { HealthModule } from './feature/health/health.module';
+import { Configuration, ConfigurationModule } from '@app/config';
+import { ContextModule, GlobalClassSerializerInterceptorProvider, GlobalExceptionFilterProvider, GlobalValidationPipeProvider } from '@app/core';
+
+import { AuthModule } from './feature/auth';
+import { HealthModule } from './feature/health';
+import { UserModule } from './feature/user';
 
 @Module({
   imports: [
@@ -24,6 +27,8 @@ import { HealthModule } from './feature/health/health.module';
       },
     }),
     HealthModule,
+    UserModule,
+    AuthModule,
   ],
   providers: [GlobalValidationPipeProvider, GlobalExceptionFilterProvider, GlobalClassSerializerInterceptorProvider],
 })

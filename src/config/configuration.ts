@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { ConfigService } from '@nestjs/config';
+import { JwtModuleOptions } from '@nestjs/jwt';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 import { utilities, WinstonModuleOptions } from 'nest-winston';
@@ -72,6 +73,12 @@ export class Configuration extends ConfigService {
       namingStrategy: new SnakeNamingStrategy(),
       logging: isLocal ? true : ['error', 'warn'],
       entities: [process.cwd() + '/dist/**/*.entity.{js,ts}'],
+    };
+  }
+
+  get jwtModuleOptions(): JwtModuleOptions {
+    return {
+      secret: this.getOrThrow<string>('JWT_SECRET'),
     };
   }
 }

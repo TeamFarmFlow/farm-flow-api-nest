@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { Expose } from 'class-transformer';
+
 import { NodeEnv } from '@app/config/enums';
 import { HealthResult } from '@app/feature/health/application/result';
-import { Expose } from 'class-transformer';
 
 export class HealthResponse {
   @ApiProperty({ type: String })
