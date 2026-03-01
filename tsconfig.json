@@ -22,10 +22,10 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@config": ["src/config"],
-      "@config/*": ["src/config/*"],
-      "@core": ["src/core"],
-      "@core/*": ["src/core/*"]
+      "@app/config": ["src/config"],
+      "@app/config/*": ["src/config/*"],
+      "@app/core": ["src/core"],
+      "@app/core/*": ["src/core/*"]
     }
   }
 }

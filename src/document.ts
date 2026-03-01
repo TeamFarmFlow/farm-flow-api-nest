@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-import { Configuration } from '@config';
+import { Configuration } from '@app/config';
 
 export function setupDocumet(app: INestApplication) {
   const configuration = app.get(Configuration);
