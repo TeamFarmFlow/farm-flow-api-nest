@@ -5,6 +5,8 @@ import { Configuration, ConfigurationModule } from '@app/config';
 import { ContextModule, GlobalClassSerializerInterceptorProvider, GlobalExceptionFilterProvider, GlobalValidationPipeProvider } from '@app/core';
 import { WinstonModule } from 'nest-winston';
 
+import { HealthModule } from './feature/health/health.module';
+
 @Module({
   imports: [
     ConfigurationModule.forRoot(),
@@ -21,6 +23,7 @@ import { WinstonModule } from 'nest-winston';
         return configuration.typeormModuleOptions;
       },
     }),
+    HealthModule,
   ],
   providers: [GlobalValidationPipeProvider, GlobalExceptionFilterProvider, GlobalClassSerializerInterceptorProvider],
 })

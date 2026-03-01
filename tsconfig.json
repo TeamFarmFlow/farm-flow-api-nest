@@ -25,7 +25,9 @@
       "@app/config": ["src/config"],
       "@app/config/*": ["src/config/*"],
       "@app/core": ["src/core"],
-      "@app/core/*": ["src/core/*"]
+      "@app/core/*": ["src/core/*"],
+      "@app/feature": ["src/feature"],
+      "@app/feature/*": ["src/feature/*"]
     }
   }
 }
