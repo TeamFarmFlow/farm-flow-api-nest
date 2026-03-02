@@ -1,6 +1,8 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 import { UserStatus, UserType } from '@app/shared/domain';
+
+import { FarmUsers } from './farm-users.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -30,6 +32,9 @@ export class User {
 
   @DeleteDateColumn({ type: 'timestamptz' })
   deletedAt: Date | null;
+
+  @OneToMany(() => FarmUsers, (e) => e.user, { cascade: ['insert', 'remove'] })
+  farmUsers: FarmUsers[];
 
   public static ownerOf(entityLike: Pick<User, 'email' | 'password' | 'name'>) {
     const user = new User();
