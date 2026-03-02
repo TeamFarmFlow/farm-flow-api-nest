@@ -1,15 +1,15 @@
-import { CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
-import { Permission } from './permission.entity';
 import { Role } from './role.entity';
 
 @Entity({ name: 'role_permissions' })
+@Index('ROLE_PERMISSIONS_UK', ['roleId', 'key'], { unique: true })
 export class RolePermission {
   @PrimaryColumn('uuid', { primaryKeyConstraintName: 'ROLE_PERMISSIONS_PK' })
   readonly roleId: string;
 
-  @PrimaryColumn('uuid', { primaryKeyConstraintName: 'ROLE_PERMISSIONS_PK' })
-  readonly permissionId: string;
+  @PrimaryColumn('varchar', { length: 50, primaryKeyConstraintName: 'ROLE_PERMISSIONS_PK' })
+  readonly key: string;
 
   @CreateDateColumn({ type: 'timestamptz' })
   readonly createdAt: Date;
@@ -17,8 +17,4 @@ export class RolePermission {
   @ManyToOne(() => Role, { onDelete: 'CASCADE' })
   @JoinColumn({ foreignKeyConstraintName: 'ROLE_PERMISSIONS_ROLE_FK' })
   role: Role;
-
-  @ManyToOne(() => Permission, { onDelete: 'CASCADE' })
-  @JoinColumn({ foreignKeyConstraintName: 'ROLE_PERMISSIONS_PERMISSION_FK' })
-  permission: Permission;
 }

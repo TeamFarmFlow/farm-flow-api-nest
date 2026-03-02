@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 
 import { DataSource } from 'typeorm';
 
-import { FarmRepository, FarmUserRepository, UserUsageRepository } from '@app/infra/persistence/typeorm';
+import { FarmRepository, FarmUserRepository, RoleRepository, UserUsageRepository } from '@app/infra/persistence/typeorm';
+import { FARM_ADMIN_DEFAULT_PERMISSION_KEYS, FARM_MEMBER_DEFAULT_PERMISSION_KEYS } from '@app/shared/domain';
 
 import { ExceedFarmCountException, FarmNotFoundException } from '../domain';
 
@@ -17,16 +18,21 @@ export class FarmService {
     private readonly farmRepository: FarmRepository,
     private readonly farmUserRepository: FarmUserRepository,
     private readonly userUsageRepository: UserUsageRepository,
+    private readonly roleRepository: RoleRepository,
   ) {}
 
-  // TODO join role, permission
   async getFarms(queries: GetFarmsQuery): Promise<GetFarmsResult> {
     const [rows, total] = await this.farmUserRepository.findAndCountByUserIdWithFarm(queries.userId);
 
-    return { total, rows: rows.map((row) => row.farm) };
+    return {
+      total,
+      rows: rows.map((row) => ({
+        farm: row.farm,
+        role: row.role,
+      })),
+    };
   }
 
-  // TODO create role, permission
   async createFarm(command: CreateFarmCommand) {
     await this.dataSource.transaction(async (em) => {
       const { affected } = await this.userUsageRepository.tryIncreaseFarmCount(command.userId, em);
@@ -36,7 +42,9 @@ export class FarmService {
       }
 
       const farm = await this.farmRepository.save({ name: command.name }, em);
-      await this.farmUserRepository.insert({ farmId: farm.id, userId: command.userId }, em);
+      const role = await this.roleRepository.save({ name: '관리자', permissions: FARM_ADMIN_DEFAULT_PERMISSION_KEYS.map((key) => ({ key })), required: true, super: true }, em);
+      await this.roleRepository.insert({ name: '기본', permissions: FARM_MEMBER_DEFAULT_PERMISSION_KEYS, required: true }, em);
+      await this.farmUserRepository.insert({ farmId: farm.id, userId: command.userId, role }, em);
 
       return farm;
     });

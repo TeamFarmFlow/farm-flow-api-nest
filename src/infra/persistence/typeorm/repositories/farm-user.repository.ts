@@ -20,7 +20,12 @@ export class FarmUserRepository extends TransactionalRepository<FarmUser> {
   }
 
   async findAndCountByUserIdWithFarm(userId: string, em?: EntityManager) {
-    return this.getRepository(em).createQueryBuilder('fu').innerJoinAndMapOne('fu.farm', 'fu.farm', 'f').where('fu.userId = :userId', { userId }).getManyAndCount();
+    return this.getRepository(em)
+      .createQueryBuilder('fu')
+      .innerJoinAndMapOne('fu.farm', 'fu.farm', 'f')
+      .leftJoinAndMapOne('fu.role', 'fu.role', 'r')
+      .where('fu.userId = :userId', { userId })
+      .getManyAndCount();
   }
 
   async save(entityLike: DeepPartial<FarmUser>, em?: EntityManager) {

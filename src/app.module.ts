@@ -12,6 +12,7 @@ import { GlobalValidationPipeProvider } from './core/pipes';
 import { AuthModule } from './feature/auth';
 import { FarmModule } from './feature/farm';
 import { HealthModule } from './feature/health';
+import { RoleModule } from './feature/role';
 import { UserModule } from './feature/user';
 
 @Module({
@@ -34,6 +35,7 @@ import { UserModule } from './feature/user';
     AuthModule,
     UserModule,
     FarmModule,
+    RoleModule,
   ],
   providers: [GlobalValidationPipeProvider, GlobalExceptionFilterProvider, GlobalClassSerializerInterceptorProvider],
 })
