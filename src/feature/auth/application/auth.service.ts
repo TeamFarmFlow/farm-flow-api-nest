@@ -6,7 +6,7 @@ import { isUUID } from 'class-validator';
 import { Request, Response } from 'express';
 
 import { CookieService } from '@app/core/cookies';
-import { RefreshToken, RefreshTokenRepository, User, UserRepository } from '@app/infra/persistence/typeorm';
+import { RefreshToken, RefreshTokenRepository, User, UserRepository, UserUsage } from '@app/infra/persistence/typeorm';
 import { JwtClaims } from '@app/shared/security';
 
 import { DuplicatedEmailEXception, InvalidTokenException, WrongEmailOrPasswordException } from '../domain';
@@ -44,7 +44,11 @@ export class AuthService {
       throw new DuplicatedEmailEXception();
     }
 
-    const user = await this.userRepository.save(User.ownerOf({ ...command, password: hashSync(command.password, 10) }));
+    const user = await this.userRepository.save({
+      ...command,
+      password: hashSync(command.password, 10),
+      usage: new UserUsage(),
+    });
 
     const { accessToken, expiresIn, expiresAt } = await this.issueAccessToken(user);
     const refreshToken = await this.issueRefreshToken(user);

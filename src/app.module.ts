@@ -10,6 +10,7 @@ import { GlobalExceptionFilterProvider } from './core/filters';
 import { GlobalClassSerializerInterceptorProvider } from './core/interceptors';
 import { GlobalValidationPipeProvider } from './core/pipes';
 import { AuthModule } from './feature/auth';
+import { FarmModule } from './feature/farm';
 import { HealthModule } from './feature/health';
 import { UserModule } from './feature/user';
 
@@ -30,8 +31,9 @@ import { UserModule } from './feature/user';
       },
     }),
     HealthModule,
-    UserModule,
     AuthModule,
+    UserModule,
+    FarmModule,
   ],
   providers: [GlobalValidationPipeProvider, GlobalExceptionFilterProvider, GlobalClassSerializerInterceptorProvider],
 })

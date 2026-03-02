@@ -5,8 +5,8 @@ import { Role } from './role.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'farm_users' })
-@Index('FARM_USERS_ROLE_ID_IDX', ['role'], { where: 'roleId IS NOT NULL' })
-export class FarmUsers {
+@Index('FARM_USERS_ROLE_ID_IDX', ['role'], { where: 'role_id IS NOT NULL' })
+export class FarmUser {
   @PrimaryColumn('uuid', { primaryKeyConstraintName: 'FARM_USERS_PK' })
   readonly farmId: string;
 

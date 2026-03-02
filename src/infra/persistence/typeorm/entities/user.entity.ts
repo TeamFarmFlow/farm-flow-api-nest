@@ -1,16 +1,14 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
-import { UserStatus, UserType } from '@app/shared/domain';
+import { UserStatus } from '@app/shared/domain';
 
-import { FarmUsers } from './farm-users.entity';
+import { FarmUser } from './farm-user.entity';
+import { UserUsage } from './user-usage.entity';
 
 @Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn('uuid', { primaryKeyConstraintName: 'USERS_PK' })
   readonly id: string;
-
-  @Column({ type: 'varchar', length: 20 })
-  type: UserType;
 
   @Column({ type: 'varchar', length: 340 })
   email: string;
@@ -21,7 +19,7 @@ export class User {
   @Column({ type: 'varchar', length: 50 })
   name: string;
 
-  @Column({ type: 'varchar', length: 20 })
+  @Column({ type: 'varchar', length: 20, default: UserStatus.Activated })
   status: UserStatus;
 
   @CreateDateColumn({ type: 'timestamptz' })
@@ -33,18 +31,9 @@ export class User {
   @DeleteDateColumn({ type: 'timestamptz' })
   deletedAt: Date | null;
 
-  @OneToMany(() => FarmUsers, (e) => e.user, { cascade: ['insert', 'remove'] })
-  farmUsers: FarmUsers[];
+  @OneToOne(() => UserUsage, (e) => e.user, { cascade: ['insert', 'remove'] })
+  usage: UserUsage;
 
-  public static ownerOf(entityLike: Pick<User, 'email' | 'password' | 'name'>) {
-    const user = new User();
-
-    user.type = UserType.Owner;
-    user.email = entityLike.email;
-    user.password = entityLike.password;
-    user.name = entityLike.name;
-    user.status = UserStatus.Activated;
-
-    return user;
-  }
+  @OneToMany(() => FarmUser, (e) => e.user, { cascade: ['insert', 'remove'] })
+  farmUsers: FarmUser[];
 }

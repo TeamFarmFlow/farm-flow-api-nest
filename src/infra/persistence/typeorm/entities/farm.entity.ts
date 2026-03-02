@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
-import { FarmUsers } from './farm-users.entity';
+import { FarmUser } from './farm-user.entity';
 import { Role } from './role.entity';
 
 @Entity({ name: 'farms' })
@@ -20,6 +20,6 @@ export class Farm {
   @OneToMany(() => Role, (e) => e.farm, { cascade: ['insert', 'remove'] })
   roles: Role[];
 
-  @OneToMany(() => FarmUsers, (e) => e.farm, { cascade: ['insert', 'remove'] })
-  farmUsers: FarmUsers[];
+  @OneToMany(() => FarmUser, (e) => e.farm, { cascade: ['insert', 'remove'] })
+  farmUsers: FarmUser[];
 }

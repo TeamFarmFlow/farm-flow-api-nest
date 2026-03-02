@@ -2,13 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { Expose } from 'class-transformer';
 
-import { UserStatus, UserType } from '@app/shared/domain';
+import { UserStatus } from '@app/shared/domain';
 
 export class AuthUserResponse {
-  @ApiProperty({ enum: UserType })
-  @Expose()
-  type: UserType;
-
   @ApiProperty({ type: String })
   @Expose()
   email: string;

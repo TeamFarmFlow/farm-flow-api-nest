@@ -1,0 +1,51 @@
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+
+import { ContextService } from '@app/core/context';
+import { ParseUuidStringPipe } from '@app/core/pipes';
+import { toInstance } from '@app/core/transform';
+import { AuthPrincipal } from '@app/shared/security';
+
+import { FarmService } from '../application';
+
+import { CreateFarmRequest, GetFarmsRequest, UpdateFarmRequest } from './dto/request';
+import { FarmResponse, FarmsResponse } from './dto/response';
+
+@ApiTags('농장')
+@Controller('farms')
+export class FarmController {
+  constructor(
+    private readonly contextService: ContextService<AuthPrincipal>,
+    private readonly farmService: FarmService,
+  ) {}
+
+  @Get()
+  @ApiOperation({ summary: '내 농장 목록 조회' })
+  @ApiOkResponse({ type: FarmResponse })
+  async getFarms() {
+    return toInstance(FarmsResponse, await this.farmService.getFarms(new GetFarmsRequest().toQuery(this.contextService.user.id)));
+  }
+
+  @Post()
+  @ApiOperation({ summary: '농장 등록' })
+  @ApiCreatedResponse()
+  async createFarm(@Body() body: CreateFarmRequest) {
+    return this.farmService.createFarm(body.toCommand(this.contextService.user.id));
+  }
+
+  @Patch(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: '농장 수정' })
+  @ApiNoContentResponse()
+  async updateFarm(@Param('id', new ParseUuidStringPipe()) farmId: string, @Body() body: UpdateFarmRequest) {
+    return this.farmService.updateFarm(body.toCommand(farmId, this.contextService.user.id));
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: '농장 삭제' })
+  @ApiNoContentResponse()
+  async deleteFarm(@Param('id', new ParseUuidStringPipe()) farmId: string) {
+    return this.farmService.deleteFarm({ farmId, userId: this.contextService.user.id });
+  }
+}
