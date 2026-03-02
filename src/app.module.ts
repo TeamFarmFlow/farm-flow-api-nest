@@ -4,8 +4,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { WinstonModule } from 'nest-winston';
 
 import { Configuration, ConfigurationModule } from '@app/config';
-import { ContextModule, GlobalClassSerializerInterceptorProvider, GlobalExceptionFilterProvider, GlobalValidationPipeProvider } from '@app/core';
 
+import { ContextModule } from './core/context';
+import { GlobalExceptionFilterProvider } from './core/filters';
+import { GlobalClassSerializerInterceptorProvider } from './core/interceptors';
+import { GlobalValidationPipeProvider } from './core/pipes';
 import { AuthModule } from './feature/auth';
 import { HealthModule } from './feature/health';
 import { UserModule } from './feature/user';

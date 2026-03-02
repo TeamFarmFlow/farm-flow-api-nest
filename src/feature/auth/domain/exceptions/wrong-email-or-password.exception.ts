@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 
-import { DomainException } from '@app/core';
+import { DomainException } from '@app/core/exceptions';
 
 export class WrongEmailOrPasswordException extends DomainException {
   constructor() {

@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { IsEmail, IsNotEmpty } from 'class-validator';
 
-import { LoginCommand } from '@app/feature/auth/application/command';
+import { LoginCommand } from '@app/feature/auth/application';
 
 export class LoginRequest {
   @ApiProperty({ type: String, format: 'email' })

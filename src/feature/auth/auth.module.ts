@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 
 import { Configuration } from '@app/config';
-import { CookieModule } from '@app/core';
+import { CookieModule } from '@app/core/cookies';
 import { RefreshToken, RefreshTokenRepository, TypeOrmExModule, User, UserRepository } from '@app/infra/persistence/typeorm';
 
-import { AuthService } from './application/auth.service';
+import { AuthService } from './application';
 import { JwtAuthGuardProvider, JwtStrategy } from './guards';
-import { AuthController } from './presentation/auth.controller';
+import { AuthController } from './presentation';
 
 @Module({
   imports: [

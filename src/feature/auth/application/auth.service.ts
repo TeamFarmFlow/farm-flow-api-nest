@@ -5,7 +5,7 @@ import { compareSync, hashSync } from 'bcrypt';
 import { isUUID } from 'class-validator';
 import { Request, Response } from 'express';
 
-import { CookieService } from '@app/core';
+import { CookieService } from '@app/core/cookies';
 import { RefreshToken, RefreshTokenRepository, User, UserRepository } from '@app/infra/persistence/typeorm';
 import { JwtClaims } from '@app/shared/security';
 

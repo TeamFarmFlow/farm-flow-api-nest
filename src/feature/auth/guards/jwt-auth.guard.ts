@@ -3,8 +3,9 @@ import { Reflector } from '@nestjs/core';
 import { TokenExpiredError } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
 
-import { ContextService, IS_PUBLIC_KEY } from '@app/core';
-import { JwtClaims } from '@app/shared/security';
+import { ContextService } from '@app/core/context';
+import { IS_PUBLIC_KEY } from '@app/core/security';
+import { AuthPrincipal, JwtClaims } from '@app/shared/security';
 
 import { ExpiredTokenException, InvalidTokenException } from '../domain';
 
@@ -12,7 +13,7 @@ import { ExpiredTokenException, InvalidTokenException } from '../domain';
 export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(
     private readonly reflector: Reflector,
-    private readonly contextService: ContextService<JwtClaims | null>,
+    private readonly contextService: ContextService<AuthPrincipal | null>,
   ) {
     super();
   }
