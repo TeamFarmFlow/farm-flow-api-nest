@@ -7,9 +7,9 @@ import { Request, Response } from 'express';
 
 import { CookieService } from '@app/core';
 import { RefreshToken, RefreshTokenRepository, User, UserRepository } from '@app/infra/persistence/typeorm';
+import { JwtClaims } from '@app/shared/security';
 
 import { DuplicatedEmailEXception, InvalidTokenException, WrongEmailOrPasswordException } from '../domain';
-import { JwtClaims } from '../vo';
 
 import { LoginCommand, RegisterCommand } from './command';
 import { AuthResult } from './result';
@@ -24,10 +24,10 @@ export class AuthService {
   ) {}
 
   private async issueAccessToken(user: User) {
-    const jwtClaims = JwtClaims.fromUser(user).toObject();
+    const payload = JwtClaims.fromPrincipal(user).toObject();
     const expiresIn = 10 * 60;
     const expiresAt = new Date(Date.now() + expiresIn * 1000);
-    const accessToken = await this.jwtService.signAsync(jwtClaims, { expiresIn });
+    const accessToken = await this.jwtService.signAsync(payload, { expiresIn });
 
     return { accessToken, expiresIn, expiresAt };
   }
@@ -81,19 +81,14 @@ export class AuthService {
       throw new InvalidTokenException();
     }
 
-    const refreshToken = await this.refreshTokenRepository
-      .createQueryBuilder('r')
-      .innerJoinAndMapOne('r.user', 'r.user', 'u')
-      .where('r.id = :id', { id: refreshTokenValue })
-      .andWhere('r.expiredAt > NOW()')
-      .getOne();
+    const refreshToken = await this.refreshTokenRepository.findValidByIdWithUser(refreshTokenValue);
 
     if (!refreshToken) {
       this.cookieService.clearRefreshToken(res);
       throw new InvalidTokenException();
     }
 
-    await this.refreshTokenRepository.delete({ id: refreshTokenValue });
+    await this.refreshTokenRepository.deleteById(refreshTokenValue);
 
     const { accessToken, expiresIn, expiresAt } = await this.issueAccessToken(refreshToken.user);
     const newRefreshToken = await this.issueRefreshToken(refreshToken.user);

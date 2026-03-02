@@ -1,20 +1,29 @@
-import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 
-import { DataSource, Repository } from 'typeorm';
+import { DeepPartial, EntityManager, Repository } from 'typeorm';
 
 import { User } from '@app/infra/persistence/typeorm';
 
-@Injectable()
-export class UserRepository extends Repository<User> {
-  constructor(dataSource: DataSource) {
-    super(User, dataSource.createEntityManager());
+import { TransactionalRepository, TypeOrmExRepository } from '../common';
+
+@TypeOrmExRepository(User)
+export class UserRepository extends TransactionalRepository<User> {
+  constructor(
+    @InjectRepository(User)
+    repository: Repository<User>,
+  ) {
+    super(repository);
   }
 
-  async hasOneByEmail(email: string) {
-    return this.existsBy({ email });
+  async hasOneByEmail(email: string, em?: EntityManager) {
+    return this.getRepository(em).existsBy({ email });
   }
 
-  async findOneByEmail(email: string) {
-    return this.findOneBy({ email });
+  async findOneByEmail(email: string, em?: EntityManager) {
+    return this.getRepository(em).findOneBy({ email });
+  }
+
+  async save(user: DeepPartial<User>, em?: EntityManager) {
+    return this.getRepository(em).save(user);
   }
 }

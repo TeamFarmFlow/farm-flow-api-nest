@@ -3,9 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { Configuration } from '@app/config';
 import { CookieModule } from '@app/core';
-import { RefreshTokenRepositoryProvider } from '@app/infra/persistence/typeorm';
-
-import { UserModule } from '../user';
+import { RefreshToken, RefreshTokenRepository, TypeOrmExModule, User, UserRepository } from '@app/infra/persistence/typeorm';
 
 import { AuthService } from './application/auth.service';
 import { JwtAuthGuardProvider, JwtStrategy } from './guards';
@@ -13,8 +11,8 @@ import { AuthController } from './presentation/auth.controller';
 
 @Module({
   imports: [
+    TypeOrmExModule.forFeature([User, RefreshToken], [UserRepository, RefreshTokenRepository]),
     CookieModule,
-    UserModule,
     JwtModule.registerAsync({
       inject: [Configuration],
       useFactory(configuration: Configuration) {
@@ -23,6 +21,6 @@ import { AuthController } from './presentation/auth.controller';
     }),
   ],
   controllers: [AuthController],
-  providers: [RefreshTokenRepositoryProvider, AuthService, JwtStrategy, JwtAuthGuardProvider],
+  providers: [AuthService, JwtStrategy, JwtAuthGuardProvider],
 })
 export class AuthModule {}

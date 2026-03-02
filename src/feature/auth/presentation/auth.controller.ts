@@ -3,8 +3,9 @@ import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { type Request, type Response } from 'express';
 
+import { Public } from '@app/core';
+
 import { AuthService } from '../application/auth.service';
-import { Public } from '../decorators';
 
 import { LoginRequest, RegisterRequest } from './dto/request';
 import { AuthResponse } from './dto/response';

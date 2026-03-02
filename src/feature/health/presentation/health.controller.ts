@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
-import { Public } from '@app/feature/auth';
+import { Public } from '@app/core';
 
 import { HealthService } from '../application/health.service';
 

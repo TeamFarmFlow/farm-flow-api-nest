@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
-import { UserStatus, UserType } from '../enums';
+import { UserStatus, UserType } from '@app/shared/domain';
 
 @Entity({ name: 'users' })
 export class User {

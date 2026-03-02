@@ -26,6 +26,8 @@
       "@app/config/*": ["src/config/*"],
       "@app/core": ["src/core"],
       "@app/core/*": ["src/core/*"],
+      "@app/shared": ["src/shared"],
+      "@app/shared/*": ["src/shared/*"],
       "@app/infra": ["src/infra"],
       "@app/infra/*": ["src/infra/*"],
       "@app/feature": ["src/feature"],

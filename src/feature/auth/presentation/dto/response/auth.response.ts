@@ -3,7 +3,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
 import { AuthResult } from '@app/feature/auth/application/result';
-import { User, UserStatus, UserType } from '@app/infra/persistence/typeorm';
+import { User } from '@app/infra/persistence/typeorm';
+import { UserStatus, UserType } from '@app/shared/domain';
 
 class AuthUser {
   @ApiProperty({ enum: UserType })

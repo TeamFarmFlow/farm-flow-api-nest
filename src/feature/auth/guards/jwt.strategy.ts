@@ -4,9 +4,9 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-jwt';
 
 import { Configuration } from '@app/config';
+import { JwtClaims } from '@app/shared/security';
 
 import { InvalidTokenException } from '../domain';
-import { JwtClaims } from '../vo';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
