@@ -14,8 +14,11 @@ export class RolePermissionRepository extends TransactionalRepository<RolePermis
     super(repository);
   }
 
-  async findByRoleId(roleId: string, em?: EntityManager) {
-    return this.getRepository(em).findBy({ roleId });
+  async findKeysByRoleId(roleId: string, em?: EntityManager) {
+    return this.getRepository(em).find({
+      select: { key: true },
+      where: { roleId },
+    });
   }
 
   async upsert(entityLikes: DeepPartial<RolePermission> | DeepPartial<RolePermission>[], em?: EntityManager) {

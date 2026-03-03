@@ -14,6 +14,12 @@ export class RefreshToken {
   @CreateDateColumn({ type: 'timestamptz' })
   readonly createdAt: Date;
 
+  @Column({ type: 'uuid' })
+  userId: string;
+
+  @Column({ type: 'uuid', nullable: true })
+  farmId: string | null;
+
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ foreignKeyConstraintName: 'REFRESH_TOKENS_USER_FK' })
   user: User;
@@ -22,7 +28,7 @@ export class RefreshToken {
   @JoinColumn({ foreignKeyConstraintName: 'REFRESH_TOKENS_FARM_FK' })
   farm: Farm | null;
 
-  public static of(userId: string, farmId?: string) {
+  public static of(userId: string, farmId: string | null) {
     const e = new RefreshToken();
 
     e.user = { id: userId } as User;
