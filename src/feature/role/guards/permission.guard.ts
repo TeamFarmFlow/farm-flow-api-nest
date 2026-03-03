@@ -4,7 +4,7 @@ import { Reflector } from '@nestjs/core';
 import { ContextService } from '@app/core/context';
 import { IS_PUBLIC_KEY, REQUIRED_PERMISSIONS_KEY, RequiredPermissionMetadata } from '@app/core/security';
 import { FarmUserRepository, RolePermissionRepository } from '@app/infra/persistence/typeorm';
-import { PermissionKey } from '@app/shared/domain';
+import { PermissionKey, PermissionKeyWildCard } from '@app/shared/domain';
 import { AuthPrincipal } from '@app/shared/security';
 
 @Injectable()
@@ -54,8 +54,8 @@ export class PermissionGuard implements CanActivate {
     return true;
   }
 
-  private hasPermission(permissions: PermissionKey[], requiredPermission: PermissionKey): boolean {
-    if (permissions.some((permission) => permission === PermissionKey.Administrator)) {
+  private hasPermission(permissions: string[], requiredPermission: string): boolean {
+    if (permissions.some((permission) => permission === PermissionKeyWildCard.Administrator.toString())) {
       return true;
     }
     if (permissions.includes(requiredPermission)) {
@@ -67,7 +67,7 @@ export class PermissionGuard implements CanActivate {
     return permissions.includes(`${permission}.*` as PermissionKey);
   }
 
-  private checkPermissions(userPermissions: PermissionKey[], requiredPermissions: PermissionKey[], mode: 'ANY' | 'ALL'): boolean {
+  private checkPermissions(userPermissions: string[], requiredPermissions: string[], mode: 'ANY' | 'ALL'): boolean {
     if (mode === 'ANY') {
       return requiredPermissions.some((permission) => this.hasPermission(userPermissions, permission));
     }

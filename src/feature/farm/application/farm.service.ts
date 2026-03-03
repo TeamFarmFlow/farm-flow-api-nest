@@ -42,15 +42,17 @@ export class FarmService {
       }
 
       const farm = await this.farmRepository.save({ name: command.name }, em);
-      const role = await this.roleRepository.save({ name: '관리자', permissions: FARM_ADMIN_DEFAULT_PERMISSION_KEYS.map((key) => ({ key })), required: true, super: true }, em);
-      await this.roleRepository.insert({ name: '기본', permissions: FARM_MEMBER_DEFAULT_PERMISSION_KEYS, required: true }, em);
+      const role = await this.roleRepository.save(
+        { name: '관리자', permissions: FARM_ADMIN_DEFAULT_PERMISSION_KEYS.map((key) => ({ key })), required: true, super: true, farm },
+        em,
+      );
+      await this.roleRepository.insert({ name: '기본', permissions: FARM_MEMBER_DEFAULT_PERMISSION_KEYS, required: true, farm }, em);
       await this.farmUserRepository.insert({ farmId: farm.id, userId: command.userId, role }, em);
 
       return farm;
     });
   }
 
-  // TODO check role, permission
   async updateFarm(command: UpdateFarmCommand) {
     const hasFarm = await this.farmUserRepository.has(command.farmId, command.userId);
 
@@ -61,7 +63,6 @@ export class FarmService {
     await this.farmRepository.update(command.farmId, { name: command.name });
   }
 
-  // TODO check role, permission
   async deleteFarm(command: DeleteFarmCommand) {
     const hasFarm = await this.farmUserRepository.has(command.farmId, command.userId);
 

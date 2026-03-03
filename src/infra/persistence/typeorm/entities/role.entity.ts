@@ -25,6 +25,9 @@ export class Role {
   @UpdateDateColumn({ type: 'timestamptz' })
   readonly updatedAt: Date;
 
+  @Column({ type: 'uuid' })
+  farmId: string;
+
   @ManyToOne(() => Farm, (e) => e.roles, { onDelete: 'CASCADE' })
   @JoinColumn({ foreignKeyConstraintName: 'ROLES_FARM_FK' })
   farm: Farm;

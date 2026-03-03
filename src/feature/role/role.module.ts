@@ -7,12 +7,14 @@ import { NodeEnv } from '@app/config/enums';
 import { FarmUser, FarmUserRepository, Role, RolePermission, RolePermissionRepository, RoleRepository, TypeOrmExModule } from '@app/infra/persistence/typeorm';
 import { FARM_ADMIN_DEFAULT_PERMISSION_KEYS } from '@app/shared/domain';
 
+import { RoleService } from './application';
 import { PermissionGuardProvider } from './guards';
+import { RoleController } from './presentation/role.controller';
 
 @Module({
   imports: [TypeOrmExModule.forFeature([Role, RolePermission, FarmUser], [RoleRepository, RolePermissionRepository, FarmUserRepository])],
-  controllers: [],
-  providers: [PermissionGuardProvider],
+  controllers: [RoleController],
+  providers: [RoleService, PermissionGuardProvider],
 })
 export class RoleModule implements OnModuleInit {
   constructor(

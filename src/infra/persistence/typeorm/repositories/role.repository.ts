@@ -18,6 +18,14 @@ export class RoleRepository extends TransactionalRepository<Role> {
     return this.getRepository(em).findBy({ super: true });
   }
 
+  async findAndCountByFarmIdWithPermissions(farmId: string, em?: EntityManager) {
+    return this.getRepository(em)
+      .createQueryBuilder('r')
+      .leftJoinAndMapMany('r.permissions', 'r.permissions', 'permissions')
+      .where('r.farmId = :farmId', { farmId })
+      .getManyAndCount();
+  }
+
   async insert(entityLike: DeepPartial<Role>, em?: EntityManager) {
     return this.getRepository(em).insert(entityLike);
   }
