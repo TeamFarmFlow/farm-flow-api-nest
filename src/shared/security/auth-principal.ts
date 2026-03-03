@@ -1,6 +1,6 @@
 export class AuthPrincipal {
   constructor(
     readonly id: string,
-    readonly email: string,
+    readonly farmId: string | null,
   ) {}
 }

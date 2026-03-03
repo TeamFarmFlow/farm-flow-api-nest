@@ -31,4 +31,8 @@ export class Role {
 
   @OneToMany(() => RolePermission, (e) => e.role, { cascade: true })
   permissions: RolePermission[];
+
+  get permissionKeys() {
+    return (this.permissions ?? []).map(({ key }) => key);
+  }
 }

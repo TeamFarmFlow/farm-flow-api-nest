@@ -22,4 +22,7 @@ export class Farm {
 
   @OneToMany(() => FarmUser, (e) => e.farm, { cascade: ['insert', 'remove'] })
   farmUsers: FarmUser[];
+
+  @OneToMany(() => FarmUser, (e) => e.farm, { cascade: ['insert', 'remove'] })
+  farmUser: FarmUser | null;
 }

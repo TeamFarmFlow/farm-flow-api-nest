@@ -5,11 +5,11 @@ import { AuthPrincipal } from './auth-principal';
 export class JwtClaims {
   constructor(
     readonly id: string,
-    readonly email: string,
+    readonly farmId: string | null,
   ) {}
 
-  public static fromPrincipal(princinal: AuthPrincipal) {
-    return new JwtClaims(princinal.id, princinal.email);
+  public static from(userId: string, farmId: string | null = null) {
+    return new JwtClaims(userId, farmId);
   }
 
   toObject() {
@@ -19,7 +19,7 @@ export class JwtClaims {
   toPrincipal(): AuthPrincipal {
     return {
       id: this.id,
-      email: this.email,
+      farmId: this.farmId,
     };
   }
 }

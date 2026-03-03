@@ -1,5 +1,6 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
+import { Farm } from './farm.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'refresh_tokens' })
@@ -17,10 +18,15 @@ export class RefreshToken {
   @JoinColumn({ foreignKeyConstraintName: 'REFRESH_TOKENS_USER_FK' })
   user: User;
 
-  public static of(userId: string) {
+  @ManyToOne(() => Farm, { onDelete: 'CASCADE', nullable: true })
+  @JoinColumn({ foreignKeyConstraintName: 'REFRESH_TOKENS_FARM_FK' })
+  farm: Farm | null;
+
+  public static of(userId: string, farmId?: string) {
     const e = new RefreshToken();
 
     e.user = { id: userId } as User;
+    e.farm = farmId ? ({ id: farmId } as Farm) : null;
 
     return e;
   }

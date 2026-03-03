@@ -3,20 +3,25 @@ import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { type Request, type Response } from 'express';
 
+import { ContextService } from '@app/core/context';
 import { Public } from '@app/core/security';
 import { toInstance } from '@app/core/transform';
+import { AuthPrincipal } from '@app/shared/security';
 
 import { AuthService } from '../application';
 
-import { LoginRequest, RegisterRequest } from './dto/request';
+import { CheckInRequest, LoginRequest, RegisterRequest } from './dto/request';
 import { AuthResponse } from './dto/response';
 
 @ApiTags('인증')
-@Public()
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly contextService: ContextService<AuthPrincipal>,
+    private readonly authService: AuthService,
+  ) {}
 
+  @Public()
   @Post('register')
   @ApiOperation({ summary: '회원가입' })
   @ApiCreatedResponse({ type: AuthResponse })
@@ -24,6 +29,7 @@ export class AuthController {
     return toInstance(AuthResponse, await this.authService.register(body.toCommand(), res));
   }
 
+  @Public()
   @Post('login')
   @ApiOperation({ summary: '로그인' })
   @ApiCreatedResponse({ type: AuthResponse })
@@ -31,10 +37,18 @@ export class AuthController {
     return toInstance(AuthResponse, await this.authService.login(body.toCommand(), res));
   }
 
+  @Public()
   @Post('refresh')
   @ApiOperation({ summary: '토큰 갱신' })
   @ApiCreatedResponse({ type: AuthResponse })
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<AuthResponse> {
     return toInstance(AuthResponse, await this.authService.refresh(req, res));
+  }
+
+  @Post('checkin')
+  @ApiOperation({ summary: '농장 체크인' })
+  @ApiCreatedResponse({ type: AuthResponse })
+  async checkIn(@Body() body: CheckInRequest, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    return toInstance(AuthResponse, await this.authService.checkIn(body.toCommand(this.contextService.user.id), req, res));
   }
 }

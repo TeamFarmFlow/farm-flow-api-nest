@@ -13,8 +13,28 @@ export class RefreshTokenRepository extends TransactionalRepository<RefreshToken
     super(repository);
   }
 
-  async findValidByIdWithUser(id: string, em?: EntityManager) {
-    return this.getRepository(em).createQueryBuilder('r').innerJoinAndMapOne('r.user', 'r.user', 'u').where('r.id = :id', { id }).andWhere('r.expiredAt > NOW()').getOne();
+  async findValidByIdWithUserAndFarmOrFail(id: string, em?: EntityManager) {
+    return this.getRepository(em)
+      .createQueryBuilder('refreshToken')
+      .innerJoinAndMapOne('refreshToken.user', 'refreshToken.user', 'user')
+      .leftJoinAndMapOne('refreshToken.farm', 'refreshToken.farm', 'farm')
+      .leftJoinAndMapOne('farm.farmUser', 'farm.farmUser', 'farmUser', 'farmUser.farmId = farm.id AND farmUser.userId = user.id')
+      .leftJoinAndMapOne('farmUser.role', 'farmUser.role', 'role')
+      .where('refreshToken.id = :id', { id })
+      .andWhere('refreshToken.expiredAt > NOW()')
+      .getOneOrFail();
+  }
+
+  async findValidByIdWithUserAndFarm(id: string, em?: EntityManager) {
+    return this.getRepository(em)
+      .createQueryBuilder('refreshToken')
+      .innerJoinAndMapOne('refreshToken.user', 'refreshToken.user', 'user')
+      .leftJoinAndMapOne('refreshToken.farm', 'refreshToken.farm', 'farm')
+      .leftJoinAndMapOne('farm.farmUser', 'farm.farmUser', 'farmUser', 'farmUser.farmId = farm.id AND farmUser.userId = user.id')
+      .leftJoinAndMapOne('farmUser.role', 'farmUser.role', 'role')
+      .where('refreshToken.id = :id', { id })
+      .andWhere('refreshToken.expiredAt > NOW()')
+      .getOne();
   }
 
   async insert(entityLike: DeepPartial<RefreshToken>, em?: EntityManager) {
