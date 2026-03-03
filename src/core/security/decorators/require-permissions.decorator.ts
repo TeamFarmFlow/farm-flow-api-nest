@@ -4,17 +4,17 @@ import { PermissionKey } from '@app/shared/domain';
 
 export const REQUIRED_PERMISSIONS_KEY = Symbol('REQUIRED_PERMISSIONS_KEY');
 
-export type RequirePermissionsOptions = {
-  mode?: 'ALL' | 'ANY';
-  allowAdminWildcard?: boolean;
+export type RequiredPermissionsOptions = {
+  mode: 'ALL' | 'ANY';
 };
 
-export const RequirePermissions = (permissions: PermissionKey[], options: RequirePermissionsOptions = {}) =>
+export type RequiredPermissionMetadata = {
+  permissions: PermissionKey[];
+  options: RequiredPermissionsOptions;
+};
+
+export const RequiredPermissions = (permissions: PermissionKey[], options: RequiredPermissionsOptions = { mode: 'ANY' }) =>
   SetMetadata(REQUIRED_PERMISSIONS_KEY, {
     permissions,
-    options: {
-      mode: 'ANY',
-      allowAdminWildcard: true,
-      ...options,
-    },
+    options,
   });

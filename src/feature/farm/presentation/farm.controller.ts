@@ -3,7 +3,9 @@ import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, 
 
 import { ContextService } from '@app/core/context';
 import { ParseUuidStringPipe } from '@app/core/pipes';
+import { RequiredPermissions } from '@app/core/security';
 import { toInstance } from '@app/core/transform';
+import { PermissionKey } from '@app/shared/domain';
 import { AuthPrincipal } from '@app/shared/security';
 
 import { FarmService } from '../application';
@@ -33,6 +35,7 @@ export class FarmController {
     return this.farmService.createFarm(body.toCommand(this.contextService.user.id));
   }
 
+  @RequiredPermissions([PermissionKey.FarmUpdate])
   @Patch(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: '농장 수정' })
@@ -41,6 +44,7 @@ export class FarmController {
     return this.farmService.updateFarm(body.toCommand(farmId, this.contextService.user.id));
   }
 
+  @RequiredPermissions([PermissionKey.FarmDelete])
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: '농장 삭제' })
