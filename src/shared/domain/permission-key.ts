@@ -7,6 +7,7 @@ export enum PermissionKey {
   Update = 'update',
   Delete = 'delete',
   RoleManagement = 'role.management',
+  RoleManagementTest = 'role.management.test',
 }
 
 export const FARM_ADMIN_DEFAULT_PERMISSION_KEYS = Object.values(PermissionKey);
