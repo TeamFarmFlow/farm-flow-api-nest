@@ -35,7 +35,7 @@ export class FarmController {
     return this.farmService.createFarm(body.toCommand(this.contextService.user.id));
   }
 
-  @RequiredPermissions([PermissionKey.FarmUpdate])
+  @RequiredPermissions([PermissionKey.Update])
   @Patch(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: '농장 수정' })
@@ -44,7 +44,7 @@ export class FarmController {
     return this.farmService.updateFarm(body.toCommand(farmId, this.contextService.user.id));
   }
 
-  @RequiredPermissions([PermissionKey.FarmDelete])
+  @RequiredPermissions([PermissionKey.Delete])
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: '농장 삭제' })

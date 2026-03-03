@@ -1,5 +1,7 @@
 import { CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
+import { PermissionKey } from '@app/shared/domain';
+
 import { Role } from './role.entity';
 
 @Entity({ name: 'role_permissions' })
@@ -9,7 +11,7 @@ export class RolePermission {
   readonly roleId: string;
 
   @PrimaryColumn('varchar', { length: 50, primaryKeyConstraintName: 'ROLE_PERMISSIONS_PK' })
-  readonly key: string;
+  readonly key: PermissionKey;
 
   @CreateDateColumn({ type: 'timestamptz' })
   readonly createdAt: Date;
