@@ -10,12 +10,4 @@ export class AuthFarmResponse {
   @ApiProperty({ type: String })
   @Expose()
   name: string;
-
-  @ApiProperty({ type: Date })
-  @Expose()
-  createdAt: Date;
-
-  @ApiProperty({ type: Date })
-  @Expose()
-  updatedAt: Date;
 }

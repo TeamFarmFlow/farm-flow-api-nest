@@ -16,12 +16,4 @@ export class AuthUserResponse {
   @ApiProperty({ enum: UserStatus })
   @Expose()
   status: UserStatus;
-
-  @ApiProperty({ type: Date })
-  @Expose()
-  createdAt: Date;
-
-  @ApiProperty({ type: Date })
-  @Expose()
-  updatedAt: Date;
 }

@@ -33,7 +33,6 @@ export class Role {
   permissions: RolePermission[];
 
   get permissionKeys() {
-    console.log(this.permissions);
     return (this.permissions ?? []).map(({ key }) => key);
   }
 }
