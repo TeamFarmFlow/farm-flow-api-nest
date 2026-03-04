@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 
-import { FarmUser, FarmUserRepository, Invitation, InvitationRepository, Role, RoleRepository, TypeOrmExModule } from '@app/infra/persistence/typeorm';
+import { FarmUser, FarmUserRepository, Invitation, InvitationRepository, Role, RoleRepository, TypeOrmExModule, User, UserRepository } from '@app/infra/persistence/typeorm';
 
 import { InvitationService } from './application';
 import { InvitationController } from './presentation';
 
 @Module({
-  imports: [TypeOrmExModule.forFeature([Invitation, FarmUser, Role], [InvitationRepository, FarmUserRepository, RoleRepository])],
+  imports: [TypeOrmExModule.forFeature([User, Role, FarmUser, Invitation], [UserRepository, RoleRepository, FarmUserRepository, InvitationRepository])],
   controllers: [InvitationController],
   providers: [InvitationService],
 })

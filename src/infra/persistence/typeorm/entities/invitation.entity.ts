@@ -10,7 +10,7 @@ const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 const TOKEN_LENGTH = 6;
 
 @Entity({ name: 'invitations' })
-@Index('INVITATIONS_CODE_UQ', ['code'], { unique: true })
+@Index('INVITATIONS_CODE_UQ', ['email', 'code'], { unique: true })
 @Index('INVITATIONS_CODE_STATUS_EXPIRES_AT_IDX', ['code', 'status', 'expiredAt'])
 @Index('INVITATIONS_CODE_EXPIRES_IDX', ['expiredAt'])
 export class Invitation {

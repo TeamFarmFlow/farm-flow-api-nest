@@ -23,6 +23,10 @@ export class UserRepository extends TransactionalRepository<User> {
     return this.getRepository(em).findOneBy({ email });
   }
 
+  async findOneById(id: string, em?: EntityManager) {
+    return this.getRepository(em).findOneByOrFail({ id });
+  }
+
   async save(user: DeepPartial<User>, em?: EntityManager) {
     return this.getRepository(em).save(user);
   }

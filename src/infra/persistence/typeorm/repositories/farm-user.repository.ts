@@ -56,6 +56,10 @@ export class FarmUserRepository extends TransactionalRepository<FarmUser> {
     return this.getRepository(em).insert(entityLike);
   }
 
+  async upsertOrIgnore(entityLike: DeepPartial<FarmUser>, em?: EntityManager) {
+    return this.getRepository(em).createQueryBuilder().insert().into(FarmUser).values(entityLike).orIgnore().execute();
+  }
+
   async updateRole(currentRoleId: string, updateRoleId: string, em?: EntityManager) {
     return this.getRepository(em).update({ roleId: currentRoleId }, { roleId: updateRoleId, updatedAt: () => 'NOW()' });
   }

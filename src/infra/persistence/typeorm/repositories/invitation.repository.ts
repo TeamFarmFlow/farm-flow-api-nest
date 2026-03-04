@@ -16,10 +16,11 @@ export class InvitationRepository extends TransactionalRepository<Invitation> {
     super(repository);
   }
 
-  async findValidByCode(code: string, em?: EntityManager) {
+  async findValid(email: string, code: string, em?: EntityManager) {
     return this.getRepository(em)
       .createQueryBuilder('i')
-      .where('i.code = :code', { code })
+      .where('i.email = :email', { email })
+      .andWhere('i.code = :code', { code })
       .andWhere('i.status = :status', { status: InvitationStatus.Published })
       .andWhere('i.expiredAt > NOW()')
       .getOne();
@@ -29,7 +30,9 @@ export class InvitationRepository extends TransactionalRepository<Invitation> {
     return this.getRepository(em).insert(entityLike);
   }
 
-  async update(id: string, entityLike: DeepPartial<Invitation>, em?: EntityManager) {
-    return this.getRepository(em).update(id, { ...entityLike, updatedAt: () => 'NOW()' });
+  async acceptIfPending(id: string, em: EntityManager): Promise<boolean> {
+    const result = await this.getRepository(em).update({ id, status: InvitationStatus.Published }, { status: InvitationStatus.Accepted, updatedAt: () => 'NOW()' });
+
+    return (result.affected ?? 0) === 1;
   }
 }
