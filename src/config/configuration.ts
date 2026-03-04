@@ -6,6 +6,7 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 import { CookieOptions } from 'express';
 import { utilities, WinstonModuleOptions } from 'nest-winston';
+import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import { ExtractJwt, WithSecretOrKey } from 'passport-jwt';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import winston from 'winston';
@@ -99,6 +100,16 @@ export class Configuration extends ConfigService {
       secure: isLocal ? false : true,
       sameSite: isLocal ? 'lax' : 'none',
       path: 'api/v1/auth',
+    };
+  }
+
+  get mailOptions(): SMTPTransport.Options {
+    return {
+      service: 'gmail',
+      auth: {
+        user: this.getOrThrow<string>('EMAIL_USER'),
+        pass: this.getOrThrow<string>('EMAIL_PASSWORD'),
+      },
     };
   }
 }

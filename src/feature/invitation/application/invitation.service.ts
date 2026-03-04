@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { DataSource } from 'typeorm';
 
+import { MailService } from '@app/infra/mail';
 import { FarmUser, FarmUserRepository, Invitation, InvitationRepository, RoleRepository, UserRepository } from '@app/infra/persistence/typeorm';
 
 import { InvalidInvitationCodeException } from '../domain';
@@ -17,13 +18,17 @@ export class InvitationService {
     private readonly invitationRepository: InvitationRepository,
     private readonly farmUserRepository: FarmUserRepository,
     private readonly roleRepository: RoleRepository,
+    private readonly mailService: MailService,
   ) {}
 
   async createInvitation(command: CreateInvitationCommand): Promise<CreateInvitationResult> {
-    const invitation = Invitation.of(command.farmId, command.userId, command.email, command.url);
-    await this.invitationRepository.insert(invitation);
+    const invitationEntity = Invitation.of(command.farmId, command.userId, command.email, command.url);
+    await this.invitationRepository.insert(invitationEntity);
+    const invitation = await this.invitationRepository.findByIdWithFarm(invitationEntity.id);
 
-    // TODO send email
+    void this.mailService
+      .sendInvitationMail(invitation.email, invitation.code, invitation.url, invitation.farm.name)
+      .then(() => this.invitationRepository.publishedIfPending(invitationEntity.id));
 
     return { id: invitation.id };
   }
@@ -37,7 +42,7 @@ export class InvitationService {
         throw new InvalidInvitationCodeException();
       }
 
-      const accepted = await this.invitationRepository.acceptIfPending(invitation.id, em);
+      const accepted = await this.invitationRepository.acceptIfPublished(invitation.id, em);
 
       if (accepted) {
         const defaultRole = await this.roleRepository.findDefault(invitation.farmId, em);

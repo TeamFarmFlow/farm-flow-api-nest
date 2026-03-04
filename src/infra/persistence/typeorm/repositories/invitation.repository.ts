@@ -26,11 +26,24 @@ export class InvitationRepository extends TransactionalRepository<Invitation> {
       .getOne();
   }
 
+  async findByIdWithFarm(id: string, em?: EntityManager) {
+    return this.getRepository(em).findOneOrFail({
+      relations: { farm: true },
+      where: { id },
+    });
+  }
+
   async insert(entityLike: DeepPartial<Invitation>, em?: EntityManager) {
     return this.getRepository(em).insert(entityLike);
   }
 
-  async acceptIfPending(id: string, em: EntityManager): Promise<boolean> {
+  async publishedIfPending(id: string, em?: EntityManager): Promise<boolean> {
+    const result = await this.getRepository(em).update({ id, status: InvitationStatus.Pending }, { status: InvitationStatus.Published, updatedAt: () => 'NOW()' });
+
+    return (result.affected ?? 0) === 1;
+  }
+
+  async acceptIfPublished(id: string, em?: EntityManager): Promise<boolean> {
     const result = await this.getRepository(em).update({ id, status: InvitationStatus.Published }, { status: InvitationStatus.Accepted, updatedAt: () => 'NOW()' });
 
     return (result.affected ?? 0) === 1;
