@@ -43,6 +43,12 @@ export class InvitationRepository extends TransactionalRepository<Invitation> {
     return (result.affected ?? 0) === 1;
   }
 
+  async failedIfPending(id: string, em?: EntityManager): Promise<boolean> {
+    const result = await this.getRepository(em).update({ id, status: InvitationStatus.Pending }, { status: InvitationStatus.Failed, updatedAt: () => 'NOW()' });
+
+    return (result.affected ?? 0) === 1;
+  }
+
   async acceptIfPublished(id: string, em?: EntityManager): Promise<boolean> {
     const result = await this.getRepository(em).update({ id, status: InvitationStatus.Published }, { status: InvitationStatus.Accepted, updatedAt: () => 'NOW()' });
 

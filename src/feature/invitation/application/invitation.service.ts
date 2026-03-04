@@ -28,7 +28,8 @@ export class InvitationService {
 
     void this.mailService
       .sendInvitationMail(invitation.email, invitation.code, invitation.url, invitation.farm.name)
-      .then(() => this.invitationRepository.publishedIfPending(invitationEntity.id));
+      .then(() => this.invitationRepository.publishedIfPending(invitationEntity.id))
+      .catch(() => this.invitationRepository.failedIfPending(invitationEntity.id));
 
     return { id: invitation.id };
   }
