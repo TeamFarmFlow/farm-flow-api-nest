@@ -9,6 +9,7 @@ import { ContextModule } from './core/context';
 import { GlobalExceptionFilterProvider } from './core/filters';
 import { GlobalClassSerializerInterceptorProvider } from './core/interceptors';
 import { GlobalValidationPipeProvider } from './core/pipes';
+import { AttendanceModule } from './feature/attendance';
 import { AuthModule } from './feature/auth';
 import { FarmModule } from './feature/farm';
 import { HealthModule } from './feature/health';
@@ -38,6 +39,7 @@ import { UserModule } from './feature/user';
     FarmModule,
     RoleModule,
     InvitationModule,
+    AttendanceModule,
   ],
   providers: [GlobalValidationPipeProvider, GlobalExceptionFilterProvider, GlobalClassSerializerInterceptorProvider],
 })

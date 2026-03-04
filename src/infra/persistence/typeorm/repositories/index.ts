@@ -6,3 +6,5 @@ export * from './refresh-token.repository';
 export * from './role.repository';
 export * from './role-permission.repository';
 export * from './invitation.repository';
+export * from './attendance.repository';
+export * from './attendance-qr-challenges.repository';

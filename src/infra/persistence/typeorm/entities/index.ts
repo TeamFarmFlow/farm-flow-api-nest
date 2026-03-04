@@ -6,3 +6,5 @@ export * from './farm-user.entity';
 export * from './role.entity';
 export * from './role-permission.entity';
 export * from './invitation.entity';
+export * from './attendance.entity';
+export * from './attendance-qr-challenges.entity';

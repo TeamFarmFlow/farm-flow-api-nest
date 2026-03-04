@@ -11,8 +11,8 @@ const TOKEN_LENGTH = 6;
 
 @Entity({ name: 'invitations' })
 @Index('INVITATIONS_CODE_UQ', ['email', 'code'], { unique: true })
-@Index('INVITATIONS_CODE_STATUS_EXPIRES_AT_IDX', ['code', 'status', 'expiredAt'])
-@Index('INVITATIONS_CODE_EXPIRES_IDX', ['expiredAt'])
+@Index('INVITATIONS_CODE_STATUS_EXPIRES_AT_IDX', ['code', 'status', 'expiresAt'])
+@Index('INVITATIONS_CODE_EXPIRES_IDX', ['expiresAt'])
 export class Invitation {
   @PrimaryGeneratedColumn('uuid', { primaryKeyConstraintName: 'INVITATIONS_PK' })
   readonly id: string;
@@ -27,7 +27,7 @@ export class Invitation {
   url: string;
 
   @Column({ type: 'timestamptz', default: () => "NOW() + INTERVAL '10 MINUTE'" })
-  expiredAt: Date;
+  expiresAt: Date;
 
   @Column({ type: 'varchar', length: 20, default: InvitationStatus.Pending })
   status: InvitationStatus;

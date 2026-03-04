@@ -21,12 +21,12 @@ export class RefreshTokenRepository extends TransactionalRepository<RefreshToken
       .leftJoinAndMapOne('farm.farmUser', 'farm.farmUser', 'farmUser', 'farmUser.farmId = farm.id AND farmUser.userId = user.id')
       .leftJoinAndMapOne('farmUser.role', 'farmUser.role', 'role')
       .where('refreshToken.id = :id', { id })
-      .andWhere('refreshToken.expiredAt > NOW()')
+      .andWhere('refreshToken.expiresAt > NOW()')
       .getOneOrFail();
   }
 
   async findValidById(id: string, em?: EntityManager) {
-    return this.getRepository(em).createQueryBuilder('refreshToken').where('refreshToken.id = :id', { id }).andWhere('refreshToken.expiredAt > NOW()').getOne();
+    return this.getRepository(em).createQueryBuilder('refreshToken').where('refreshToken.id = :id', { id }).andWhere('refreshToken.expiresAt > NOW()').getOne();
   }
 
   async insert(entityLike: DeepPartial<RefreshToken>, em?: EntityManager) {

@@ -22,7 +22,7 @@ export class InvitationRepository extends TransactionalRepository<Invitation> {
       .where('i.email = :email', { email })
       .andWhere('i.code = :code', { code })
       .andWhere('i.status = :status', { status: InvitationStatus.Published })
-      .andWhere('i.expiredAt > NOW()')
+      .andWhere('i.expiresAt > NOW()')
       .getOne();
   }
 

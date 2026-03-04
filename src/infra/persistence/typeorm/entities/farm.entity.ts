@@ -11,6 +11,9 @@ export class Farm {
   @Column({ type: 'varchar', length: 50 })
   name: string;
 
+  @Column({ type: 'varchar', length: 20, default: 'Asia/Seoul' })
+  timezone: string;
+
   @CreateDateColumn({ type: 'timestamptz' })
   readonly createdAt: Date;
 

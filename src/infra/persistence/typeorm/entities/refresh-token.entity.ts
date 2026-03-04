@@ -9,7 +9,7 @@ export class RefreshToken {
   readonly id: string;
 
   @Column({ type: 'timestamptz', default: () => "NOW() + INTERVAL '20 DAYS'" })
-  readonly expiredAt: Date;
+  readonly expiresAt: Date;
 
   @CreateDateColumn({ type: 'timestamptz' })
   readonly createdAt: Date;
