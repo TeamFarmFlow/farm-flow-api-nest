@@ -1,4 +1,4 @@
-import { Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { ContextService } from '@app/core/context';
@@ -9,6 +9,7 @@ import { AuthFarmPrincipal } from '@app/shared/security';
 
 import { AttendanceQrChallengeService } from '../application';
 
+import { CreateAttendanceQrCodeRequest } from './dto/request';
 import { CreateAttendanceQrCodeResponse } from './dto/response';
 
 @RequiredPermissions([PermissionKey.AttendanceQrCreate])
@@ -24,6 +25,9 @@ export class AttendanceQrChallengeController {
   @ApiOperation({ summary: '출퇴근 QR 코드 생성' })
   @ApiCreatedResponse({ type: CreateAttendanceQrCodeResponse })
   async createAttendanceQrCode(): Promise<CreateAttendanceQrCodeResponse> {
-    return toInstance(CreateAttendanceQrCodeResponse, await this.attendanceQrChallengeService.createQrCode(this.contextService.user.farmId));
+    return toInstance(
+      CreateAttendanceQrCodeResponse,
+      await this.attendanceQrChallengeService.createQrCode(new CreateAttendanceQrCodeRequest().toCommand(this.contextService.user.farmId)),
+    );
   }
 }
