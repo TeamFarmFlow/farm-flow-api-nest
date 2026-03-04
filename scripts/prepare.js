@@ -8,15 +8,15 @@ function setEnvRoot() {
   const envPath = path.resolve(ROOT, '.env');
   const envLocalPath = path.resolve(ROOT, '.env.local');
 
-  if (!fs.existsSync(envLocalPath)) {
+  if (!fs.existsSync(envPath)) {
     return;
   }
 
-  if (fs.existsSync(envPath)) {
+  if (fs.existsSync(envLocalPath)) {
     return;
   }
 
-  fs.cpSync(envLocalPath, envPath);
+  fs.cpSync(envPath, envLocalPath);
 }
 
 function setEnvApps() {
@@ -27,15 +27,15 @@ function setEnvApps() {
     const envPath = path.resolve(ROOT, 'apps', app, '.env');
     const envLocalPath = path.resolve(ROOT, 'apps', app, '.env.local');
 
-    if (!fs.existsSync(envLocalPath)) {
+    if (!fs.existsSync(envPath)) {
       continue;
     }
 
-    if (fs.existsSync(envPath)) {
+    if (fs.existsSync(envLocalPath)) {
       continue;
     }
 
-    fs.cpSync(envLocalPath, envPath);
+    fs.cpSync(envPath, envLocalPath);
   }
 }
 
