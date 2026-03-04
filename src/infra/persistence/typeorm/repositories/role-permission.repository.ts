@@ -26,4 +26,8 @@ export class RolePermissionRepository extends TransactionalRepository<RolePermis
       conflictPaths: { roleId: true, key: true },
     });
   }
+
+  async saves(entityLikes: DeepPartial<RolePermission>[], em?: EntityManager) {
+    return this.getRepository(em).save(entityLikes);
+  }
 }

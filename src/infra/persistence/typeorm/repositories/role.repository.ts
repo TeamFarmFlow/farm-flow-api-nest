@@ -26,11 +26,22 @@ export class RoleRepository extends TransactionalRepository<Role> {
       .getManyAndCount();
   }
 
+  async findByIdWithPermissions(id: string, em?: EntityManager) {
+    return this.getRepository(em).findOne({
+      relations: { permissions: true },
+      where: { id },
+    });
+  }
+
   async insert(entityLike: DeepPartial<Role>, em?: EntityManager) {
     return this.getRepository(em).insert(entityLike);
   }
 
   async save(entityLike: DeepPartial<Role>, em?: EntityManager) {
     return this.getRepository(em).save(entityLike);
+  }
+
+  async update(id: string, entityLike: DeepPartial<Role>, em?: EntityManager) {
+    return this.getRepository(em).update(id, entityLike);
   }
 }

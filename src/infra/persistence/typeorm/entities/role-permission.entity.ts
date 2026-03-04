@@ -8,10 +8,10 @@ import { Role } from './role.entity';
 @Index('ROLE_PERMISSIONS_UK', ['roleId', 'key'], { unique: true })
 export class RolePermission {
   @PrimaryColumn('uuid', { primaryKeyConstraintName: 'ROLE_PERMISSIONS_PK' })
-  readonly roleId: string;
+  roleId: string;
 
   @PrimaryColumn('varchar', { length: 50, primaryKeyConstraintName: 'ROLE_PERMISSIONS_PK' })
-  readonly key: PermissionKey;
+  key: PermissionKey;
 
   @CreateDateColumn({ type: 'timestamptz' })
   readonly createdAt: Date;
@@ -19,4 +19,13 @@ export class RolePermission {
   @ManyToOne(() => Role, { onDelete: 'CASCADE' })
   @JoinColumn({ foreignKeyConstraintName: 'ROLE_PERMISSIONS_ROLE_FK' })
   role: Role;
+
+  public static of(roleId: string, key: PermissionKey) {
+    const rolePermission = new RolePermission();
+
+    rolePermission.roleId = roleId;
+    rolePermission.key = key;
+
+    return rolePermission;
+  }
 }
