@@ -27,14 +27,15 @@ export class MailService {
     <div style="font-family: Arial, sans-serif; padding: 24px; background:#f7f7f7">
       <div style="max-width:520px;margin:0 auto;background:white;padding:32px;border-radius:10px">
 
-        <h2 style="margin-top:0">
+        <h2 style="margin-top:0; text-align: center;">
           ${farmName} 농장에 초대되었습니다 🌱
         </h2>
 
-        <p style="line-height:1.6">
-          안녕하세요.<br/>
+        <hr style="margin:28px 0;border:none;border-top:1px solid #eee"/>
+
+        <p style="line-height:1.6; text-align: center;">
           <b>${farmName}</b> 농장에 참여할 수 있도록 초대되었습니다.<br/>
-          아래 버튼을 눌러 초대를 수락해주세요.
+          초대 수락 버튼을 클릭하여 아래 코드를 입력해주세요.
         </p>
 
         <div style="margin:28px 0;text-align:center">
@@ -51,10 +52,6 @@ export class MailService {
           </a>
         </div>
 
-        <p style="margin-bottom:8px">
-          버튼이 작동하지 않는 경우 아래 초대 코드를 입력해주세요.
-        </p>
-
         <div style="text-align:center;">
           <div style="
             font-size:26px;
@@ -64,31 +61,16 @@ export class MailService {
             padding:12px 18px;
             display:inline-block;
             border-radius:8px;
-            margin-bottom:16px">
+            margin-bottom:2px">
             ${code}
-          </div>
-        </div>
-
-        <p style="margin-top:24px;font-size:14px;color:#666">
-          또는 아래 링크를 브라우저에 직접 입력할 수도 있습니다.
-        </p>
-
-
-        <div style="text-align:center;">
-          <div style="
-            font-size:13px;
-            word-break:break-all;
-            color:#4CAF50">
-            ${url}
           </div>
         </div>
 
         <hr style="margin:28px 0;border:none;border-top:1px solid #eee"/>
 
-        <p style="font-size:13px;color:#888;margin:0">
+        <p style="font-size:13px;color:#888;margin:0; text-align: center">
           이 초대장은 <b>10분 후 만료</b>됩니다.
         </p>
-
       </div>
     </div>`;
   }
