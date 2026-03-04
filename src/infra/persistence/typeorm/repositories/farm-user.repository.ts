@@ -41,6 +41,13 @@ export class FarmUserRepository extends TransactionalRepository<FarmUser> {
     return this.getRepository(em).findBy({ role: { id: roleId } });
   }
 
+  async findByRoleIdWithUser(roleId: string, em?: EntityManager) {
+    return this.getRepository(em).find({
+      relations: { user: true },
+      where: { role: { id: roleId } },
+    });
+  }
+
   async save(entityLike: DeepPartial<FarmUser>, em?: EntityManager) {
     return this.getRepository(em).save(entityLike);
   }

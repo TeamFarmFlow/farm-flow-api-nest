@@ -12,7 +12,7 @@ import { RoleService } from '../application';
 
 import { CreateRoleRequest, UpdateRoleRequest } from './dto/request';
 import { GetRolesRequest } from './dto/request/get-roles.request';
-import { CreateRoleResponse, RolesResponse } from './dto/response';
+import { CreateRoleResponse, RoleDetailsResponse, RolesResponse } from './dto/response';
 
 @RequiredPermissions([PermissionKey.RoleManagement])
 @ApiTags('역할/권한')
@@ -22,6 +22,13 @@ export class RoleController {
     private readonly contextService: ContextService<AuthFarmPrincipal>,
     private readonly roleService: RoleService,
   ) {}
+
+  @Get(':id')
+  @ApiOperation({ summary: '역할 상세 조회' })
+  @ApiOkResponse({ type: RoleDetailsResponse })
+  async getRoleDetails(@Param('id', new ParseUuidStringPipe()) id: string) {
+    return toInstance(RoleDetailsResponse, await this.roleService.getRoleDetails(id));
+  }
 
   @Get()
   @ApiOperation({ summary: '역할 목록 조회' })
@@ -50,6 +57,6 @@ export class RoleController {
   @ApiOperation({ summary: '역할 삭제' })
   @ApiNoContentResponse()
   async deleteRole(@Param('id', new ParseUuidStringPipe()) id: string) {
-    return this.roleService.deleteRole({ roleId: id });
+    return this.roleService.deleteRole(id);
   }
 }

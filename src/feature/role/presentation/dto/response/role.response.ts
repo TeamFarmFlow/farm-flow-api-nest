@@ -11,6 +11,14 @@ export class RoleResponse {
   @Expose()
   name: string;
 
+  @ApiProperty({ type: Boolean })
+  @Expose()
+  super: boolean;
+
+  @ApiProperty({ type: Boolean })
+  @Expose()
+  required: boolean;
+
   @ApiProperty({ type: String })
   @Expose({ name: 'permissionKeys' })
   permissions: string[];

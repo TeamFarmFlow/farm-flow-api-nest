@@ -6,9 +6,9 @@ import { FarmUserRepository, RolePermission, RolePermissionRepository, RoleRepos
 
 import { RoleCannotUpdateOrDeleteException, RoleNotFoundException } from '../domain';
 
-import { CreateRoleCommand, DeleteRoleCommand, UpdateRoleCommand } from './commands';
+import { CreateRoleCommand, UpdateRoleCommand } from './commands';
 import { GetRolesQuery } from './queries';
-import { CreateRoleResult, GetRolesResult } from './results';
+import { CreateRoleResult, GetRoleDetailsResult, GetRolesResult } from './results';
 
 @Injectable()
 export class RoleService {
@@ -18,6 +18,21 @@ export class RoleService {
     private readonly rolePermissionRepository: RolePermissionRepository,
     private readonly farmUserRepository: FarmUserRepository,
   ) {}
+
+  async getRoleDetails(id: string): Promise<GetRoleDetailsResult> {
+    return this.dataSource.transaction(async (em) => {
+      const role = await this.roleRepository.findByIdWithPermissions(id, em);
+
+      if (!role) {
+        throw new RoleNotFoundException();
+      }
+
+      const farmUsers = await this.farmUserRepository.findByRoleIdWithUser(role.id, em);
+      const users = farmUsers.map((farmUser) => farmUser.user);
+
+      return { role, users };
+    });
+  }
 
   async getRoles(query: GetRolesQuery): Promise<GetRolesResult> {
     const [rows, total] = await this.roleRepository.findAndCountByFarmIdWithPermissions(query.farmId);
@@ -61,8 +76,8 @@ export class RoleService {
     });
   }
 
-  async deleteRole(command: DeleteRoleCommand): Promise<void> {
-    const role = await this.roleRepository.findByIdWithPermissions(command.roleId);
+  async deleteRole(id: string): Promise<void> {
+    const role = await this.roleRepository.findByIdWithPermissions(id);
 
     if (!role) {
       throw new RoleNotFoundException();
