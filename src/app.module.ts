@@ -12,6 +12,7 @@ import { GlobalValidationPipeProvider } from './core/pipes';
 import { AuthModule } from './feature/auth';
 import { FarmModule } from './feature/farm';
 import { HealthModule } from './feature/health';
+import { InvitationModule } from './feature/invitation';
 import { RoleModule } from './feature/role';
 import { UserModule } from './feature/user';
 
@@ -36,6 +37,7 @@ import { UserModule } from './feature/user';
     UserModule,
     FarmModule,
     RoleModule,
+    InvitationModule,
   ],
   providers: [GlobalValidationPipeProvider, GlobalExceptionFilterProvider, GlobalClassSerializerInterceptorProvider],
 })

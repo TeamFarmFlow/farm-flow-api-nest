@@ -8,10 +8,10 @@ import { User } from './user.entity';
 @Index('FARM_USERS_ROLE_ID_IDX', ['roleId'], { where: 'role_id IS NOT NULL' })
 export class FarmUser {
   @PrimaryColumn('uuid', { primaryKeyConstraintName: 'FARM_USERS_PK' })
-  readonly farmId: string;
+  farmId: string;
 
   @PrimaryColumn('uuid', { primaryKeyConstraintName: 'FARM_USERS_PK' })
-  readonly userId: string;
+  userId: string;
 
   @CreateDateColumn({ type: 'timestamptz' })
   readonly createdAt: Date;
@@ -20,7 +20,7 @@ export class FarmUser {
   readonly updatedAt: Date;
 
   @Column({ type: 'uuid', nullable: true })
-  roleId: string;
+  roleId: string | null;
 
   @ManyToOne(() => Farm, (e) => e.farmUsers, { onDelete: 'CASCADE' })
   @JoinColumn({ foreignKeyConstraintName: 'FARM_USERS_FARM_FK' })
@@ -33,4 +33,14 @@ export class FarmUser {
   @ManyToOne(() => Role, (e) => e.farmUsers, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ foreignKeyConstraintName: 'FARM_USERS_ROLE_FK' })
   role: Role | null;
+
+  public static of(farmId: string, userId: string, roleId: string | null = null) {
+    const farmUser = new FarmUser();
+
+    farmUser.farmId = farmId;
+    farmUser.userId = userId;
+    farmUser.roleId = roleId;
+
+    return farmUser;
+  }
 }

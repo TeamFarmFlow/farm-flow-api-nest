@@ -5,3 +5,4 @@ export * from './farm-user.repository';
 export * from './refresh-token.repository';
 export * from './role.repository';
 export * from './role-permission.repository';
+export * from './invitation.repository';
