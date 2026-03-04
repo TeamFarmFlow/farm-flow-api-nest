@@ -1,11 +1,11 @@
-import { CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 
 import { Farm } from './farm.entity';
 import { Role } from './role.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'farm_users' })
-@Index('FARM_USERS_ROLE_ID_IDX', ['role'], { where: 'role_id IS NOT NULL' })
+@Index('FARM_USERS_ROLE_ID_IDX', ['roleId'], { where: 'role_id IS NOT NULL' })
 export class FarmUser {
   @PrimaryColumn('uuid', { primaryKeyConstraintName: 'FARM_USERS_PK' })
   readonly farmId: string;
@@ -16,6 +16,12 @@ export class FarmUser {
   @CreateDateColumn({ type: 'timestamptz' })
   readonly createdAt: Date;
 
+  @UpdateDateColumn({ type: 'timestamptz' })
+  readonly updatedAt: Date;
+
+  @Column({ type: 'uuid', nullable: true })
+  roleId: string;
+
   @ManyToOne(() => Farm, (e) => e.farmUsers, { onDelete: 'CASCADE' })
   @JoinColumn({ foreignKeyConstraintName: 'FARM_USERS_FARM_FK' })
   farm: Farm;
@@ -24,7 +30,7 @@ export class FarmUser {
   @JoinColumn({ foreignKeyConstraintName: 'FARM_USERS_USER_FK' })
   user: User;
 
-  @ManyToOne(() => Role, { onDelete: 'SET NULL', nullable: true })
+  @ManyToOne(() => Role, (e) => e.farmUsers, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ foreignKeyConstraintName: 'FARM_USERS_ROLE_FK' })
   role: Role | null;
 }

@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 import { Farm } from './farm.entity';
+import { FarmUser } from './farm-user.entity';
 import { RolePermission } from './role-permission.entity';
 
 @Entity({ name: 'roles' })
@@ -31,6 +32,9 @@ export class Role {
   @ManyToOne(() => Farm, (e) => e.roles, { onDelete: 'CASCADE' })
   @JoinColumn({ foreignKeyConstraintName: 'ROLES_FARM_FK' })
   farm: Farm;
+
+  @OneToMany(() => FarmUser, (e) => e.role, { cascade: ['remove'] })
+  farmUsers: FarmUser[];
 
   @OneToMany(() => RolePermission, (e) => e.role, { cascade: true })
   permissions: RolePermission[];

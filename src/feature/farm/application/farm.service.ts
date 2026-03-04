@@ -9,7 +9,7 @@ import { ExceedFarmCountException, FarmNotFoundException } from '../domain';
 
 import { CreateFarmCommand, DeleteFarmCommand, UpdateFarmCommand } from './commands';
 import { GetFarmsQuery } from './queries';
-import { GetFarmsResult } from './results';
+import { CreateFarmResult, GetFarmsResult } from './results';
 
 @Injectable()
 export class FarmService {
@@ -33,8 +33,8 @@ export class FarmService {
     };
   }
 
-  async createFarm(command: CreateFarmCommand) {
-    await this.dataSource.transaction(async (em) => {
+  async createFarm(command: CreateFarmCommand): Promise<CreateFarmResult> {
+    const farm = await this.dataSource.transaction(async (em) => {
       const { affected } = await this.userUsageRepository.tryIncreaseFarmCount(command.userId, em);
 
       if (!affected) {
@@ -51,9 +51,11 @@ export class FarmService {
 
       return farm;
     });
+
+    return { id: farm.id };
   }
 
-  async updateFarm(command: UpdateFarmCommand) {
+  async updateFarm(command: UpdateFarmCommand): Promise<void> {
     const hasFarm = await this.farmUserRepository.has(command.farmId, command.userId);
 
     if (!hasFarm) {
@@ -63,7 +65,7 @@ export class FarmService {
     await this.farmRepository.update(command.farmId, { name: command.name });
   }
 
-  async deleteFarm(command: DeleteFarmCommand) {
+  async deleteFarm(command: DeleteFarmCommand): Promise<void> {
     const hasFarm = await this.farmUserRepository.has(command.farmId, command.userId);
 
     if (!hasFarm) {

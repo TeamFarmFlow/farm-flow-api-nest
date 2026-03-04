@@ -37,12 +37,20 @@ export class FarmUserRepository extends TransactionalRepository<FarmUser> {
       .getManyAndCount();
   }
 
+  async findByRoleId(roleId: string, em?: EntityManager) {
+    return this.getRepository(em).findBy({ role: { id: roleId } });
+  }
+
   async save(entityLike: DeepPartial<FarmUser>, em?: EntityManager) {
     return this.getRepository(em).save(entityLike);
   }
 
   async insert(entityLike: DeepPartial<FarmUser>, em?: EntityManager) {
     return this.getRepository(em).insert(entityLike);
+  }
+
+  async updateRole(currentRoleId: string, updateRoleId: string, em?: EntityManager) {
+    return this.getRepository(em).update({ roleId: currentRoleId }, { roleId: updateRoleId, updatedAt: () => 'NOW()' });
   }
 
   async delete(farmId: string, userId: string, em?: EntityManager) {

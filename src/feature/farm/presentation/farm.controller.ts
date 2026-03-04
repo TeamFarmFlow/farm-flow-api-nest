@@ -11,7 +11,7 @@ import { AuthPrincipal } from '@app/shared/security';
 import { FarmService } from '../application';
 
 import { CreateFarmRequest, GetFarmsRequest, UpdateFarmRequest } from './dto/request';
-import { FarmResponse, FarmsResponse } from './dto/response';
+import { CreateFarmResponse, FarmResponse, FarmsResponse } from './dto/response';
 
 @ApiTags('농장')
 @Controller('farms')
@@ -29,10 +29,10 @@ export class FarmController {
   }
 
   @Post()
-  @ApiOperation({ summary: '농장 등록' })
-  @ApiCreatedResponse()
-  async createFarm(@Body() body: CreateFarmRequest) {
-    return this.farmService.createFarm(body.toCommand(this.contextService.user.id));
+  @ApiOperation({ summary: '농장 생성' })
+  @ApiCreatedResponse({ type: CreateFarmResponse })
+  async createFarm(@Body() body: CreateFarmRequest): Promise<CreateFarmResponse> {
+    return toInstance(CreateFarmResponse, await this.farmService.createFarm(body.toCommand(this.contextService.user.id)));
   }
 
   @RequiredPermissions([PermissionKey.Update])

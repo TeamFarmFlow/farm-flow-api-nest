@@ -33,6 +33,20 @@ export class RoleRepository extends TransactionalRepository<Role> {
     });
   }
 
+  async findById(id: string, em?: EntityManager) {
+    return this.getRepository(em).findOne({
+      where: { id },
+    });
+  }
+
+  async findDefault(farmId: string, em?: EntityManager) {
+    return this.getRepository(em).findOneByOrFail({
+      farmId,
+      required: true,
+      super: false,
+    });
+  }
+
   async insert(entityLike: DeepPartial<Role>, em?: EntityManager) {
     return this.getRepository(em).insert(entityLike);
   }
@@ -42,6 +56,10 @@ export class RoleRepository extends TransactionalRepository<Role> {
   }
 
   async update(id: string, entityLike: DeepPartial<Role>, em?: EntityManager) {
-    return this.getRepository(em).update(id, entityLike);
+    return this.getRepository(em).update(id, { ...entityLike, updatedAt: () => 'NOW()' });
+  }
+
+  async delete(id: string, em?: EntityManager) {
+    return this.getRepository(em).delete(id);
   }
 }

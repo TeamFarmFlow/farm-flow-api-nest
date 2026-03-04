@@ -2,11 +2,13 @@ import { Injectable } from '@nestjs/common';
 
 import { DataSource } from 'typeorm';
 
-import { RolePermission, RolePermissionRepository, RoleRepository } from '@app/infra/persistence/typeorm';
+import { FarmUserRepository, RolePermission, RolePermissionRepository, RoleRepository } from '@app/infra/persistence/typeorm';
 
-import { CreateRoleCommand, UpdateRoleCommand } from './commands';
+import { RoleCannotUpdateOrDeleteException, RoleNotFoundException } from '../domain';
+
+import { CreateRoleCommand, DeleteRoleCommand, UpdateRoleCommand } from './commands';
 import { GetRolesQuery } from './queries';
-import { GetRolesResult } from './results';
+import { CreateRoleResult, GetRolesResult } from './results';
 
 @Injectable()
 export class RoleService {
@@ -14,6 +16,7 @@ export class RoleService {
     private readonly dataSource: DataSource,
     private readonly roleRepository: RoleRepository,
     private readonly rolePermissionRepository: RolePermissionRepository,
+    private readonly farmUserRepository: FarmUserRepository,
   ) {}
 
   async getRoles(query: GetRolesQuery): Promise<GetRolesResult> {
@@ -22,27 +25,30 @@ export class RoleService {
     return { total, rows };
   }
 
-  async createRole(command: CreateRoleCommand): Promise<void> {
-    await this.roleRepository.save({
+  async createRole(command: CreateRoleCommand): Promise<CreateRoleResult> {
+    const role = await this.roleRepository.save({
       farmId: command.farmId,
       name: command.name,
       permissions: command.permissions.map((key) => ({ key })),
     });
+
+    return { id: role.id };
   }
 
-  // BUGFIX 기존에 있던 permission 안 사라짐
   async updateRole(command: UpdateRoleCommand): Promise<void> {
     const role = await this.roleRepository.findByIdWithPermissions(command.roleId);
 
     if (!role) {
-      throw new Error('not found role');
+      throw new RoleNotFoundException();
     }
 
     if (role.required) {
-      throw new Error('cannot update role');
+      throw new RoleCannotUpdateOrDeleteException();
     }
 
     const permissionSet = new Set(command.permissions);
+    const deletePermissions = role.permissions.filter(({ key }) => !permissionSet.has(key)).map((permission) => permission.id);
+
     const permissions = [
       ...role.permissions.filter(({ key }) => permissionSet.has(key)),
       ...command.permissions.filter((key) => !role.permissions.some((permission) => permission.key === key)).map((key) => RolePermission.of(command.roleId, key)),
@@ -51,6 +57,26 @@ export class RoleService {
     await this.dataSource.transaction(async (em) => {
       await this.roleRepository.update(command.roleId, { name: command.name }, em);
       await this.rolePermissionRepository.saves(permissions, em);
+      await this.rolePermissionRepository.deleteInIds(deletePermissions);
+    });
+  }
+
+  async deleteRole(command: DeleteRoleCommand): Promise<void> {
+    const role = await this.roleRepository.findByIdWithPermissions(command.roleId);
+
+    if (!role) {
+      throw new RoleNotFoundException();
+    }
+
+    if (role.required) {
+      throw new RoleCannotUpdateOrDeleteException();
+    }
+
+    const defaultRole = await this.roleRepository.findDefault(role.farmId);
+
+    await this.dataSource.transaction(async (em) => {
+      await this.farmUserRepository.updateRole(role.id, defaultRole.id, em);
+      await this.roleRepository.delete(role.id);
     });
   }
 }

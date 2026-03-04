@@ -30,4 +30,12 @@ export class RolePermissionRepository extends TransactionalRepository<RolePermis
   async saves(entityLikes: DeepPartial<RolePermission>[], em?: EntityManager) {
     return this.getRepository(em).save(entityLikes);
   }
+
+  async deleteInIds(ids: string[], em?: EntityManager) {
+    if (ids.length === 0) {
+      return;
+    }
+
+    return this.getRepository(em).delete(ids);
+  }
 }
