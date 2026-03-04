@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Sse } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { ContextService } from '@app/core/context';
@@ -20,6 +20,11 @@ export class AttendanceQrChallengeController {
     private readonly contextService: ContextService<AuthFarmPrincipal>,
     private readonly attendanceQrChallengeService: AttendanceQrChallengeService,
   ) {}
+
+  @Sse(':deviceId')
+  getAttendanceQrCodeByDevice() {
+    return;
+  }
 
   @Post()
   @ApiOperation({ summary: '출퇴근 QR 코드 생성' })
