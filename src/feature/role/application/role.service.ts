@@ -30,6 +30,7 @@ export class RoleService {
     });
   }
 
+  // BUGFIX 기존에 있던 permission 안 사라짐
   async updateRole(command: UpdateRoleCommand): Promise<void> {
     const role = await this.roleRepository.findByIdWithPermissions(command.roleId);
 

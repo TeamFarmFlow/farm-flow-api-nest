@@ -41,6 +41,6 @@ export class RoleController {
   @ApiOperation({ summary: '역할 수정' })
   @ApiCreatedResponse()
   async updateRole(@Param('id', new ParseUuidStringPipe()) id: string, @Body() body: UpdateRoleRequest) {
-    return this.roleService.updateRole(body.toCommand(this.contextService.user.farmId));
+    return this.roleService.updateRole(body.toCommand(id));
   }
 }
