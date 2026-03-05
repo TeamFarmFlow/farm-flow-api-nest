@@ -4,7 +4,6 @@ import { Reflector } from '@nestjs/core';
 import { ContextService } from '@app/core/context';
 import { IS_PUBLIC_KEY } from '@app/core/security';
 import { FarmUserRepository } from '@app/infra/persistence/typeorm';
-import { AuthFarmPrincipal } from '@app/shared/security';
 
 import { IS_SKIP_FARM_AUTH } from '../../../core/security/constants';
 import { ForbiddenFarmUserException } from '../domain';
@@ -13,7 +12,7 @@ import { ForbiddenFarmUserException } from '../domain';
 export class FarmAuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly contextService: ContextService<AuthFarmPrincipal>,
+    private readonly contextService: ContextService,
     private readonly farmUserRepository: FarmUserRepository,
   ) {}
 
@@ -30,8 +29,8 @@ export class FarmAuthGuard implements CanActivate {
       return true;
     }
 
-    const userId = this.contextService.user.id;
-    const farmId = this.contextService.user.farmId;
+    const userId = this.contextService.userId;
+    const farmId = this.contextService.farmId;
 
     if (!farmId) {
       throw new ForbiddenFarmUserException();

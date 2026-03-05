@@ -5,7 +5,6 @@ import { ContextService } from '@app/core/context';
 import { IS_PUBLIC_KEY, REQUIRED_PERMISSIONS_KEY, RequiredPermissionMetadata } from '@app/core/security';
 import { FarmUserRepository, RolePermissionRepository } from '@app/infra/persistence/typeorm';
 import { PermissionKey, PermissionKeyWildCard } from '@app/shared/domain';
-import { AuthPrincipal } from '@app/shared/security';
 
 import { ForbiddenPermissionException } from '../domain';
 
@@ -13,7 +12,7 @@ import { ForbiddenPermissionException } from '../domain';
 export class PermissionGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly contextService: ContextService<AuthPrincipal>,
+    private readonly contextService: ContextService,
     private readonly farmUserRepository: FarmUserRepository,
     private readonly rolePermissionRepository: RolePermissionRepository,
   ) {}
@@ -35,8 +34,8 @@ export class PermissionGuard implements CanActivate {
       return true;
     }
 
-    const userId = this.contextService.user.id;
-    const farmId = this.contextService.user.farmId;
+    const userId = this.contextService.userId;
+    const farmId = this.contextService.farmId;
 
     if (!farmId) {
       throw new ForbiddenPermissionException();

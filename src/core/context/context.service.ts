@@ -5,7 +5,7 @@ import { ClsService } from 'nestjs-cls';
 import { ContextKey } from './enums';
 
 @Injectable()
-export class ContextService<IUser = unknown> {
+export class ContextService {
   constructor(private readonly clsService: ClsService) {}
 
   get<K = string, V = unknown>(key: K) {
@@ -16,12 +16,20 @@ export class ContextService<IUser = unknown> {
     return this.clsService.set(key as string, value);
   }
 
-  get user() {
-    return this.clsService.get('user') as IUser;
+  get userId() {
+    return this.clsService.get<string>('user.id') ?? null;
   }
 
-  set user(user: IUser) {
-    this.clsService.set<string>('user', user);
+  set userId(userId: string) {
+    this.clsService.set('user.id', userId);
+  }
+
+  get farmId() {
+    return this.clsService.get<string>('farm.id') ?? null;
+  }
+
+  set farmId(farmId: string) {
+    this.clsService.set('farm.id', farmId);
   }
 
   get context() {
@@ -53,7 +61,10 @@ export class ContextService<IUser = unknown> {
       os: this.get(ContextKey.RequestOS),
       device: this.get(ContextKey.RequestDevice),
       browser: this.get(ContextKey.RequestBrowser),
-      user: this.user,
+      user: {
+        userId: this.get('user.id'),
+        farmId: this.get('farm.id'),
+      },
     };
   }
 }

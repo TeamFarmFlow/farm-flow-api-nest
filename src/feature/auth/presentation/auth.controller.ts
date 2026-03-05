@@ -4,9 +4,8 @@ import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { type Request, type Response } from 'express';
 
 import { ContextService } from '@app/core/context';
-import { Public } from '@app/core/security';
+import { Public, SkipFarmAuth } from '@app/core/security';
 import { toInstance } from '@app/core/transform';
-import { AuthPrincipal } from '@app/shared/security';
 
 import { AuthService } from '../application';
 
@@ -17,7 +16,7 @@ import { AuthResponse } from './dto/response';
 @Controller('auth')
 export class AuthController {
   constructor(
-    private readonly contextService: ContextService<AuthPrincipal>,
+    private readonly contextService: ContextService,
     private readonly authService: AuthService,
   ) {}
 
@@ -45,10 +44,11 @@ export class AuthController {
     return toInstance(AuthResponse, await this.authService.refresh(req, res));
   }
 
+  @SkipFarmAuth()
   @Post('checkin')
   @ApiOperation({ summary: '농장 체크인' })
   @ApiCreatedResponse({ type: AuthResponse })
   async checkIn(@Body() body: CheckInRequest, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    return toInstance(AuthResponse, await this.authService.checkIn(body.toCommand(this.contextService.user.id), req, res));
+    return toInstance(AuthResponse, await this.authService.checkIn(body.toCommand(this.contextService.userId), req, res));
   }
 }

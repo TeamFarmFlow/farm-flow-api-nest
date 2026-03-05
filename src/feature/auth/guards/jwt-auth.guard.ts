@@ -5,7 +5,7 @@ import { AuthGuard } from '@nestjs/passport';
 
 import { ContextService } from '@app/core/context';
 import { IS_PUBLIC_KEY } from '@app/core/security';
-import { AuthPrincipal, JwtClaims } from '@app/shared/security';
+import { JwtClaims } from '@app/shared/security';
 
 import { ExpiredTokenException, InvalidTokenException } from '../domain';
 
@@ -13,7 +13,7 @@ import { ExpiredTokenException, InvalidTokenException } from '../domain';
 export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(
     private readonly reflector: Reflector,
-    private readonly contextService: ContextService<AuthPrincipal | null>,
+    private readonly contextService: ContextService,
   ) {
     super();
   }
@@ -24,8 +24,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [context.getHandler(), context.getClass()]);
 
     if (isPublic) {
-      this.contextService.user = null;
-
       return true;
     }
 
@@ -41,7 +39,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       throw new InvalidTokenException();
     }
 
-    this.contextService.user = user ?? null;
+    this.contextService.userId = user?.id;
+    this.contextService.farmId = user?.farmId ?? '';
 
     return user ?? null;
   }

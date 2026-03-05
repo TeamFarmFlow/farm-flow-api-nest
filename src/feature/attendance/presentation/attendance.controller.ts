@@ -3,7 +3,6 @@ import { ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nes
 
 import { ContextService } from '@app/core/context';
 import { toInstance } from '@app/core/transform';
-import { AuthFarmPrincipal } from '@app/shared/security';
 
 import { AttendanceService } from '../application';
 
@@ -14,7 +13,7 @@ import { AttendanceResponse } from './dto/response';
 @Controller('attendances')
 export class AttendanceController {
   constructor(
-    private readonly contextService: ContextService<AuthFarmPrincipal>,
+    private readonly contextService: ContextService,
     private readonly attendanceService: AttendanceService,
   ) {}
 
@@ -22,7 +21,7 @@ export class AttendanceController {
   @ApiOperation({ summary: '오늘 출퇴근 기록 조회' })
   @ApiOkResponse({ type: AttendanceResponse })
   async getAttendanceByToday() {
-    return toInstance(AttendanceResponse, await this.attendanceService.getAttendanceByToday(this.contextService.user.farmId, this.contextService.user.id));
+    return toInstance(AttendanceResponse, await this.attendanceService.getAttendanceByToday(this.contextService.farmId, this.contextService.userId));
   }
 
   @Post('checkin')
@@ -30,7 +29,7 @@ export class AttendanceController {
   @ApiOperation({ summary: '출근' })
   @ApiNoContentResponse()
   checkInAttendance(@Body() body: CheckInAttendanceRequest) {
-    return this.attendanceService.checkInAttendnace(body.toCommand(this.contextService.user.farmId, this.contextService.user.id));
+    return this.attendanceService.checkInAttendnace(body.toCommand(this.contextService.farmId, this.contextService.userId));
   }
 
   @Post('checkout')
@@ -38,6 +37,6 @@ export class AttendanceController {
   @ApiOperation({ summary: '퇴근' })
   @ApiNoContentResponse()
   checkOutAttendance(@Body() body: CheckOutAttendanceRequest) {
-    return this.attendanceService.checkOutAttendnace(body.toCommand(this.contextService.user.farmId, this.contextService.user.id));
+    return this.attendanceService.checkOutAttendnace(body.toCommand(this.contextService.farmId, this.contextService.userId));
   }
 }

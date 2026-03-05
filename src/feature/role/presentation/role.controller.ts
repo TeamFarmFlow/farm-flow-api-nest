@@ -6,7 +6,6 @@ import { ParseUuidStringPipe } from '@app/core/pipes';
 import { RequiredPermissions } from '@app/core/security';
 import { toInstance } from '@app/core/transform';
 import { PermissionKey } from '@app/shared/domain';
-import { AuthFarmPrincipal } from '@app/shared/security';
 
 import { RoleService } from '../application';
 
@@ -19,7 +18,7 @@ import { CreateRoleResponse, RoleDetailsResponse, RolesResponse } from './dto/re
 @Controller('roles')
 export class RoleController {
   constructor(
-    private readonly contextService: ContextService<AuthFarmPrincipal>,
+    private readonly contextService: ContextService,
     private readonly roleService: RoleService,
   ) {}
 
@@ -34,14 +33,14 @@ export class RoleController {
   @ApiOperation({ summary: '역할 목록 조회' })
   @ApiOkResponse({ type: RolesResponse })
   async getRoles(): Promise<RolesResponse> {
-    return toInstance(RolesResponse, await this.roleService.getRoles(new GetRolesRequest().toQuery(this.contextService.user.farmId)));
+    return toInstance(RolesResponse, await this.roleService.getRoles(new GetRolesRequest().toQuery(this.contextService.farmId)));
   }
 
   @Post()
   @ApiOperation({ summary: '역할 생성' })
   @ApiCreatedResponse({ type: CreateRoleResponse })
   async createRole(@Body() body: CreateRoleRequest): Promise<CreateRoleResponse> {
-    return toInstance(CreateRoleResponse, await this.roleService.createRole(body.toCommand(this.contextService.user.farmId)));
+    return toInstance(CreateRoleResponse, await this.roleService.createRole(body.toCommand(this.contextService.farmId)));
   }
 
   @Patch(':id')

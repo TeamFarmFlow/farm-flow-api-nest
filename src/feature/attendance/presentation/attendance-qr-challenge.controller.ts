@@ -8,7 +8,6 @@ import { ContextService } from '@app/core/context';
 import { RequiredPermissions } from '@app/core/security';
 import { toInstance } from '@app/core/transform';
 import { PermissionKey } from '@app/shared/domain';
-import { AuthFarmPrincipal } from '@app/shared/security';
 
 import { AttendanceQrChallengeService, AttendanceQrCodeGeneratedEvent } from '../application';
 
@@ -21,7 +20,7 @@ import { CreateAttendanceQrCodeResponse } from './dto/response';
 export class AttendanceQrChallengeController {
   constructor(
     private readonly eventEmitter: EventEmitter2,
-    private readonly contextService: ContextService<AuthFarmPrincipal>,
+    private readonly contextService: ContextService,
     private readonly attendanceQrChallengeService: AttendanceQrChallengeService,
   ) {}
 
@@ -39,6 +38,6 @@ export class AttendanceQrChallengeController {
   @ApiOperation({ summary: '출퇴근 QR 코드 생성' })
   @ApiCreatedResponse({ type: CreateAttendanceQrCodeResponse })
   async createAttendanceQrCode(@Body() body: CreateAttendanceQrCodeRequest): Promise<CreateAttendanceQrCodeResponse> {
-    return toInstance(CreateAttendanceQrCodeResponse, await this.attendanceQrChallengeService.createQrCode(body.toCommand(this.contextService.user.farmId)));
+    return toInstance(CreateAttendanceQrCodeResponse, await this.attendanceQrChallengeService.createQrCode(body.toCommand(this.contextService.farmId)));
   }
 }
