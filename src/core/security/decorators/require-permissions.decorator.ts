@@ -2,7 +2,7 @@ import { SetMetadata } from '@nestjs/common';
 
 import { PermissionKey, PermissionKeyWildCard } from '@app/shared/domain';
 
-export const REQUIRED_PERMISSIONS_KEY = Symbol('REQUIRED_PERMISSIONS_KEY');
+import { REQUIRED_PERMISSIONS_KEY } from '../constants';
 
 export type RequiredPermissionsOptions = {
   mode: 'ALL' | 'ANY';

@@ -15,6 +15,7 @@ import {
 } from '@app/infra/persistence/typeorm';
 
 import { FarmService } from './application';
+import { FarmAuthGuardProvider } from './guards';
 import { FarmController } from './presentation';
 
 @Module({
@@ -25,6 +26,6 @@ import { FarmController } from './presentation';
     ),
   ],
   controllers: [FarmController],
-  providers: [FarmService],
+  providers: [FarmService, FarmAuthGuardProvider],
 })
 export class FarmModule {}
