@@ -1,5 +1,5 @@
 export type CheckOutAttendanceCommand = {
-  crCode: string;
+  qrCode: string;
   userId: string;
   farmId: string;
 };

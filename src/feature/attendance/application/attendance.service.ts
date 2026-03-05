@@ -36,7 +36,7 @@ export class AttendanceService {
     }
 
     const attendanceQrChallenge = await this.dataSource.transaction(async (em) => {
-      const { affected, deviceId } = await this.attendanceQrChallengeRepository.deleteById(command.crCode, em);
+      const { affected, deviceId } = await this.attendanceQrChallengeRepository.deleteById(command.qrCode, em);
 
       if (!affected) {
         throw new Error('invalid qr code');
@@ -60,7 +60,7 @@ export class AttendanceService {
     }
 
     const attendanceQrChallenge = await this.dataSource.transaction(async (em) => {
-      const { affected, deviceId } = await this.attendanceQrChallengeRepository.deleteById(command.crCode, em);
+      const { affected, deviceId } = await this.attendanceQrChallengeRepository.deleteById(command.qrCode, em);
 
       if (!affected) {
         throw new Error('invalid qr code');

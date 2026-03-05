@@ -7,11 +7,11 @@ import { CheckOutAttendanceCommand } from '@app/feature/attendance/application';
 export class CheckOutAttendanceRequest {
   @ApiProperty({ type: String })
   @IsNotEmpty()
-  readonly crCode: string;
+  readonly qrCode: string;
 
   toCommand(farmId: string, userId: string): CheckOutAttendanceCommand {
     return {
-      crCode: this.crCode,
+      qrCode: this.qrCode,
       farmId,
       userId,
     };

@@ -10,7 +10,7 @@ import { PermissionKey } from '@app/shared/domain';
 import { FarmService } from '../application';
 
 import { CreateFarmRequest, GetFarmsRequest, UpdateFarmRequest } from './dto/request';
-import { CreateFarmResponse, FarmResponse, FarmsResponse } from './dto/response';
+import { CreateFarmResponse, FarmsResponse } from './dto/response';
 
 @ApiTags('농장')
 @Controller('farms')
@@ -22,7 +22,7 @@ export class FarmController {
 
   @Get()
   @ApiOperation({ summary: '내 농장 목록 조회' })
-  @ApiOkResponse({ type: FarmResponse })
+  @ApiOkResponse({ type: FarmsResponse })
   async getFarms() {
     return toInstance(FarmsResponse, await this.farmService.getFarms(new GetFarmsRequest().toQuery(this.contextService.userId)));
   }
