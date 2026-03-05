@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { DataSource } from 'typeorm';
 
 import { Attendance, AttendanceQrChallenge, AttendanceQrChallengeRepository, AttendanceRepository, FarmUserRepository } from '@app/infra/persistence/typeorm';
+import { RedisPublisher } from '@app/infra/redis';
 
 import { CheckInAttendanceCommand, CheckOutAttendanceCommand } from './commands';
 import { AttendanceQrCodeGeneratedEvent } from './events';
@@ -12,7 +12,7 @@ import { AttendanceQrCodeGeneratedEvent } from './events';
 export class AttendanceService {
   constructor(
     private readonly dataSource: DataSource,
-    private readonly eventeEmitter: EventEmitter2,
+    private readonly redisPublisher: RedisPublisher,
     private readonly farmUserRepository: FarmUserRepository,
     private readonly attendanceRepository: AttendanceRepository,
     private readonly attendanceQrChallengeRepository: AttendanceQrChallengeRepository,
@@ -49,7 +49,7 @@ export class AttendanceService {
       return attendanceQrChallenge;
     });
 
-    await this.eventeEmitter.emitAsync('attendance.qr.generated', AttendanceQrCodeGeneratedEvent.from(attendanceQrChallenge));
+    await this.redisPublisher.publishJSON('attendance.qr.generated', AttendanceQrCodeGeneratedEvent.from(attendanceQrChallenge));
   }
 
   async checkOutAttendnace(command: CheckOutAttendanceCommand): Promise<void> {
@@ -73,6 +73,6 @@ export class AttendanceService {
       return attendanceQrChallenge;
     });
 
-    await this.eventeEmitter.emitAsync('attendance.qr.generated', AttendanceQrCodeGeneratedEvent.from(attendanceQrChallenge));
+    await this.redisPublisher.publishJSON('attendance.qr.generated', AttendanceQrCodeGeneratedEvent.from(attendanceQrChallenge));
   }
 }

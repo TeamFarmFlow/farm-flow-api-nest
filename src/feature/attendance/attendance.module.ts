@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import {
   Attendance,
@@ -9,6 +10,7 @@ import {
   FarmUserRepository,
   TypeOrmExModule,
 } from '@app/infra/persistence/typeorm';
+import { RedisSubscriber } from '@app/infra/redis';
 
 import { AttendanceQrChallengeService, AttendanceService } from './application';
 import { AttendanceController, AttendanceQrChallengeController } from './presentation';
@@ -18,4 +20,15 @@ import { AttendanceController, AttendanceQrChallengeController } from './present
   controllers: [AttendanceController, AttendanceQrChallengeController],
   providers: [AttendanceService, AttendanceQrChallengeService],
 })
-export class AttendanceModule {}
+export class AttendanceModule implements OnModuleInit {
+  constructor(
+    private readonly eventEmitter: EventEmitter2,
+    private readonly redisSubscriber: RedisSubscriber,
+  ) {}
+
+  async onModuleInit() {
+    await this.redisSubscriber.subscribePatternJSON('attendance.*', (payload, channel) => {
+      this.eventEmitter.emit(channel, payload);
+    });
+  }
+}
