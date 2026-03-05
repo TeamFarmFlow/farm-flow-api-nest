@@ -3,7 +3,7 @@ import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, 
 
 import { ContextService } from '@app/core/context';
 import { ParseUuidStringPipe } from '@app/core/pipes';
-import { RequiredPermissions } from '@app/core/security';
+import { RequiredPermissions, SkipFarmAuth } from '@app/core/security';
 import { toInstance } from '@app/core/transform';
 import { PermissionKey } from '@app/shared/domain';
 
@@ -12,6 +12,7 @@ import { FarmService } from '../application';
 import { CreateFarmRequest, GetFarmsRequest, UpdateFarmRequest } from './dto/request';
 import { CreateFarmResponse, FarmsResponse } from './dto/response';
 
+@SkipFarmAuth()
 @ApiTags('농장')
 @Controller('farms')
 export class FarmController {

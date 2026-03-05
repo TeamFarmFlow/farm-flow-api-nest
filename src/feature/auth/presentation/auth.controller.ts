@@ -1,10 +1,10 @@
-import { Body, Controller, Post, Req, Res } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
+import { ApiCreatedResponse, ApiNoContentResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { type Request, type Response } from 'express';
 
 import { ContextService } from '@app/core/context';
-import { Public, SkipFarmAuth } from '@app/core/security';
+import { Public } from '@app/core/security';
 import { toInstance } from '@app/core/transform';
 
 import { AuthService } from '../application';
@@ -44,11 +44,19 @@ export class AuthController {
     return toInstance(AuthResponse, await this.authService.refresh(req, res));
   }
 
-  @SkipFarmAuth()
   @Post('checkin')
   @ApiOperation({ summary: '농장 체크인' })
   @ApiCreatedResponse({ type: AuthResponse })
   async checkIn(@Body() body: CheckInRequest, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     return toInstance(AuthResponse, await this.authService.checkIn(body.toCommand(this.contextService.userId), req, res));
+  }
+
+  @Public()
+  @Delete('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: '로그아웃' })
+  @ApiNoContentResponse()
+  logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    return this.authService.logout(req, res);
   }
 }

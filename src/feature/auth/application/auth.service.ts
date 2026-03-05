@@ -7,14 +7,13 @@ import { Request, Response } from 'express';
 import { DataSource } from 'typeorm';
 
 import { CookieService } from '@app/core/cookies';
-import { FarmNotFoundException } from '@app/feature/farm/domain';
-import { FarmUserRepository, RefreshToken, RefreshTokenRepository, RolePermissionRepository, UserRepository, UserUsage } from '@app/infra/persistence/typeorm';
+import { RefreshToken, RefreshTokenRepository, RolePermissionRepository, UserRepository, UserUsage } from '@app/infra/persistence/typeorm';
 import { JwtClaims } from '@app/shared/security';
 
 import { DuplicatedEmailEXception, InvalidTokenException, WrongEmailOrPasswordException } from '../domain';
 
 import { CheckInCommand, LoginCommand, RegisterCommand } from './command';
-import { AuthResult, IssueAccessTokenResult } from './result';
+import { AuthResult } from './result';
 
 @Injectable()
 export class AuthService {
@@ -24,17 +23,14 @@ export class AuthService {
     private readonly cookieService: CookieService,
     private readonly refreshTokenRepository: RefreshTokenRepository,
     private readonly userRepository: UserRepository,
-    private readonly farmUserRepository: FarmUserRepository,
     private readonly rolePermissionRepository: RolePermissionRepository,
   ) {}
 
-  private async issueAccessToken(userId: string, farmId: string | null = null): Promise<IssueAccessTokenResult> {
+  private async issueAccessToken(userId: string, farmId: string | null = null): Promise<string> {
     const payload = JwtClaims.from(userId, farmId).toObject();
     const expiresIn = 10 * 60;
-    const expiresAt = new Date(Date.now() + expiresIn * 1000);
-    const accessToken = await this.jwtService.signAsync(payload, { expiresIn });
 
-    return { accessToken, expiresIn, expiresAt };
+    return this.jwtService.signAsync(payload, { expiresIn });
   }
 
   private async issueRefreshToken(userId: string, farmId: string | null = null, incomingRefreshTokenId?: string) {
@@ -55,11 +51,8 @@ export class AuthService {
     });
   }
 
-  private buildAuthResult(accessToken: IssueAccessTokenResult, refreshToken: RefreshToken): AuthResult {
+  private buildAuthResult(refreshToken: RefreshToken): AuthResult {
     return {
-      accessToken: accessToken.accessToken,
-      expiresIn: accessToken.expiresIn,
-      expiresAt: accessToken.expiresAt,
       user: refreshToken.user,
       farm: refreshToken.farm,
       role: refreshToken.farm?.farmUser?.role ?? null,
@@ -80,12 +73,15 @@ export class AuthService {
     const accessToken = await this.issueAccessToken(user.id);
     const refreshToken = await this.issueRefreshToken(user.id);
 
+    this.cookieService.setAccessToken(res, accessToken);
     this.cookieService.setRefreshToken(res, refreshToken.id);
 
-    return this.buildAuthResult(accessToken, refreshToken);
+    return this.buildAuthResult(refreshToken);
   }
 
   async login(command: LoginCommand, res: Response): Promise<AuthResult> {
+    this.cookieService.setCacheControl(res);
+
     const user = await this.userRepository.findOneByEmail(command.email);
 
     if (!user) {
@@ -99,16 +95,20 @@ export class AuthService {
     const accessToken = await this.issueAccessToken(user.id);
     const refreshToken = await this.issueRefreshToken(user.id);
 
+    this.cookieService.setAccessToken(res, accessToken);
     this.cookieService.setRefreshToken(res, refreshToken.id);
 
-    return this.buildAuthResult(accessToken, refreshToken);
+    return this.buildAuthResult(refreshToken);
   }
 
   async refresh(req: Request, res: Response): Promise<AuthResult> {
+    this.cookieService.setCacheControl(res);
+
     const incomingRefreshTokenId = this.cookieService.parseRefreshToken(req);
     const incomingRefreshToken = isUUID(incomingRefreshTokenId, 4) ? await this.refreshTokenRepository.findValidById(incomingRefreshTokenId) : null;
 
     if (!incomingRefreshToken) {
+      this.cookieService.clearAccessToken(res);
       this.cookieService.clearRefreshToken(res);
       throw new InvalidTokenException();
     }
@@ -116,22 +116,20 @@ export class AuthService {
     const accessToken = await this.issueAccessToken(incomingRefreshToken.userId, incomingRefreshToken.farmId);
     const refreshToken = await this.issueRefreshToken(incomingRefreshToken.userId, incomingRefreshToken.farmId, incomingRefreshTokenId);
 
+    this.cookieService.setAccessToken(res, accessToken);
     this.cookieService.setRefreshToken(res, refreshToken.id);
 
-    return this.buildAuthResult(accessToken, refreshToken);
+    return this.buildAuthResult(refreshToken);
   }
 
   async checkIn(command: CheckInCommand, req: Request, res: Response): Promise<AuthResult> {
-    const hasFarm = await this.farmUserRepository.has(command.farmId, command.userId);
-
-    if (!hasFarm) {
-      throw new FarmNotFoundException();
-    }
+    this.cookieService.setCacheControl(res);
 
     const incomingRefreshTokenId = this.cookieService.parseRefreshToken(req);
     const incomingRefreshToken = isUUID(incomingRefreshTokenId, 4) ? await this.refreshTokenRepository.findValidById(incomingRefreshTokenId) : null;
 
     if (!incomingRefreshToken) {
+      this.cookieService.clearAccessToken(res);
       this.cookieService.clearRefreshToken(res);
       throw new InvalidTokenException();
     }
@@ -139,8 +137,23 @@ export class AuthService {
     const accessToken = await this.issueAccessToken(command.userId, command.farmId);
     const refreshToken = await this.issueRefreshToken(command.userId, command.farmId, incomingRefreshTokenId);
 
+    this.cookieService.setAccessToken(res, accessToken);
     this.cookieService.setRefreshToken(res, refreshToken.id);
 
-    return this.buildAuthResult(accessToken, refreshToken);
+    return this.buildAuthResult(refreshToken);
+  }
+
+  async logout(req: Request, res: Response): Promise<void> {
+    this.cookieService.setCacheControl(res);
+
+    const incomingRefreshTokenId = this.cookieService.parseRefreshToken(req);
+    const incomingRefreshToken = isUUID(incomingRefreshTokenId, 4) ? await this.refreshTokenRepository.findValidById(incomingRefreshTokenId) : null;
+
+    if (incomingRefreshToken) {
+      await this.refreshTokenRepository.deleteById(incomingRefreshToken.id);
+    }
+
+    this.cookieService.clearAccessToken(res);
+    this.cookieService.clearRefreshToken(res);
   }
 }
