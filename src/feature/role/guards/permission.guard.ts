@@ -7,7 +7,7 @@ import { FarmUserRepository, RolePermissionRepository } from '@app/infra/persist
 import { PermissionKey, PermissionKeyWildCard } from '@app/shared/domain';
 import { AuthPrincipal } from '@app/shared/security';
 
-import { AccessDeninedException } from '../domain';
+import { ForbiddenPermissionException } from '../domain';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
@@ -39,13 +39,13 @@ export class PermissionGuard implements CanActivate {
     const farmId = this.contextService.user.farmId;
 
     if (!farmId) {
-      throw new AccessDeninedException();
+      throw new ForbiddenPermissionException();
     }
 
     const farmUser = await this.farmUserRepository.findWithRole(farmId, userId);
 
     if (!farmUser?.role?.id) {
-      throw new AccessDeninedException();
+      throw new ForbiddenPermissionException();
     }
 
     const permissions = await this.rolePermissionRepository.findKeysByRoleId(farmUser.role.id);
@@ -54,7 +54,7 @@ export class PermissionGuard implements CanActivate {
     const allowed = this.checkPermissions(userPermissions, metadata.permissions, metadata.options.mode);
 
     if (!allowed) {
-      throw new AccessDeninedException();
+      throw new ForbiddenPermissionException();
     }
 
     return true;

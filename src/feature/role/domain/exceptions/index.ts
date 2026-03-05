@@ -1,3 +1,3 @@
-export * from './access-denined.exception';
+export * from './forbidden-permission.exception';
 export * from './role-not-found.exception';
 export * from './role-cannot-update-or-delete.exception';
