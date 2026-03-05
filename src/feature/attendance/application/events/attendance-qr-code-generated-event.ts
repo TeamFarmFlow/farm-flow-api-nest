@@ -1,14 +1,14 @@
-import { AttendanceQrChallenge } from '@app/infra/persistence/typeorm';
+import { AttendanceQrCodeSchema } from '@app/infra/redis';
 
 export class AttendanceQrCodeGeneratedEvent {
   id: string;
   deviceId: string;
 
-  public static from(attendanceQrChallenge: AttendanceQrChallenge) {
+  public static from(attendanceQrCode: AttendanceQrCodeSchema) {
     const event = new AttendanceQrCodeGeneratedEvent();
 
-    event.id = attendanceQrChallenge.id;
-    event.deviceId = attendanceQrChallenge.deviceId;
+    event.id = attendanceQrCode.id;
+    event.deviceId = attendanceQrCode.deviceId;
 
     return event;
   }

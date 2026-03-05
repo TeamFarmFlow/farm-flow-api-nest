@@ -9,28 +9,28 @@ import { RequiredPermissions } from '@app/core/security';
 import { toInstance } from '@app/core/transform';
 import { PermissionKey } from '@app/shared/domain';
 
-import { AttendanceQrChallengeService, AttendanceQrCodeGeneratedEvent } from '../application';
+import { AttendanceQrCodeGeneratedEvent, AttendanceQrCodeService } from '../application';
 
 import { CreateAttendanceQrCodeRequest } from './dto/request';
-import { CreateAttendanceQrCodeResponse } from './dto/response';
+import { AttendanceQrCodeResponse, CreateAttendanceQrCodeResponse } from './dto/response';
 
 @RequiredPermissions([PermissionKey.AttendanceQrCreate])
 @ApiTags('출퇴근 QR 코드')
 @Controller('attendances/qr')
-export class AttendanceQrChallengeController {
+export class AttendanceQrCodeController {
   constructor(
     private readonly eventEmitter: EventEmitter2,
     private readonly contextService: ContextService,
-    private readonly attendanceQrChallengeService: AttendanceQrChallengeService,
+    private readonly attendanceQrCodeService: AttendanceQrCodeService,
   ) {}
 
   @Sse(':deviceId')
-  @ApiOperation({ summary: '출퇴근 QR 코드 수신 SSE' })
-  @ApiOkResponse({ type: CreateAttendanceQrCodeResponse })
-  getAttendanceQrCodeByDevice(@Param('deviceId') deviceId: string): Observable<{ data: CreateAttendanceQrCodeResponse }> {
+  @ApiOperation({ summary: '출퇴근 QR 코드 이벤트 수신(SSE)' })
+  @ApiOkResponse({ type: AttendanceQrCodeResponse })
+  getAttendanceQrCodeByDevice(@Param('deviceId') deviceId: string): Observable<{ data: AttendanceQrCodeResponse }> {
     return fromEvent(this.eventEmitter, 'attendance.qr.generated').pipe(
       filter((data: AttendanceQrCodeGeneratedEvent) => data.deviceId === deviceId),
-      map((data: AttendanceQrCodeGeneratedEvent) => ({ data: toInstance(CreateAttendanceQrCodeResponse, data) })),
+      map((data: AttendanceQrCodeGeneratedEvent) => ({ data: toInstance(AttendanceQrCodeResponse, data) })),
     );
   }
 
@@ -38,6 +38,6 @@ export class AttendanceQrChallengeController {
   @ApiOperation({ summary: '출퇴근 QR 코드 생성' })
   @ApiCreatedResponse({ type: CreateAttendanceQrCodeResponse })
   async createAttendanceQrCode(@Body() body: CreateAttendanceQrCodeRequest): Promise<CreateAttendanceQrCodeResponse> {
-    return toInstance(CreateAttendanceQrCodeResponse, await this.attendanceQrChallengeService.createQrCode(body.toCommand(this.contextService.farmId)));
+    return toInstance(CreateAttendanceQrCodeResponse, await this.attendanceQrCodeService.createQrCode(body.toCommand(this.contextService.farmId)));
   }
 }

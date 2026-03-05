@@ -1,4 +1,5 @@
 export * from './types';
+export * from './schema';
 export * from './redis.client';
 export * from './redis.module';
 export * from './redis.publisher';

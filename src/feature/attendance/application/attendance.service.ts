@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
-import { DataSource } from 'typeorm';
-
-import { Attendance, AttendanceQrChallenge, AttendanceQrChallengeRepository, AttendanceRepository, FarmUserRepository } from '@app/infra/persistence/typeorm';
-import { RedisPublisher } from '@app/infra/redis';
+import { toInstance } from '@app/core/transform';
+import { Attendance, AttendanceRepository, FarmUserRepository } from '@app/infra/persistence/typeorm';
+import { AttendanceQrCodeSchema, RedisClient, RedisPublisher } from '@app/infra/redis';
 
 import { CheckInAttendanceCommand, CheckOutAttendanceCommand } from './commands';
 import { AttendanceQrCodeGeneratedEvent } from './events';
@@ -11,11 +10,10 @@ import { AttendanceQrCodeGeneratedEvent } from './events';
 @Injectable()
 export class AttendanceService {
   constructor(
-    private readonly dataSource: DataSource,
+    private readonly redisClient: RedisClient,
     private readonly redisPublisher: RedisPublisher,
     private readonly farmUserRepository: FarmUserRepository,
     private readonly attendanceRepository: AttendanceRepository,
-    private readonly attendanceQrChallengeRepository: AttendanceQrChallengeRepository,
   ) {}
 
   async getAttendanceByToday(farmId: string, userId: string): Promise<Attendance | null> {
@@ -35,21 +33,19 @@ export class AttendanceService {
       throw new Error('forbidden');
     }
 
-    const attendanceQrChallenge = await this.dataSource.transaction(async (em) => {
-      const { affected, deviceId } = await this.attendanceQrChallengeRepository.deleteById(command.qrCode, em);
+    const attendanceQrCodeKey = AttendanceQrCodeSchema.of(command.farmId).key();
+    const attendanceQrCode = toInstance(AttendanceQrCodeSchema, await this.redisClient.getJSON(attendanceQrCodeKey));
+    await this.redisClient.del(attendanceQrCodeKey);
 
-      if (!affected) {
-        throw new Error('invalid qr code');
-      }
+    if (!attendanceQrCode) {
+      throw new Error('invalid qr code');
+    }
 
-      const attendanceQrChallenge = AttendanceQrChallenge.of(farmUser.farmId, deviceId);
-      await this.attendanceQrChallengeRepository.insert(attendanceQrChallenge, em);
-      await this.attendanceRepository.upsertOrIgnore(Attendance.of(farmUser.farm, farmUser.userId), em);
-
-      return attendanceQrChallenge;
-    });
-
-    await this.redisPublisher.publishJSON('attendance.qr.generated', AttendanceQrCodeGeneratedEvent.from(attendanceQrChallenge));
+    const newAttendanceQrCode = AttendanceQrCodeSchema.of(command.farmId, attendanceQrCode.deviceId);
+    await this.redisClient.setJSON(newAttendanceQrCode.key(), newAttendanceQrCode);
+    await this.redisClient.expire(newAttendanceQrCode.key(), newAttendanceQrCode.expiresIn());
+    await this.redisPublisher.publishJSON('attendance.qr.generated', AttendanceQrCodeGeneratedEvent.from(newAttendanceQrCode));
+    await this.attendanceRepository.upsertOrIgnore(Attendance.of(farmUser.farm, farmUser.userId));
   }
 
   async checkOutAttendnace(command: CheckOutAttendanceCommand): Promise<void> {
@@ -59,20 +55,18 @@ export class AttendanceService {
       throw new Error('forbidden');
     }
 
-    const attendanceQrChallenge = await this.dataSource.transaction(async (em) => {
-      const { affected, deviceId } = await this.attendanceQrChallengeRepository.deleteById(command.qrCode, em);
+    const attendanceQrCodeKey = AttendanceQrCodeSchema.of(command.farmId).key();
+    const attendanceQrCode = toInstance(AttendanceQrCodeSchema, await this.redisClient.getJSON(attendanceQrCodeKey));
+    await this.redisClient.del(attendanceQrCodeKey);
 
-      if (!affected) {
-        throw new Error('invalid qr code');
-      }
+    if (!attendanceQrCode) {
+      throw new Error('invalid qr code');
+    }
 
-      const attendanceQrChallenge = AttendanceQrChallenge.of(farmUser.farmId, deviceId);
-      await this.attendanceQrChallengeRepository.insert(attendanceQrChallenge, em);
-      await this.attendanceRepository.updateToCheckOutByWorkDate(farmUser.farmId, farmUser.userId, farmUser.farm.dateOfTimeZone, em);
-
-      return attendanceQrChallenge;
-    });
-
-    await this.redisPublisher.publishJSON('attendance.qr.generated', AttendanceQrCodeGeneratedEvent.from(attendanceQrChallenge));
+    const newAttendanceQrCode = AttendanceQrCodeSchema.of(command.farmId, attendanceQrCode.deviceId);
+    await this.redisClient.setJSON(newAttendanceQrCode.key(), newAttendanceQrCode);
+    await this.redisClient.expire(newAttendanceQrCode.key(), newAttendanceQrCode.expiresIn());
+    await this.redisPublisher.publishJSON('attendance.qr.generated', AttendanceQrCodeGeneratedEvent.from(newAttendanceQrCode));
+    await this.attendanceRepository.updateToCheckOutByWorkDate(farmUser.farmId, farmUser.userId, farmUser.farm.dateOfTimeZone);
   }
 }
