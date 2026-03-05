@@ -16,6 +16,17 @@ services:
     networks:
       - farm-flow
 
+  valkey:
+    image: valkey/valkey:latest
+    container_name: farm-flow-valkey
+    volumes:
+      - ../docker/farm-flow/valkey:/data
+    ports:
+      - 6370:6379
+    restart: unless-stopped
+    networks:
+      - farm-flow
+
 networks:
   farm-flow:
     driver: bridge

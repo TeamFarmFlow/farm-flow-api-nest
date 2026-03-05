@@ -17,6 +17,7 @@ import { HealthModule } from './feature/health';
 import { InvitationModule } from './feature/invitation';
 import { RoleModule } from './feature/role';
 import { UserModule } from './feature/user';
+import { RedisModule } from './infra/redis';
 
 @Module({
   imports: [
@@ -32,6 +33,13 @@ import { UserModule } from './feature/user';
       inject: [Configuration],
       useFactory(configuration: Configuration) {
         return configuration.typeormModuleOptions;
+      },
+    }),
+    RedisModule.forRootAsync({
+      pubSub: true,
+      inject: [Configuration],
+      useFactory(configuration: Configuration) {
+        return configuration.redisOptions;
       },
     }),
     EventEmitterModule.forRoot(),

@@ -5,6 +5,7 @@ import { JwtModuleOptions } from '@nestjs/jwt';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 import { CookieOptions } from 'express';
+import { RedisOptions } from 'ioredis';
 import { utilities, WinstonModuleOptions } from 'nest-winston';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import { ExtractJwt, WithSecretOrKey } from 'passport-jwt';
@@ -76,6 +77,13 @@ export class Configuration extends ConfigService {
       namingStrategy: new SnakeNamingStrategy(),
       logging: isLocal ? true : ['error', 'warn'],
       entities: [process.cwd() + '/dist/**/*.entity.{js,ts}'],
+    };
+  }
+
+  get redisOptions(): RedisOptions {
+    return {
+      host: this.getOrThrow<string>('REDIS_HOST'),
+      port: +this.getOrThrow<string>('REDIS_PORT'),
     };
   }
 
