@@ -1,12 +1,12 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
-import { dayjs } from '@app/core/time';
 import { AttendanceStatus } from '@app/shared/domain';
 
 import { Farm } from './farm.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'attendances' })
+@Index('ATTENDANCES_UQ', ['workDate', 'farmId', 'userId'], { unique: true })
 export class Attendance {
   @PrimaryGeneratedColumn('uuid', { primaryKeyConstraintName: 'ATTENDANCES_PK' })
   readonly id: string;
@@ -49,9 +49,10 @@ export class Attendance {
   public static of(farm: Farm, userId: string) {
     const attendance = new Attendance();
 
-    attendance.workDate = dayjs(new Date()).tz(farm.timezone).format('YYYY-MM-DD');
+    attendance.workDate = farm.dateOfTimeZone;
     attendance.farmId = farm.id;
     attendance.userId = userId;
+    attendance.status = AttendanceStatus.CheckIn;
 
     return attendance;
   }

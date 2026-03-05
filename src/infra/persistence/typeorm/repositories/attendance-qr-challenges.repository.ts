@@ -19,14 +19,18 @@ export class AttendanceQrChallengeRepository extends TransactionalRepository<Att
   }
 
   async deleteById(id: string, em?: EntityManager) {
-    const { affected } = await this.getRepository(em)
-      .createQueryBuilder('a')
+    const result = (await this.getRepository(em)
+      .createQueryBuilder()
       .delete()
-      .where('a.id = :id', { id })
-      .andWhere('a.expiresAt > NOW()')
-      .andWhere('a.consumedAt IS NULL')
-      .execute();
+      .where('id = :id', { id })
+      .andWhere('expiresAt > NOW()')
+      .andWhere('consumedAt IS NULL')
+      .returning('deviceId')
+      .execute()) as { affected: number; raw: { device_id: string }[] };
 
-    return (affected ?? 0) > 0 ? true : false;
+    return {
+      affected: (result.affected ?? 0) > 0 ? true : false,
+      deviceId: result.raw[0]?.device_id,
+    };
   }
 }

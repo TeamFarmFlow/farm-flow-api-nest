@@ -28,6 +28,15 @@ export class FarmUserRepository extends TransactionalRepository<FarmUser> {
       .getOne();
   }
 
+  async findWithFarm(farmId: string, userId: string, em?: EntityManager) {
+    return this.getRepository(em)
+      .createQueryBuilder('fu')
+      .innerJoinAndMapOne('fu.farm', 'fu.farm', 'f')
+      .where('fu.farmId = :farmId', { farmId })
+      .andWhere('fu.userId = :userId', { userId })
+      .getOne();
+  }
+
   async findAndCountByUserIdWithFarm(userId: string, em?: EntityManager) {
     return this.getRepository(em)
       .createQueryBuilder('fu')
@@ -57,7 +66,7 @@ export class FarmUserRepository extends TransactionalRepository<FarmUser> {
   }
 
   async upsertOrIgnore(entityLike: DeepPartial<FarmUser>, em?: EntityManager) {
-    return this.getRepository(em).createQueryBuilder().insert().into(FarmUser).values(entityLike).orIgnore().execute();
+    return this.getRepository(em).createQueryBuilder().insert().values(entityLike).orIgnore().execute();
   }
 
   async updateRole(currentRoleId: string, updateRoleId: string, em?: EntityManager) {

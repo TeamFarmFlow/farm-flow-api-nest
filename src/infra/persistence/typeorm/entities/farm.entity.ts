@@ -1,5 +1,7 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
+import { dayjs } from '@app/core/time';
+
 import { FarmUser } from './farm-user.entity';
 import { Role } from './role.entity';
 
@@ -28,4 +30,8 @@ export class Farm {
 
   @OneToMany(() => FarmUser, (e) => e.farm, { cascade: ['insert', 'remove'] })
   farmUser: FarmUser | null;
+
+  get dateOfTimeZone() {
+    return dayjs(new Date()).tz(this.timezone).format('YYYY-MM-DD');
+  }
 }
