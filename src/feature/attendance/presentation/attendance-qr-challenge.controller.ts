@@ -1,5 +1,8 @@
-import { Body, Controller, Post, Sse } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Param, Post, Sse } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+
+import { filter, fromEvent, map, Observable } from 'rxjs';
 
 import { ContextService } from '@app/core/context';
 import { RequiredPermissions } from '@app/core/security';
@@ -7,7 +10,7 @@ import { toInstance } from '@app/core/transform';
 import { PermissionKey } from '@app/shared/domain';
 import { AuthFarmPrincipal } from '@app/shared/security';
 
-import { AttendanceQrChallengeService } from '../application';
+import { AttendanceQrChallengeService, AttendanceQrCodeGeneratedEvent } from '../application';
 
 import { CreateAttendanceQrCodeRequest } from './dto/request';
 import { CreateAttendanceQrCodeResponse } from './dto/response';
@@ -17,22 +20,25 @@ import { CreateAttendanceQrCodeResponse } from './dto/response';
 @Controller('attendances/qr')
 export class AttendanceQrChallengeController {
   constructor(
+    private readonly eventEmitter: EventEmitter2,
     private readonly contextService: ContextService<AuthFarmPrincipal>,
     private readonly attendanceQrChallengeService: AttendanceQrChallengeService,
   ) {}
 
   @Sse(':deviceId')
-  getAttendanceQrCodeByDevice() {
-    return;
+  @ApiOperation({ summary: '출퇴근 QR 코드 수신 SSE' })
+  @ApiOkResponse({ type: CreateAttendanceQrCodeResponse })
+  getAttendanceQrCodeByDevice(@Param('deviceId') deviceId: string): Observable<{ id: string }> {
+    return fromEvent(this.eventEmitter, 'attendance.qr.generated').pipe(
+      filter((event: AttendanceQrCodeGeneratedEvent) => event.deviceId === deviceId),
+      map((event: AttendanceQrCodeGeneratedEvent) => toInstance(CreateAttendanceQrCodeResponse, event)),
+    );
   }
 
   @Post()
   @ApiOperation({ summary: '출퇴근 QR 코드 생성' })
   @ApiCreatedResponse({ type: CreateAttendanceQrCodeResponse })
-  async createAttendanceQrCode(): Promise<CreateAttendanceQrCodeResponse> {
-    return toInstance(
-      CreateAttendanceQrCodeResponse,
-      await this.attendanceQrChallengeService.createQrCode(new CreateAttendanceQrCodeRequest().toCommand(this.contextService.user.farmId)),
-    );
+  async createAttendanceQrCode(@Body() body: CreateAttendanceQrCodeRequest): Promise<CreateAttendanceQrCodeResponse> {
+    return toInstance(CreateAttendanceQrCodeResponse, await this.attendanceQrChallengeService.createQrCode(body.toCommand(this.contextService.user.farmId)));
   }
 }

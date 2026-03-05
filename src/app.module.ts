@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { WinstonModule } from 'nest-winston';
@@ -33,6 +34,7 @@ import { UserModule } from './feature/user';
         return configuration.typeormModuleOptions;
       },
     }),
+    EventEmitterModule.forRoot(),
     HealthModule,
     AuthModule,
     UserModule,

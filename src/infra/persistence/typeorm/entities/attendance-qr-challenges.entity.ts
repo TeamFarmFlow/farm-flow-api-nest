@@ -10,6 +10,9 @@ export class AttendanceQrChallenge {
   @Column({ type: 'uuid' })
   farmId: string;
 
+  @Column({ type: 'varchar', length: 50 })
+  deviceId: string;
+
   @Column({ type: 'timestamptz', default: () => "NOW() + INTERVAL '1 MINUTE'" })
   expiresAt: Date;
 
@@ -23,10 +26,11 @@ export class AttendanceQrChallenge {
   @JoinColumn({ foreignKeyConstraintName: 'ATTENDANCE_QR_CHANLLENGES_FARM_FK' })
   farm: Farm;
 
-  public static of(farmId: string) {
+  public static of(farmId: string, deviceId: string) {
     const attendanceQrChallenge = new AttendanceQrChallenge();
 
     attendanceQrChallenge.farmId = farmId;
+    attendanceQrChallenge.deviceId = deviceId;
 
     return attendanceQrChallenge;
   }
