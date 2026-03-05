@@ -27,10 +27,10 @@ export class AttendanceQrChallengeController {
   @Sse(':deviceId')
   @ApiOperation({ summary: '출퇴근 QR 코드 수신 SSE' })
   @ApiOkResponse({ type: CreateAttendanceQrCodeResponse })
-  getAttendanceQrCodeByDevice(@Param('deviceId') deviceId: string): Observable<{ id: string }> {
+  getAttendanceQrCodeByDevice(@Param('deviceId') deviceId: string): Observable<{ data: CreateAttendanceQrCodeResponse }> {
     return fromEvent(this.eventEmitter, 'attendance.qr.generated').pipe(
-      filter((event: AttendanceQrCodeGeneratedEvent) => event.deviceId === deviceId),
-      map((event: AttendanceQrCodeGeneratedEvent) => toInstance(CreateAttendanceQrCodeResponse, event)),
+      filter((data: AttendanceQrCodeGeneratedEvent) => data.deviceId === deviceId),
+      map((data: AttendanceQrCodeGeneratedEvent) => ({ data: toInstance(CreateAttendanceQrCodeResponse, data) })),
     );
   }
 

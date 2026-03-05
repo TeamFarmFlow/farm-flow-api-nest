@@ -4,7 +4,7 @@ import { ApiCreatedResponse, ApiNoContentResponse, ApiOperation, ApiTags } from 
 import { type Request, type Response } from 'express';
 
 import { ContextService } from '@app/core/context';
-import { Public } from '@app/core/security';
+import { Public, SkipFarmAuth } from '@app/core/security';
 import { toInstance } from '@app/core/transform';
 
 import { AuthService } from '../application';
@@ -44,6 +44,7 @@ export class AuthController {
     return toInstance(AuthResponse, await this.authService.refresh(req, res));
   }
 
+  @SkipFarmAuth()
   @Post('checkin')
   @ApiOperation({ summary: '농장 체크인' })
   @ApiCreatedResponse({ type: AuthResponse })
