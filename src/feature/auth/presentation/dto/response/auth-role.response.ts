@@ -11,6 +11,14 @@ export class AuthRoleResponse {
   @Expose()
   name: string;
 
+  @ApiProperty({ type: Boolean })
+  @Expose()
+  required: boolean;
+
+  @ApiProperty({ type: Boolean })
+  @Expose()
+  super: boolean;
+
   @ApiProperty({ type: String, isArray: true })
   @Expose({ name: 'permissionKeys' })
   permissions: string[];

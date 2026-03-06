@@ -15,17 +15,17 @@ export class FarmRepository extends TransactionalRepository<Farm> {
     super(repository);
   }
 
-  async update(id: string, entityLike: DeepPartial<Farm>, em?: EntityManager) {
-    const { affected } = await this.getRepository(em).update({ id }, { ...entityLike, updatedAt: () => 'NOW()' });
-
-    return { affected: affected ? true : false };
+  async insert(entityLike: DeepPartial<Farm>, em?: EntityManager) {
+    return this.getRepository(em).insert(entityLike);
   }
 
   async save(entityLike: DeepPartial<Farm>, em?: EntityManager) {
     return this.getRepository(em).save(entityLike);
   }
 
-  async insert(entityLike: DeepPartial<Farm>, em?: EntityManager) {
-    return this.getRepository(em).insert(entityLike);
+  async update(id: string, entityLike: DeepPartial<Farm>, em?: EntityManager) {
+    const { affected } = await this.getRepository(em).update({ id }, { ...entityLike, updatedAt: () => 'NOW()' });
+
+    return { affected: affected ? true : false };
   }
 }

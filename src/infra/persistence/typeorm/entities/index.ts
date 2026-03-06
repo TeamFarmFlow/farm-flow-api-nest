@@ -1,4 +1,3 @@
-export * from './refresh-token.entity';
 export * from './user.entity';
 export * from './user-usage.entity';
 export * from './farm.entity';

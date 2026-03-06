@@ -7,6 +7,10 @@ import { UserStatus } from '@app/shared/domain';
 export class AuthUserResponse {
   @ApiProperty({ type: String })
   @Expose()
+  id: string;
+
+  @ApiProperty({ type: String })
+  @Expose()
   email: string;
 
   @ApiProperty({ type: String })

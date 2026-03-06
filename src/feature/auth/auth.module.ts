@@ -3,7 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { Configuration } from '@app/config';
 import { CookieModule } from '@app/core/cookies';
-import { RefreshToken, RefreshTokenRepository, RolePermission, RolePermissionRepository, TypeOrmExModule, User, UserRepository } from '@app/infra/persistence/typeorm';
+import { FarmUser, FarmUserRepository, RolePermission, RolePermissionRepository, TypeOrmExModule, User, UserRepository } from '@app/infra/persistence/typeorm';
 
 import { AuthService } from './application';
 import { JwtAuthGuardProvider, JwtStrategy } from './guards';
@@ -11,7 +11,7 @@ import { AuthController } from './presentation';
 
 @Module({
   imports: [
-    TypeOrmExModule.forFeature([User, RefreshToken, RolePermission], [UserRepository, RefreshTokenRepository, RolePermissionRepository]),
+    TypeOrmExModule.forFeature([User, FarmUser, RolePermission], [UserRepository, FarmUserRepository, RolePermissionRepository]),
     CookieModule,
     JwtModule.registerAsync({
       inject: [Configuration],

@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { compare, hash } from 'bcrypt';
-import { isUUID } from 'class-validator';
+import { plainToInstance } from 'class-transformer';
 import { Request, Response } from 'express';
-import { DataSource } from 'typeorm';
 
 import { CookieService } from '@app/core/cookies';
-import { RefreshToken, RefreshTokenRepository, RolePermissionRepository, UserRepository, UserUsage } from '@app/infra/persistence/typeorm';
+import { FarmUserRepository, RolePermissionRepository, UserRepository, UserUsage } from '@app/infra/persistence/typeorm';
+import { RedisClient, RefreshTokenSchema } from '@app/infra/redis';
 import { JwtClaims } from '@app/shared/security';
 
 import { DuplicatedEmailEXception, InvalidTokenException, WrongEmailOrPasswordException } from '../domain';
@@ -18,11 +18,11 @@ import { AuthResult } from './result';
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly dataSource: DataSource,
+    private readonly redisClient: RedisClient,
     private readonly jwtService: JwtService,
     private readonly cookieService: CookieService,
-    private readonly refreshTokenRepository: RefreshTokenRepository,
     private readonly userRepository: UserRepository,
+    private readonly farmUserRepository: FarmUserRepository,
     private readonly rolePermissionRepository: RolePermissionRepository,
   ) {}
 
@@ -33,30 +33,21 @@ export class AuthService {
     return this.jwtService.signAsync(payload, { expiresIn });
   }
 
-  private async issueRefreshToken(userId: string, farmId: string | null = null, incomingRefreshTokenId?: string) {
-    return this.dataSource.transaction(async (em) => {
-      if (incomingRefreshTokenId) {
-        await this.refreshTokenRepository.deleteById(incomingRefreshTokenId, em);
-      }
+  private async issueRefreshToken(userId: string, farmId: string | null = null) {
+    const refreshTokenSchame = RefreshTokenSchema.of(userId, farmId);
 
-      const refreshTokenEntity = RefreshToken.of(userId, farmId);
-      await this.refreshTokenRepository.insert(refreshTokenEntity, em);
-      const refreshToken = await this.refreshTokenRepository.findValidByIdWithUserAndFarmOrFail(refreshTokenEntity.id, em);
+    await this.redisClient.setJSON(refreshTokenSchame.key(), refreshTokenSchame);
+    await this.redisClient.expire(refreshTokenSchame.key(), refreshTokenSchame.expiresIn());
 
-      if (refreshToken.farm?.farmUser?.role) {
-        refreshToken.farm.farmUser.role.permissions = await this.rolePermissionRepository.findKeysByRoleId(refreshToken.farm?.farmUser?.role.id, em);
-      }
-
-      return refreshToken;
-    });
+    return refreshTokenSchame.id;
   }
 
-  private buildAuthResult(refreshToken: RefreshToken): AuthResult {
-    return {
-      user: refreshToken.user,
-      farm: refreshToken.farm,
-      role: refreshToken.farm?.farmUser?.role ?? null,
-    };
+  private async getRefreshToken(refreshTokenId: string): Promise<RefreshTokenSchema | null> {
+    return plainToInstance(RefreshTokenSchema, await this.redisClient.getJSON(RefreshTokenSchema.from(refreshTokenId).key()));
+  }
+
+  private async revokeRefreshToken(refreshTokenId: string) {
+    return this.redisClient.del(RefreshTokenSchema.from(refreshTokenId).key());
   }
 
   async register(command: RegisterCommand, res: Response): Promise<AuthResult> {
@@ -65,7 +56,8 @@ export class AuthService {
     }
 
     const user = await this.userRepository.save({
-      ...command,
+      email: command.email,
+      name: command.name,
       password: await hash(command.password, 10),
       usage: new UserUsage(),
     });
@@ -74,9 +66,9 @@ export class AuthService {
     const refreshToken = await this.issueRefreshToken(user.id);
 
     this.cookieService.setAccessToken(res, accessToken);
-    this.cookieService.setRefreshToken(res, refreshToken.id);
+    this.cookieService.setRefreshToken(res, refreshToken);
 
-    return this.buildAuthResult(refreshToken);
+    return { user, farm: null, role: null };
   }
 
   async login(command: LoginCommand, res: Response): Promise<AuthResult> {
@@ -96,16 +88,16 @@ export class AuthService {
     const refreshToken = await this.issueRefreshToken(user.id);
 
     this.cookieService.setAccessToken(res, accessToken);
-    this.cookieService.setRefreshToken(res, refreshToken.id);
+    this.cookieService.setRefreshToken(res, refreshToken);
 
-    return this.buildAuthResult(refreshToken);
+    return { user, farm: null, role: null };
   }
 
   async refresh(req: Request, res: Response): Promise<AuthResult> {
     this.cookieService.setCacheControl(res);
 
     const incomingRefreshTokenId = this.cookieService.parseRefreshToken(req);
-    const incomingRefreshToken = isUUID(incomingRefreshTokenId, 4) ? await this.refreshTokenRepository.findValidById(incomingRefreshTokenId) : null;
+    const incomingRefreshToken = await this.getRefreshToken(incomingRefreshTokenId);
 
     if (!incomingRefreshToken) {
       this.cookieService.clearAccessToken(res);
@@ -113,20 +105,29 @@ export class AuthService {
       throw new InvalidTokenException();
     }
 
+    const user = await this.userRepository.findOneById(incomingRefreshToken.userId);
+    const farmUser = incomingRefreshToken.farmId ? await this.farmUserRepository.findWithFarmAndRole(incomingRefreshToken.farmId, incomingRefreshToken.userId) : null;
+
+    if (farmUser?.role) {
+      farmUser.role.permissions = await this.rolePermissionRepository.findKeysByRoleId(farmUser.role.id);
+    }
+
+    await this.revokeRefreshToken(incomingRefreshTokenId);
     const accessToken = await this.issueAccessToken(incomingRefreshToken.userId, incomingRefreshToken.farmId);
-    const refreshToken = await this.issueRefreshToken(incomingRefreshToken.userId, incomingRefreshToken.farmId, incomingRefreshTokenId);
+    const refreshToken = await this.issueRefreshToken(incomingRefreshToken.userId, incomingRefreshToken.farmId);
 
     this.cookieService.setAccessToken(res, accessToken);
-    this.cookieService.setRefreshToken(res, refreshToken.id);
+    this.cookieService.setRefreshToken(res, refreshToken);
 
-    return this.buildAuthResult(refreshToken);
+    return { user, farm: farmUser?.farm ?? null, role: farmUser?.role ?? null };
   }
 
   async checkIn(command: CheckInCommand, req: Request, res: Response): Promise<AuthResult> {
     this.cookieService.setCacheControl(res);
 
     const incomingRefreshTokenId = this.cookieService.parseRefreshToken(req);
-    const incomingRefreshToken = isUUID(incomingRefreshTokenId, 4) ? await this.refreshTokenRepository.findValidById(incomingRefreshTokenId) : null;
+    const incomingRefreshToken = await this.getRefreshToken(incomingRefreshTokenId);
+    await this.revokeRefreshToken(incomingRefreshTokenId);
 
     if (!incomingRefreshToken) {
       this.cookieService.clearAccessToken(res);
@@ -134,24 +135,27 @@ export class AuthService {
       throw new InvalidTokenException();
     }
 
+    const user = await this.userRepository.findOneById(command.userId);
+    const farmUser = await this.farmUserRepository.findWithFarmAndRole(command.farmId, command.userId);
+
+    if (farmUser?.role) {
+      farmUser.role.permissions = await this.rolePermissionRepository.findKeysByRoleId(farmUser.role.id);
+    }
+
     const accessToken = await this.issueAccessToken(command.userId, command.farmId);
-    const refreshToken = await this.issueRefreshToken(command.userId, command.farmId, incomingRefreshTokenId);
+    const refreshToken = await this.issueRefreshToken(command.userId, command.farmId);
 
     this.cookieService.setAccessToken(res, accessToken);
-    this.cookieService.setRefreshToken(res, refreshToken.id);
+    this.cookieService.setRefreshToken(res, refreshToken);
 
-    return this.buildAuthResult(refreshToken);
+    return { user, farm: farmUser?.farm ?? null, role: farmUser?.role ?? null };
   }
 
   async logout(req: Request, res: Response): Promise<void> {
     this.cookieService.setCacheControl(res);
 
     const incomingRefreshTokenId = this.cookieService.parseRefreshToken(req);
-    const incomingRefreshToken = isUUID(incomingRefreshTokenId, 4) ? await this.refreshTokenRepository.findValidById(incomingRefreshTokenId) : null;
-
-    if (incomingRefreshToken) {
-      await this.refreshTokenRepository.deleteById(incomingRefreshToken.id);
-    }
+    await this.revokeRefreshToken(incomingRefreshTokenId);
 
     this.cookieService.clearAccessToken(res);
     this.cookieService.clearRefreshToken(res);
