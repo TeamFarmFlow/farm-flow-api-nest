@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { ContextService } from '@app/core/context';
 import { toInstance } from '@app/core/transform';
@@ -25,18 +25,18 @@ export class AttendanceController {
   }
 
   @Post('checkin')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: '출근' })
-  @ApiNoContentResponse()
-  checkInAttendance(@Body() body: CheckInAttendanceRequest) {
-    return this.attendanceService.checkInAttendnace(body.toCommand(this.contextService.farmId, this.contextService.userId));
+  @ApiOkResponse({ type: AttendanceResponse })
+  async checkInAttendance(@Body() body: CheckInAttendanceRequest) {
+    return toInstance(AttendanceResponse, await this.attendanceService.checkInAttendnace(body.toCommand(this.contextService.farmId, this.contextService.userId)));
   }
 
   @Post('checkout')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: '퇴근' })
-  @ApiNoContentResponse()
-  checkOutAttendance(@Body() body: CheckOutAttendanceRequest) {
-    return this.attendanceService.checkOutAttendnace(body.toCommand(this.contextService.farmId, this.contextService.userId));
+  @ApiOkResponse({ type: AttendanceResponse })
+  async checkOutAttendance(@Body() body: CheckOutAttendanceRequest) {
+    return toInstance(AttendanceResponse, await this.attendanceService.checkOutAttendnace(body.toCommand(this.contextService.farmId, this.contextService.userId)));
   }
 }

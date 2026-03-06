@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
-import { toInstance } from '@app/core/transform';
+import { plainToInstance } from 'class-transformer';
+
 import { Attendance, AttendanceRepository, FarmUserRepository } from '@app/infra/persistence/typeorm';
 import { AttendanceQrCodeSchema, RedisClient, RedisPublisher } from '@app/infra/redis';
+
+import { InvalidQrCodeException } from '../domain/exceptions';
 
 import { CheckInAttendanceCommand, CheckOutAttendanceCommand } from './commands';
 import { AttendanceQrCodeGeneratedEvent } from './events';
@@ -19,26 +22,17 @@ export class AttendanceService {
   async getAttendanceByToday(farmId: string, userId: string): Promise<Attendance | null> {
     const farmUser = await this.farmUserRepository.findWithFarm(farmId, userId);
 
-    if (!farmUser) {
-      throw new Error('forbidden');
-    }
-
     return this.attendanceRepository.findByWorkDate(farmId, userId, farmUser.farm.dateOfTimeZone);
   }
 
-  async checkInAttendnace(command: CheckInAttendanceCommand): Promise<void> {
+  async checkInAttendnace(command: CheckInAttendanceCommand): Promise<Attendance> {
     const farmUser = await this.farmUserRepository.findWithFarm(command.farmId, command.userId);
-
-    if (!farmUser) {
-      throw new Error('forbidden');
-    }
-
-    const attendanceQrCodeKey = AttendanceQrCodeSchema.of(command.farmId).key();
-    const attendanceQrCode = toInstance(AttendanceQrCodeSchema, await this.redisClient.getJSON(attendanceQrCodeKey));
+    const attendanceQrCodeKey = AttendanceQrCodeSchema.from(command.qrCode).key();
+    const attendanceQrCode = plainToInstance(AttendanceQrCodeSchema, await this.redisClient.getJSON(attendanceQrCodeKey));
     await this.redisClient.del(attendanceQrCodeKey);
 
     if (!attendanceQrCode) {
-      throw new Error('invalid qr code');
+      throw new InvalidQrCodeException();
     }
 
     const newAttendanceQrCode = AttendanceQrCodeSchema.of(command.farmId, attendanceQrCode.deviceId);
@@ -46,21 +40,19 @@ export class AttendanceService {
     await this.redisClient.expire(newAttendanceQrCode.key(), newAttendanceQrCode.expiresIn());
     await this.redisPublisher.publishJSON('attendance.qr.generated', AttendanceQrCodeGeneratedEvent.from(newAttendanceQrCode));
     await this.attendanceRepository.upsertOrIgnore(Attendance.of(farmUser.farm, farmUser.userId));
+
+    return this.attendanceRepository.findByWorkDateOrFail(farmUser.farmId, farmUser.userId, farmUser.farm.dateOfTimeZone);
   }
 
-  async checkOutAttendnace(command: CheckOutAttendanceCommand): Promise<void> {
+  async checkOutAttendnace(command: CheckOutAttendanceCommand): Promise<Attendance> {
     const farmUser = await this.farmUserRepository.findWithFarm(command.farmId, command.userId);
 
-    if (!farmUser) {
-      throw new Error('forbidden');
-    }
-
-    const attendanceQrCodeKey = AttendanceQrCodeSchema.of(command.farmId).key();
-    const attendanceQrCode = toInstance(AttendanceQrCodeSchema, await this.redisClient.getJSON(attendanceQrCodeKey));
+    const attendanceQrCodeKey = AttendanceQrCodeSchema.from(command.qrCode).key();
+    const attendanceQrCode = plainToInstance(AttendanceQrCodeSchema, await this.redisClient.getJSON(attendanceQrCodeKey));
     await this.redisClient.del(attendanceQrCodeKey);
 
     if (!attendanceQrCode) {
-      throw new Error('invalid qr code');
+      throw new InvalidQrCodeException();
     }
 
     const newAttendanceQrCode = AttendanceQrCodeSchema.of(command.farmId, attendanceQrCode.deviceId);
@@ -68,5 +60,7 @@ export class AttendanceService {
     await this.redisClient.expire(newAttendanceQrCode.key(), newAttendanceQrCode.expiresIn());
     await this.redisPublisher.publishJSON('attendance.qr.generated', AttendanceQrCodeGeneratedEvent.from(newAttendanceQrCode));
     await this.attendanceRepository.updateToCheckOutByWorkDate(farmUser.farmId, farmUser.userId, farmUser.farm.dateOfTimeZone);
+
+    return this.attendanceRepository.findByWorkDateOrFail(farmUser.farmId, farmUser.userId, farmUser.farm.dateOfTimeZone);
   }
 }

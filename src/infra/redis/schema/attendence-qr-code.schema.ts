@@ -13,6 +13,14 @@ export class AttendanceQrCodeSchema {
     return 70;
   }
 
+  public static from(id: string) {
+    const schema = new AttendanceQrCodeSchema();
+
+    schema.id = id;
+
+    return schema;
+  }
+
   public static of(farmId: string, deviceId: string = '') {
     const schema = new AttendanceQrCodeSchema();
 

@@ -24,6 +24,14 @@ export class AttendanceRepository extends TransactionalRepository<Attendance> {
     });
   }
 
+  async findByWorkDateOrFail(farmId: string, userId: string, workDate: string, em?: EntityManager) {
+    return this.getRepository(em).findOneByOrFail({
+      farmId,
+      userId,
+      workDate,
+    });
+  }
+
   async upsertOrIgnore(entityLike: DeepPartial<Attendance>, em?: EntityManager) {
     return this.getRepository(em).createQueryBuilder().insert().values(entityLike).orIgnore().execute();
   }

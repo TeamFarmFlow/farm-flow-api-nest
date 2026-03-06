@@ -44,7 +44,7 @@ export class FarmUserRepository extends TransactionalRepository<FarmUser> {
       .innerJoinAndMapOne('fu.farm', 'fu.farm', 'f')
       .where('fu.farmId = :farmId', { farmId })
       .andWhere('fu.userId = :userId', { userId })
-      .getOne();
+      .getOneOrFail();
   }
 
   async findAndCountByUserIdWithFarm(userId: string, em?: EntityManager) {
