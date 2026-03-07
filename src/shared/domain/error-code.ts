@@ -1,0 +1,14 @@
+export enum ErrorCode {
+  WrongEmailOrPassword = 'WRONG_EMAIL_OR_PASSWORD',
+  DuplicatedEmail = 'DUPLICATED_EMAIL',
+  InvalidToken = 'INVALID_TOKEN',
+  ExpiredToken = 'EXPIRED_TOKEN',
+  InvalidQrCode = 'INVALID_QR_CODE',
+  ExceedFarmCount = 'EXCEED_FARM_COUNT',
+  ForbiddenFarmUser = 'FORBIDDEN_FARM_USER',
+  FarmNotFound = 'FARM_NOT_FOUND',
+  InvalidInvitationCode = 'INVALID_INVITATION_CODE',
+  ForbiddenPermission = 'FORBIDDEN_PERMISSION',
+  RoleCannotUpdateOrDelete = 'ROLE_CANNOT_UPDATE_OR_DELETE',
+  RoleNotFound = 'ROLE_NOT_FOUND',
+}

@@ -1,9 +1,10 @@
 import { HttpStatus } from '@nestjs/common';
 
 import { DomainException } from '@app/core/exceptions';
+import { ErrorCode } from '@app/shared/domain';
 
 export class DuplicatedEmailEXception extends DomainException {
   constructor() {
-    super('DUPLICATED_EMAIL', HttpStatus.CONFLICT, 'Duplicated email');
+    super(ErrorCode.DuplicatedEmail, HttpStatus.CONFLICT, 'Duplicated email');
   }
 }

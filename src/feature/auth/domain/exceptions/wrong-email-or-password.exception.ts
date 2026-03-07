@@ -1,9 +1,10 @@
 import { HttpStatus } from '@nestjs/common';
 
 import { DomainException } from '@app/core/exceptions';
+import { ErrorCode } from '@app/shared/domain';
 
 export class WrongEmailOrPasswordException extends DomainException {
   constructor() {
-    super('WRONG_EMAIL_OR_PASSWORD', HttpStatus.UNAUTHORIZED, 'Wrong email or password');
+    super(ErrorCode.WrongEmailOrPassword, HttpStatus.UNAUTHORIZED, 'Wrong email or password');
   }
 }
