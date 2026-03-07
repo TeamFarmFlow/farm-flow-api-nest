@@ -19,7 +19,7 @@ export class RoleResponse {
   @Expose()
   required: boolean;
 
-  @ApiProperty({ type: String })
-  @Expose({ name: 'permissionKeys' })
-  permissions: string[];
+  @ApiProperty({ type: String, isArray: true })
+  @Expose()
+  permissionKeys: string[];
 }
