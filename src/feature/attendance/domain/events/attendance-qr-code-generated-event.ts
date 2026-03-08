@@ -1,10 +1,10 @@
-import { AttendanceQrCodeSchema } from '@app/infra/redis';
+import { AttendanceQrCode } from '..';
 
 export class AttendanceQrCodeGeneratedEvent {
   id: string;
   deviceId: string;
 
-  public static from(attendanceQrCode: AttendanceQrCodeSchema) {
+  public static from(attendanceQrCode: AttendanceQrCode) {
     const event = new AttendanceQrCodeGeneratedEvent();
 
     event.id = attendanceQrCode.id;

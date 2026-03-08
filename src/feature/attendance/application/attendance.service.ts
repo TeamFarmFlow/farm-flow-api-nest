@@ -3,12 +3,11 @@ import { Injectable } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 
 import { Attendance, AttendanceRepository, FarmUserRepository } from '@app/infra/persistence/typeorm';
-import { AttendanceQrCodeSchema, RedisClient, RedisPublisher } from '@app/infra/redis';
+import { RedisClient, RedisPublisher } from '@app/infra/redis';
 
-import { InvalidQrCodeException } from '../domain/exceptions';
+import { AttendanceQrCode, AttendanceQrCodeGeneratedEvent, InvalidQrCodeException } from '../domain';
 
 import { CheckInAttendanceCommand, CheckOutAttendanceCommand } from './commands';
-import { AttendanceQrCodeGeneratedEvent } from './events';
 
 @Injectable()
 export class AttendanceService {
@@ -27,15 +26,15 @@ export class AttendanceService {
 
   async checkInAttendnace(command: CheckInAttendanceCommand): Promise<Attendance> {
     const farmUser = await this.farmUserRepository.findWithFarm(command.farmId, command.userId);
-    const attendanceQrCodeKey = AttendanceQrCodeSchema.from(command.qrCode).key();
-    const attendanceQrCode = plainToInstance(AttendanceQrCodeSchema, await this.redisClient.getJSON(attendanceQrCodeKey));
+    const attendanceQrCodeKey = AttendanceQrCode.from(command.qrCode).key();
+    const attendanceQrCode = plainToInstance(AttendanceQrCode, await this.redisClient.getJSON(attendanceQrCodeKey));
     await this.redisClient.del(attendanceQrCodeKey);
 
     if (!attendanceQrCode) {
       throw new InvalidQrCodeException();
     }
 
-    const newAttendanceQrCode = AttendanceQrCodeSchema.of(command.farmId, attendanceQrCode.deviceId);
+    const newAttendanceQrCode = AttendanceQrCode.of(command.farmId, attendanceQrCode.deviceId);
     await this.redisClient.setJSON(newAttendanceQrCode.key(), newAttendanceQrCode);
     await this.redisClient.expire(newAttendanceQrCode.key(), newAttendanceQrCode.expiresIn());
     await this.redisPublisher.publishJSON('attendance.qr.generated', AttendanceQrCodeGeneratedEvent.from(newAttendanceQrCode));
@@ -47,15 +46,15 @@ export class AttendanceService {
   async checkOutAttendnace(command: CheckOutAttendanceCommand): Promise<Attendance> {
     const farmUser = await this.farmUserRepository.findWithFarm(command.farmId, command.userId);
 
-    const attendanceQrCodeKey = AttendanceQrCodeSchema.from(command.qrCode).key();
-    const attendanceQrCode = plainToInstance(AttendanceQrCodeSchema, await this.redisClient.getJSON(attendanceQrCodeKey));
+    const attendanceQrCodeKey = AttendanceQrCode.from(command.qrCode).key();
+    const attendanceQrCode = plainToInstance(AttendanceQrCode, await this.redisClient.getJSON(attendanceQrCodeKey));
     await this.redisClient.del(attendanceQrCodeKey);
 
     if (!attendanceQrCode) {
       throw new InvalidQrCodeException();
     }
 
-    const newAttendanceQrCode = AttendanceQrCodeSchema.of(command.farmId, attendanceQrCode.deviceId);
+    const newAttendanceQrCode = AttendanceQrCode.of(command.farmId, attendanceQrCode.deviceId);
     await this.redisClient.setJSON(newAttendanceQrCode.key(), newAttendanceQrCode);
     await this.redisClient.expire(newAttendanceQrCode.key(), newAttendanceQrCode.expiresIn());
     await this.redisPublisher.publishJSON('attendance.qr.generated', AttendanceQrCodeGeneratedEvent.from(newAttendanceQrCode));

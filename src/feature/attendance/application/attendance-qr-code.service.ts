@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
-import { AttendanceQrCodeSchema, RedisClient, RedisPublisher } from '@app/infra/redis';
+import { RedisClient, RedisPublisher } from '@app/infra/redis';
+
+import { AttendanceQrCode, AttendanceQrCodeGeneratedEvent } from '../domain';
 
 import { CreateAttendanceQrCodeCommand } from './commands';
-import { AttendanceQrCodeGeneratedEvent } from './events';
 import { CreateAttendanceQrCodeResult } from './results';
 
 @Injectable()
@@ -14,7 +15,7 @@ export class AttendanceQrCodeService {
   ) {}
 
   async createQrCode(command: CreateAttendanceQrCodeCommand): Promise<CreateAttendanceQrCodeResult> {
-    const attendanceQrCode = AttendanceQrCodeSchema.of(command.farmId, command.deviceId);
+    const attendanceQrCode = AttendanceQrCode.of(command.farmId, command.deviceId);
 
     await this.redisClient.setJSON(attendanceQrCode.key(), attendanceQrCode);
     await this.redisClient.expire(attendanceQrCode.key(), attendanceQrCode.expiresIn());

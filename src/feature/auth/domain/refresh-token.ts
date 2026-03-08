@@ -1,6 +1,6 @@
 import { v4 } from 'uuid';
 
-export class RefreshTokenSchema {
+export class RefreshToken {
   id: string;
   userId: string;
   farmId: string | null;
@@ -14,20 +14,20 @@ export class RefreshTokenSchema {
   }
 
   public static from(id: string) {
-    const schema = new RefreshTokenSchema();
+    const refreshToken = new RefreshToken();
 
-    schema.id = id;
+    refreshToken.id = id;
 
-    return schema;
+    return refreshToken;
   }
 
   public static of(userId: string, farmId: string | null) {
-    const schema = new RefreshTokenSchema();
+    const refreshToken = new RefreshToken();
 
-    schema.id = v4();
-    schema.userId = userId;
-    schema.farmId = farmId;
+    refreshToken.id = v4();
+    refreshToken.userId = userId;
+    refreshToken.farmId = farmId;
 
-    return schema;
+    return refreshToken;
   }
 }

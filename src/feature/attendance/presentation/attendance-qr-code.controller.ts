@@ -9,7 +9,8 @@ import { RequiredPermissions } from '@app/core/security';
 import { toInstance } from '@app/core/transform';
 import { PermissionKey } from '@app/shared/domain';
 
-import { AttendanceQrCodeGeneratedEvent, AttendanceQrCodeService } from '../application';
+import { AttendanceQrCodeService } from '../application';
+import { AttendanceQrCodeGeneratedEvent } from '../domain';
 
 import { CreateAttendanceQrCodeRequest } from './dto/request';
 import { AttendanceQrCodeResponse, CreateAttendanceQrCodeResponse } from './dto/response';

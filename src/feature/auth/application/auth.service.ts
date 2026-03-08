@@ -7,10 +7,10 @@ import { Request, Response } from 'express';
 
 import { CookieService } from '@app/core/cookies';
 import { FarmUserRepository, RolePermissionRepository, UserRepository, UserUsage } from '@app/infra/persistence/typeorm';
-import { RedisClient, RefreshTokenSchema } from '@app/infra/redis';
+import { RedisClient } from '@app/infra/redis';
 import { JwtClaims } from '@app/shared/security';
 
-import { DuplicatedEmailEXception, InvalidTokenException, WrongEmailOrPasswordException } from '../domain';
+import { DuplicatedEmailEXception, InvalidTokenException, RefreshToken, WrongEmailOrPasswordException } from '../domain';
 
 import { CheckInCommand, LoginCommand, RegisterCommand } from './command';
 import { AuthResult } from './result';
@@ -34,20 +34,20 @@ export class AuthService {
   }
 
   private async issueRefreshToken(userId: string, farmId: string | null = null) {
-    const refreshTokenSchame = RefreshTokenSchema.of(userId, farmId);
+    const refreshToken = RefreshToken.of(userId, farmId);
 
-    await this.redisClient.setJSON(refreshTokenSchame.key(), refreshTokenSchame);
-    await this.redisClient.expire(refreshTokenSchame.key(), refreshTokenSchame.expiresIn());
+    await this.redisClient.setJSON(refreshToken.key(), refreshToken);
+    await this.redisClient.expire(refreshToken.key(), refreshToken.expiresIn());
 
-    return refreshTokenSchame.id;
+    return refreshToken.id;
   }
 
-  private async getRefreshToken(refreshTokenId: string): Promise<RefreshTokenSchema | null> {
-    return plainToInstance(RefreshTokenSchema, await this.redisClient.getJSON(RefreshTokenSchema.from(refreshTokenId).key()));
+  private async getRefreshToken(refreshTokenId: string): Promise<RefreshToken | null> {
+    return plainToInstance(RefreshToken, await this.redisClient.getJSON(RefreshToken.from(refreshTokenId).key()));
   }
 
   private async revokeRefreshToken(refreshTokenId: string) {
-    return this.redisClient.del(RefreshTokenSchema.from(refreshTokenId).key());
+    return this.redisClient.del(RefreshToken.from(refreshTokenId).key());
   }
 
   async register(command: RegisterCommand, res: Response): Promise<AuthResult> {
