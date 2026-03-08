@@ -9,7 +9,7 @@ import { PermissionKey } from '@app/shared/domain';
 import { InvitationService } from '../application';
 
 import { CreateInvitationRequest, ValidateInvitationCodeRequest } from './dto/request';
-import { CreateInvitationResponse, ValidateInvitationCodeResponse } from './dto/response';
+import { ValidateInvitationCodeResponse } from './dto/response';
 
 @ApiTags('초대장')
 @Controller('invitations')
@@ -22,9 +22,9 @@ export class InvitationController {
   @RequiredPermissions([PermissionKey.InvitationCreate])
   @Post()
   @ApiOperation({ summary: '초대장 발급' })
-  @ApiCreatedResponse({ type: CreateInvitationResponse })
-  async createInvitation(@Body() body: CreateInvitationRequest): Promise<CreateInvitationResponse> {
-    return toInstance(CreateInvitationResponse, await this.invitationService.createInvitation(body.toCommand(this.contextService.farmId, this.contextService.userId)));
+  @ApiCreatedResponse()
+  async createInvitation(@Body() body: CreateInvitationRequest): Promise<void> {
+    return this.invitationService.createInvitation(body.toCommand(this.contextService.farmId, this.contextService.userId));
   }
 
   @SkipFarmAuth()

@@ -1,58 +1,70 @@
 import { Injectable } from '@nestjs/common';
 
-import { DataSource } from 'typeorm';
+import { plainToInstance } from 'class-transformer';
 
 import { MailService } from '@app/infra/mail';
-import { FarmUser, FarmUserRepository, Invitation, InvitationRepository, RoleRepository, UserRepository } from '@app/infra/persistence/typeorm';
+import { FarmRepository, FarmUser, FarmUserRepository, RoleRepository, UserRepository } from '@app/infra/persistence/typeorm';
+import { RedisClient } from '@app/infra/redis';
 
-import { InvalidInvitationCodeException } from '../domain';
+import { DuplicatedInvitationException, InvalidInvitationCodeException, Invitation, InvitationFarmNotFoundException } from '../domain';
 
 import { CreateInvitationCommand, ValidateInvitationCodeCommand } from './commands';
-import { CreateInvitationResult, ValidateInvitationCodeResult } from './results';
+import { ValidateInvitationCodeResult } from './results';
 
 @Injectable()
 export class InvitationService {
   constructor(
-    private readonly dataSource: DataSource,
+    private readonly redisClient: RedisClient,
     private readonly userRepository: UserRepository,
-    private readonly invitationRepository: InvitationRepository,
+    private readonly farmRepository: FarmRepository,
     private readonly farmUserRepository: FarmUserRepository,
     private readonly roleRepository: RoleRepository,
     private readonly mailService: MailService,
   ) {}
 
-  async createInvitation(command: CreateInvitationCommand): Promise<CreateInvitationResult> {
-    const invitationEntity = Invitation.of(command.farmId, command.userId, command.email, command.url);
-    await this.invitationRepository.insert(invitationEntity);
-    const invitation = await this.invitationRepository.findByIdWithFarm(invitationEntity.id);
+  async createInvitation(command: CreateInvitationCommand): Promise<void> {
+    const farm = await this.farmRepository.findOneById(command.farmId);
 
-    void this.mailService
-      .sendInvitationMail(invitation.email, invitation.code, invitation.url, invitation.farm.name)
-      .then(() => this.invitationRepository.publishedIfPending(invitationEntity.id))
-      .catch(() => this.invitationRepository.failedIfPending(invitationEntity.id));
+    if (!farm) {
+      throw new InvitationFarmNotFoundException();
+    }
 
-    return { id: invitation.id };
+    const hasFarmUser = await this.farmUserRepository.has(command.farmId, command.userId);
+
+    if (hasFarmUser) {
+      throw new DuplicatedInvitationException();
+    }
+
+    const invitation = Invitation.of(command.email, command.url, command.farmId);
+    await this.redisClient.setJSON(invitation.key(), invitation);
+    await this.redisClient.expire(invitation.key(), invitation.expiresIn());
+    await this.mailService.sendInvitationMail(invitation.email, invitation.code, invitation.url, farm.name);
   }
 
   async validateInvitationCode(command: ValidateInvitationCodeCommand): Promise<ValidateInvitationCodeResult> {
     const user = await this.userRepository.findOneById(command.userId);
-    const farmId = await this.dataSource.transaction(async (em) => {
-      const invitation = await this.invitationRepository.findValid(user.email, command.code, em);
 
-      if (!invitation) {
-        throw new InvalidInvitationCodeException();
-      }
+    const invitationKey = Invitation.from(command.code).key();
+    const invitation = plainToInstance(Invitation, await this.redisClient.getJSON(invitationKey));
 
-      const accepted = await this.invitationRepository.acceptIfPublished(invitation.id, em);
+    if (!invitation || invitation.email !== user.email) {
+      throw new InvalidInvitationCodeException();
+    }
 
-      if (accepted) {
-        const defaultRole = await this.roleRepository.findDefault(invitation.farmId, em);
-        await this.farmUserRepository.upsertOrIgnore(FarmUser.of(invitation.farmId, command.userId, defaultRole.id), em);
-      }
+    await this.redisClient.del(invitationKey);
+    const hasFarm = await this.farmRepository.hasById(invitation.farmId);
 
-      return invitation.farmId;
-    });
+    if (!hasFarm) {
+      throw new InvitationFarmNotFoundException();
+    }
 
-    return { farmId };
+    const hasFarmUser = await this.farmUserRepository.has(invitation.farmId, user.id);
+
+    if (!hasFarmUser) {
+      const defaultRole = await this.roleRepository.findDefault(invitation.farmId);
+      await this.farmUserRepository.upsertOrIgnore(FarmUser.of(invitation.farmId, command.userId, defaultRole.id));
+    }
+
+    return { farmId: invitation.farmId };
   }
 }

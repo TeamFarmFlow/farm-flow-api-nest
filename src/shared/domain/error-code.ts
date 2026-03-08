@@ -11,4 +11,6 @@ export enum ErrorCode {
   ForbiddenPermission = 'FORBIDDEN_PERMISSION',
   RoleCannotUpdateOrDelete = 'ROLE_CANNOT_UPDATE_OR_DELETE',
   RoleNotFound = 'ROLE_NOT_FOUND',
+  DuplicatedInvitation = 'DUPLICATED_INVITATION',
+  InvitationFarmNotFound = 'INVITATION_FARM_NOT_FOUND',
 }

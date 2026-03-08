@@ -15,6 +15,14 @@ export class FarmRepository extends TransactionalRepository<Farm> {
     super(repository);
   }
 
+  async hasById(id: string, em?: EntityManager) {
+    return this.getRepository(em).existsBy({ id });
+  }
+
+  async findOneById(id: string, em?: EntityManager) {
+    return this.getRepository(em).findOneBy({ id });
+  }
+
   async insert(entityLike: DeepPartial<Farm>, em?: EntityManager) {
     return this.getRepository(em).insert(entityLike);
   }
