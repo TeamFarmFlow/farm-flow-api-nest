@@ -13,7 +13,6 @@ import { CreateRoleRequest, UpdateRoleRequest } from './dto/request';
 import { GetRolesRequest } from './dto/request/get-roles.request';
 import { CreateRoleResponse, RoleDetailsResponse, RolesResponse } from './dto/response';
 
-@RequiredPermissions([PermissionKey.RoleManagement])
 @ApiTags('역할/권한')
 @Controller('roles')
 export class RoleController {
@@ -22,6 +21,7 @@ export class RoleController {
     private readonly roleService: RoleService,
   ) {}
 
+  @RequiredPermissions([PermissionKey.RoleRead])
   @Get(':id')
   @ApiOperation({ summary: '역할 상세 조회' })
   @ApiOkResponse({ type: RoleDetailsResponse })
@@ -29,6 +29,7 @@ export class RoleController {
     return toInstance(RoleDetailsResponse, await this.roleService.getRoleDetails(id));
   }
 
+  @RequiredPermissions([PermissionKey.RoleRead])
   @Get()
   @ApiOperation({ summary: '역할 목록 조회' })
   @ApiOkResponse({ type: RolesResponse })
@@ -36,6 +37,7 @@ export class RoleController {
     return toInstance(RolesResponse, await this.roleService.getRoles(new GetRolesRequest().toQuery(this.contextService.farmId)));
   }
 
+  @RequiredPermissions([PermissionKey.RoleCreate])
   @Post()
   @ApiOperation({ summary: '역할 생성' })
   @ApiCreatedResponse({ type: CreateRoleResponse })
@@ -43,6 +45,7 @@ export class RoleController {
     return toInstance(CreateRoleResponse, await this.roleService.createRole(body.toCommand(this.contextService.farmId)));
   }
 
+  @RequiredPermissions([PermissionKey.RoleUpdate])
   @Patch(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: '역할 수정' })
@@ -51,6 +54,7 @@ export class RoleController {
     return this.roleService.updateRole(body.toCommand(id));
   }
 
+  @RequiredPermissions([PermissionKey.RoleRemove])
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: '역할 삭제' })

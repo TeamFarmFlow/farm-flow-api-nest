@@ -18,10 +18,9 @@ export class CreateInvitationRequest {
   @IsNotEmpty()
   readonly url: string;
 
-  toCommand(farmId: string, userId: string): CreateInvitationCommand {
+  toCommand(farmId: string): CreateInvitationCommand {
     return {
       farmId,
-      userId,
       email: this.email,
       url: this.url,
     };

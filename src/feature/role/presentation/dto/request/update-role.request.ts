@@ -14,13 +14,13 @@ export class UpdateRoleRequest {
   @IsEnum(PermissionKey, { each: true })
   @IsArray()
   @IsNotEmpty()
-  readonly permissions: PermissionKey[];
+  readonly permissionKeys: PermissionKey[];
 
   toCommand(roleId: string): UpdateRoleCommand {
     return {
       roleId,
       name: this.name,
-      permissions: this.permissions,
+      permissionKeys: this.permissionKeys,
     };
   }
 }

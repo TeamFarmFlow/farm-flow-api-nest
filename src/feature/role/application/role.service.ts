@@ -44,7 +44,7 @@ export class RoleService {
     const role = await this.roleRepository.save({
       farmId: command.farmId,
       name: command.name,
-      permissions: command.permissions.map((key) => ({ key })),
+      permissions: command.permissionKeys.map((key) => ({ key })),
     });
 
     return { id: role.id };
@@ -61,12 +61,12 @@ export class RoleService {
       throw new RoleProtectedException();
     }
 
-    const permissionSet = new Set(command.permissions);
+    const permissionSet = new Set(command.permissionKeys);
     const deletePermissions = role.permissions.filter(({ key }) => !permissionSet.has(key)).map((permission) => permission.id);
 
     const permissions = [
       ...role.permissions.filter(({ key }) => permissionSet.has(key)),
-      ...command.permissions.filter((key) => !role.permissions.some((permission) => permission.key === key)).map((key) => RolePermission.of(command.roleId, key)),
+      ...command.permissionKeys.filter((key) => !role.permissions.some((permission) => permission.key === key)).map((key) => RolePermission.of(command.roleId, key)),
     ];
 
     await this.dataSource.transaction(async (em) => {

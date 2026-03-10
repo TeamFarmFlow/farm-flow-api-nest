@@ -29,10 +29,14 @@ export class InvitationService {
       throw new InvitationFarmNotFoundException();
     }
 
-    const hasFarmUser = await this.farmUserRepository.has(command.farmId, command.userId);
+    const user = await this.userRepository.findOneByEmail(command.email);
 
-    if (hasFarmUser) {
-      throw new InvitationDuplicatedException();
+    if (user) {
+      const hasFarmUser = await this.farmUserRepository.has(command.farmId, user.id);
+
+      if (hasFarmUser) {
+        throw new InvitationDuplicatedException();
+      }
     }
 
     const invitation = Invitation.of(command.email, command.url, command.farmId);

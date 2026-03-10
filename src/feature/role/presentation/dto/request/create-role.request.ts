@@ -14,13 +14,13 @@ export class CreateRoleRequest {
   @IsEnum(PermissionKey, { each: true })
   @IsArray()
   @IsNotEmpty()
-  readonly permissions: PermissionKey[];
+  readonly permissionKeys: PermissionKey[];
 
   toCommand(farmId: string): CreateRoleCommand {
     return {
       farmId,
       name: this.name,
-      permissions: this.permissions,
+      permissionKeys: this.permissionKeys,
     };
   }
 }

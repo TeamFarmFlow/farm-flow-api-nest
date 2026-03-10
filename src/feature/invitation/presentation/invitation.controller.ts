@@ -24,7 +24,7 @@ export class InvitationController {
   @ApiOperation({ summary: '초대장 발급' })
   @ApiCreatedResponse()
   async createInvitation(@Body() body: CreateInvitationRequest): Promise<void> {
-    return this.invitationService.createInvitation(body.toCommand(this.contextService.farmId, this.contextService.userId));
+    return this.invitationService.createInvitation(body.toCommand(this.contextService.farmId));
   }
 
   @SkipFarmAuth()
