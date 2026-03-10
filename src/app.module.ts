@@ -15,10 +15,9 @@ import { AuthModule } from './feature/auth';
 import { FarmModule } from './feature/farm';
 import { HealthModule } from './feature/health';
 import { InvitationModule } from './feature/invitation';
+import { MemberModule } from './feature/member';
 import { RoleModule } from './feature/role';
-import { UserModule } from './feature/user';
 import { RedisModule } from './infra/redis';
-
 @Module({
   imports: [
     ConfigurationModule.forRoot(),
@@ -45,9 +44,9 @@ import { RedisModule } from './infra/redis';
     EventEmitterModule.forRoot(),
     HealthModule,
     AuthModule,
-    UserModule,
     FarmModule,
     RoleModule,
+    MemberModule,
     InvitationModule,
     AttendanceModule,
   ],

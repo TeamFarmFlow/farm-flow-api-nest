@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { DeepPartial, EntityManager, Repository } from 'typeorm';
+import { DeepPartial, EntityManager, In, Repository } from 'typeorm';
 
 import { TransactionalRepository, TypeOrmExRepository } from '../common';
 import { RolePermission } from '../entities';
@@ -18,6 +18,17 @@ export class RolePermissionRepository extends TransactionalRepository<RolePermis
     return this.getRepository(em).find({
       select: { key: true },
       where: { roleId },
+    });
+  }
+
+  async findKeysByRoleIds(roleIds: string[], em?: EntityManager) {
+    if (roleIds.length === 0) {
+      return [];
+    }
+
+    return this.getRepository(em).find({
+      select: { roleId: true, key: true },
+      where: { roleId: In(roleIds) },
     });
   }
 

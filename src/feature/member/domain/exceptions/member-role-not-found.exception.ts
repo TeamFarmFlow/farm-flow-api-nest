@@ -3,8 +3,8 @@ import { HttpStatus } from '@nestjs/common';
 import { DomainException } from '@app/core/exceptions';
 import { ErrorCode } from '@app/shared/domain';
 
-export class DuplicatedInvitationException extends DomainException {
+export class MemberRoleNotFoundException extends DomainException {
   constructor() {
-    super(ErrorCode.DuplicatedInvitation, HttpStatus.CONFLICT, 'Duplicated invitation');
+    super(ErrorCode.RoleNotFound, HttpStatus.NOT_FOUND, 'Role not found');
   }
 }

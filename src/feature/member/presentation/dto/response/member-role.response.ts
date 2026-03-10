@@ -2,9 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { Expose } from 'class-transformer';
 
-import { PermissionKey } from '@app/shared/domain';
-
-export class AuthRoleResponse {
+export class MemberRoleResponse {
   @ApiProperty({ type: String })
   @Expose()
   id: string;
@@ -15,13 +13,9 @@ export class AuthRoleResponse {
 
   @ApiProperty({ type: Boolean })
   @Expose()
-  required: boolean;
+  super: boolean;
 
   @ApiProperty({ type: Boolean })
   @Expose()
-  super: boolean;
-
-  @ApiProperty({ enum: PermissionKey, isArray: true })
-  @Expose()
-  permissionKeys: PermissionKey[];
+  required: boolean;
 }

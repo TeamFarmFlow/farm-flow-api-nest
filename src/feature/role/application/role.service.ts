@@ -4,7 +4,7 @@ import { DataSource } from 'typeorm';
 
 import { FarmUserRepository, RolePermission, RolePermissionRepository, RoleRepository } from '@app/infra/persistence/typeorm';
 
-import { RoleCannotUpdateOrDeleteException, RoleNotFoundException } from '../domain';
+import { RoleNotFoundException, RoleProtectedException } from '../domain';
 
 import { CreateRoleCommand, UpdateRoleCommand } from './commands';
 import { GetRolesQuery } from './queries';
@@ -58,7 +58,7 @@ export class RoleService {
     }
 
     if (role.required) {
-      throw new RoleCannotUpdateOrDeleteException();
+      throw new RoleProtectedException();
     }
 
     const permissionSet = new Set(command.permissions);
@@ -84,7 +84,7 @@ export class RoleService {
     }
 
     if (role.required) {
-      throw new RoleCannotUpdateOrDeleteException();
+      throw new RoleProtectedException();
     }
 
     const defaultRole = await this.roleRepository.findDefault(role.farmId);

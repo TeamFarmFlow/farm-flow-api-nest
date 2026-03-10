@@ -6,7 +6,7 @@ import { MailService } from '@app/infra/mail';
 import { FarmRepository, FarmUser, FarmUserRepository, RoleRepository, UserRepository } from '@app/infra/persistence/typeorm';
 import { RedisClient } from '@app/infra/redis';
 
-import { DuplicatedInvitationException, InvalidInvitationCodeException, Invitation, InvitationFarmNotFoundException } from '../domain';
+import { InvalidInvitationCodeException, Invitation, InvitationDuplicatedException, InvitationFarmNotFoundException } from '../domain';
 
 import { CreateInvitationCommand, ValidateInvitationCodeCommand } from './commands';
 import { ValidateInvitationCodeResult } from './results';
@@ -32,7 +32,7 @@ export class InvitationService {
     const hasFarmUser = await this.farmUserRepository.has(command.farmId, command.userId);
 
     if (hasFarmUser) {
-      throw new DuplicatedInvitationException();
+      throw new InvitationDuplicatedException();
     }
 
     const invitation = Invitation.of(command.email, command.url, command.farmId);

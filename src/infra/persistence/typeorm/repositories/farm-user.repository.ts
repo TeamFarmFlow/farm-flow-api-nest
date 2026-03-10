@@ -56,6 +56,15 @@ export class FarmUserRepository extends TransactionalRepository<FarmUser> {
       .getManyAndCount();
   }
 
+  async findAndCountByFarmIdWithUser(farmId: string, em?: EntityManager) {
+    return this.getRepository(em)
+      .createQueryBuilder('fu')
+      .innerJoinAndMapOne('fu.user', 'fu.user', 'u')
+      .leftJoinAndMapOne('fu.role', 'fu.role', 'r')
+      .where('fu.farmId = :farmId', { farmId })
+      .getManyAndCount();
+  }
+
   async findByRoleId(roleId: string, em?: EntityManager) {
     return this.getRepository(em).findBy({ role: { id: roleId } });
   }
@@ -64,6 +73,13 @@ export class FarmUserRepository extends TransactionalRepository<FarmUser> {
     return this.getRepository(em).find({
       relations: { user: true },
       where: { role: { id: roleId } },
+    });
+  }
+
+  async findOneWithRole(farmId: string, userId: string, em?: EntityManager) {
+    return this.getRepository(em).findOne({
+      relations: { role: true },
+      where: { farmId, userId },
     });
   }
 
@@ -81,6 +97,10 @@ export class FarmUserRepository extends TransactionalRepository<FarmUser> {
 
   async updateRole(currentRoleId: string, updateRoleId: string, em?: EntityManager) {
     return this.getRepository(em).update({ roleId: currentRoleId }, { roleId: updateRoleId, updatedAt: () => 'NOW()' });
+  }
+
+  async update(farmId: string, userId: string, entityLike: DeepPartial<FarmUser>, em?: EntityManager) {
+    return this.getRepository(em).update({ farmId, userId }, { ...entityLike, updatedAt: () => 'NOW()' });
   }
 
   async delete(farmId: string, userId: string, em?: EntityManager) {

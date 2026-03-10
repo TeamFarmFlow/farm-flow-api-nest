@@ -9,8 +9,9 @@ export enum ErrorCode {
   FarmNotFound = 'FARM_NOT_FOUND',
   InvalidInvitationCode = 'INVALID_INVITATION_CODE',
   ForbiddenPermission = 'FORBIDDEN_PERMISSION',
-  RoleCannotUpdateOrDelete = 'ROLE_CANNOT_UPDATE_OR_DELETE',
+  RoleProtected = 'ROLE_PROTECTED',
   RoleNotFound = 'ROLE_NOT_FOUND',
-  DuplicatedInvitation = 'DUPLICATED_INVITATION',
-  InvitationFarmNotFound = 'INVITATION_FARM_NOT_FOUND',
+  InvitationDuplicated = 'INVITATION_DUPLICATED',
+  MemberNotFound = 'MEMBER_NOT_FOUND',
+  MemberProtected = 'MEMBER_PROTECTED',
 }
