@@ -20,7 +20,7 @@ async function bootstrap() {
 
   setupDocumet(app);
 
-  await app.listen(configuration.listenPort);
+  await app.listen(configuration.listenPort, '0.0.0.0');
 }
 
 void bootstrap();
