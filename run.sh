@@ -5,8 +5,6 @@ SERVICE_ALIAS=farm-flow-api
 CONTAINER_BLUE="${SERVICE_ALIAS}-blue"
 CONTAINER_GREEN="${SERVICE_ALIAS}-green"
 
-cd /home/choewy/farm-flow/api
-
 get_active_color() {
   if docker ps --format '{{.Names}}' | grep -qx "$CONTAINER_BLUE"; then
     echo "blue"
