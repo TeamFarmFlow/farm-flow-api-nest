@@ -27,7 +27,6 @@ get_active_color() {
 
 ensure_network() {
   NETWORK="$1"
-
   if ! docker network inspect "$NETWORK" >/dev/null 2>&1; then
     docker network create "$NETWORK" >/dev/null
     echo "[INFO] created network: $NETWORK"
@@ -44,18 +43,8 @@ container_running() {
   docker ps --format '{{.Names}}' | grep -qx "$NAME"
 }
 
-disconnect_from_network_if_connected() {
-  NETWORK="$1"
-  NAME="$2"
-
-  if docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{"\n"}}{{end}}' "$NAME" 2>/dev/null | grep -qx "$NETWORK"; then
-    docker network disconnect "$NETWORK" "$NAME" >/dev/null 2>&1 || true
-  fi
-}
-
 remove_container_if_exists() {
   NAME="$1"
-
   if container_exists "$NAME"; then
     docker stop -t 10 "$NAME" >/dev/null 2>&1 || true
     docker rm "$NAME" >/dev/null 2>&1 || true
@@ -126,7 +115,6 @@ echo "[INFO] new container: $NEW_CONTAINER"
 remove_container_if_exists "$NEW_CONTAINER"
 
 echo "[INFO] starting new container on stage network: $STAGE_NETWORK"
-
 docker run -d \
   --name "$NEW_CONTAINER" \
   --network "$STAGE_NETWORK" \
@@ -147,20 +135,26 @@ if [ -n "$OLD_CONTAINER" ] && container_running "$OLD_CONTAINER"; then
 fi
 
 echo "[INFO] connecting new container to service network with alias: $SERVICE_ALIAS"
-
 docker network connect --alias "$SERVICE_ALIAS" "$SERVICE_NETWORK" "$NEW_CONTAINER"
 
-echo "[INFO] verifying service alias resolution"
+echo "[INFO] inspecting connected networks"
+docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{printf "%s -> %v\n" $k $v.Aliases}}{{end}}' "$NEW_CONTAINER"
 
-if ! docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{if eq $k "'"$SERVICE_NETWORK"'"}}{{printf "%v" $v.Aliases}}{{end}}{{end}}' "$NEW_CONTAINER" | grep -q "$SERVICE_ALIAS"; then
-  echo "[ERROR] failed to attach service alias: $SERVICE_ALIAS"
-  docker logs "$NEW_CONTAINER" || true
+if ! docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{println $k}}{{end}}' "$NEW_CONTAINER" | grep -qx "$SERVICE_NETWORK"; then
+  echo "[ERROR] service network was not attached: $SERVICE_NETWORK"
   exit 1
 fi
 
-echo "[INFO] optionally disconnecting new container from stage network"
+if ! docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{if eq $k "'"$SERVICE_NETWORK"'"}}{{range $v.Aliases}}{{println .}}{{end}}{{end}}{{end}}' "$NEW_CONTAINER" | grep -qx "$SERVICE_ALIAS"; then
+  echo "[ERROR] service alias was not attached: $SERVICE_ALIAS"
+  exit 1
+fi
 
-disconnect_from_network_if_connected "$STAGE_NETWORK" "$NEW_CONTAINER"
+echo "[INFO] disconnecting stage network"
+docker network disconnect "$STAGE_NETWORK" "$NEW_CONTAINER" >/dev/null 2>&1 || true
+
+echo "[INFO] final network state"
+docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{printf "%s -> %v\n" $k $v.Aliases}}{{end}}' "$NEW_CONTAINER"
 
 docker images "farm-flow-api" --format "{{.Repository}}:{{.Tag}}" \
 | grep -v ":latest$" \
