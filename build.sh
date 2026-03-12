@@ -1,3 +1,5 @@
+#!/bin/sh
+
 timestamp=$(date +%s)
 
 docker buildx build \
