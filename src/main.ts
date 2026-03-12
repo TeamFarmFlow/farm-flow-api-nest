@@ -12,6 +12,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   const configuration = app.get(Configuration);
 
+  console.log(process.env);
+
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   app.setGlobalPrefix('api');
   app.enableVersioning({ defaultVersion: '1', type: VersioningType.URI });
