@@ -31,6 +31,7 @@ import { RedisModule } from './infra/redis';
     TypeOrmModule.forRootAsync({
       inject: [Configuration],
       useFactory(configuration: Configuration) {
+        console.log(process.env);
         return configuration.typeormModuleOptions;
       },
     }),
@@ -38,6 +39,7 @@ import { RedisModule } from './infra/redis';
       pubSub: true,
       inject: [Configuration],
       useFactory(configuration: Configuration) {
+        console.log(process.env);
         return configuration.redisOptions;
       },
     }),
