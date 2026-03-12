@@ -3,13 +3,14 @@
 set -eu
 
 IMAGE_NAME="farm-flow-api:latest"
-
-SERVICE_NETWORK="farm-flow_farm-flow"
-STAGE_NETWORK="farm-flow_stage"
+NETWORK_NAME="farm-flow_farm-flow"
 SERVICE_ALIAS="farm-flow-api"
 
 CONTAINER_BLUE="${SERVICE_ALIAS}-blue"
 CONTAINER_GREEN="${SERVICE_ALIAS}-green"
+
+STAGE_BLUE="${CONTAINER_BLUE}-stage"
+STAGE_GREEN="${CONTAINER_GREEN}-stage"
 
 get_active_color() {
   if docker ps --format '{{.Names}}' | grep -qx "$CONTAINER_BLUE"; then
@@ -26,10 +27,9 @@ get_active_color() {
 }
 
 ensure_network() {
-  NETWORK="$1"
-  if ! docker network inspect "$NETWORK" >/dev/null 2>&1; then
-    docker network create "$NETWORK" >/dev/null
-    echo "[INFO] created network: $NETWORK"
+  if ! docker network inspect "$NETWORK_NAME" >/dev/null 2>&1; then
+    docker network create "$NETWORK_NAME" >/dev/null
+    echo "[INFO] created network: $NETWORK_NAME"
   fi
 }
 
@@ -45,6 +45,7 @@ container_running() {
 
 remove_container_if_exists() {
   NAME="$1"
+
   if container_exists "$NAME"; then
     docker stop -t 10 "$NAME" >/dev/null 2>&1 || true
     docker rm "$NAME" >/dev/null 2>&1 || true
@@ -54,7 +55,7 @@ remove_container_if_exists() {
 wait_for_health() {
   NAME="$1"
 
-  echo "[INFO] waiting for new container to become healthy..."
+  echo "[INFO] waiting for container to become healthy: $NAME"
 
   HEALTHCHECK=$(docker inspect --format='{{if .Config.Healthcheck}}yes{{else}}no{{end}}' "$NAME")
 
@@ -64,12 +65,12 @@ wait_for_health() {
       STATUS=$(docker inspect --format='{{.State.Health.Status}}' "$NAME")
 
       if [ "$STATUS" = "healthy" ]; then
-        echo "[INFO] new container is healthy"
+        echo "[INFO] container is healthy: $NAME"
         return 0
       fi
 
       if [ "$STATUS" = "unhealthy" ]; then
-        echo "[ERROR] new container is unhealthy"
+        echo "[ERROR] container is unhealthy: $NAME"
         docker logs "$NAME" || true
         return 1
       fi
@@ -78,18 +79,70 @@ wait_for_health() {
       i=$((i + 1))
     done
 
-    echo "[ERROR] health check timeout"
+    echo "[ERROR] health check timeout: $NAME"
     docker logs "$NAME" || true
     return 1
   fi
 
-  echo "[WARN] no HEALTHCHECK found, waiting 10 seconds"
+  echo "[WARN] no HEALTHCHECK found, waiting 10 seconds: $NAME"
   sleep 10
   return 0
 }
 
-ensure_network "$SERVICE_NETWORK"
-ensure_network "$STAGE_NETWORK"
+run_stage_container() {
+  NAME="$1"
+
+  echo "[INFO] starting stage container: $NAME"
+
+  docker run -d \
+    --name "$NAME" \
+    --network "$NETWORK_NAME" \
+    --restart unless-stopped \
+    --log-opt max-size=10m \
+    --log-opt max-file=3 \
+    "$IMAGE_NAME" >/dev/null
+}
+
+run_live_container() {
+  NAME="$1"
+
+  echo "[INFO] starting live container with alias: $NAME"
+
+  docker run -d \
+    --name "$NAME" \
+    --network "$NETWORK_NAME" \
+    --network-alias "$SERVICE_ALIAS" \
+    --restart unless-stopped \
+    --log-opt max-size=10m \
+    --log-opt max-file=3 \
+    "$IMAGE_NAME" >/dev/null
+}
+
+verify_alias() {
+  NAME="$1"
+
+  echo "[INFO] verifying alias on container: $NAME"
+  docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{printf "%s -> %v\n" $k $v.Aliases}}{{end}}' "$NAME"
+
+  if ! docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{if eq $k "'"$NETWORK_NAME"'"}}{{range $v.Aliases}}{{println .}}{{end}}{{end}}{{end}}' "$NAME" | grep -qx "$SERVICE_ALIAS"; then
+    echo "[ERROR] alias not attached: $SERVICE_ALIAS"
+    return 1
+  fi
+
+  return 0
+}
+
+cleanup_unused_images() {
+  docker images "farm-flow-api" --format "{{.Repository}}:{{.Tag}}" \
+  | grep -v ":latest$" \
+  | while read -r image; do
+      if ! docker ps --format "{{.Image}}" | grep -q "^${image}\$"; then
+        docker rmi "$image" >/dev/null 2>&1 || true
+      fi
+    done
+}
+
+ensure_network
 
 ACTIVE_COLOR=$(get_active_color)
 
@@ -97,72 +150,64 @@ if [ "$ACTIVE_COLOR" = "blue" ]; then
   NEXT_COLOR="green"
   OLD_CONTAINER="$CONTAINER_BLUE"
   NEW_CONTAINER="$CONTAINER_GREEN"
+  STAGE_CONTAINER="$STAGE_GREEN"
 elif [ "$ACTIVE_COLOR" = "green" ]; then
   NEXT_COLOR="blue"
   OLD_CONTAINER="$CONTAINER_GREEN"
   NEW_CONTAINER="$CONTAINER_BLUE"
+  STAGE_CONTAINER="$STAGE_BLUE"
 else
   NEXT_COLOR="blue"
   OLD_CONTAINER=""
   NEW_CONTAINER="$CONTAINER_BLUE"
+  STAGE_CONTAINER="$STAGE_BLUE"
 fi
 
 echo "[INFO] active color: $ACTIVE_COLOR"
 echo "[INFO] next color: $NEXT_COLOR"
 echo "[INFO] old container: ${OLD_CONTAINER:-none}"
-echo "[INFO] new container: $NEW_CONTAINER"
+echo "[INFO] stage container: $STAGE_CONTAINER"
+echo "[INFO] new live container: $NEW_CONTAINER"
 
+remove_container_if_exists "$STAGE_CONTAINER"
 remove_container_if_exists "$NEW_CONTAINER"
 
-echo "[INFO] starting new container on stage network: $STAGE_NETWORK"
-docker run -d \
-  --name "$NEW_CONTAINER" \
-  --network "$STAGE_NETWORK" \
-  --restart unless-stopped \
-  --log-opt max-size=10m \
-  --log-opt max-file=3 \
-  "$IMAGE_NAME" >/dev/null
+run_stage_container "$STAGE_CONTAINER"
+
+if ! wait_for_health "$STAGE_CONTAINER"; then
+  echo "[ERROR] stage health check failed"
+  remove_container_if_exists "$STAGE_CONTAINER"
+  exit 1
+fi
+
+echo "[INFO] stage health check passed: $STAGE_CONTAINER"
+
+echo "[INFO] removing stage container: $STAGE_CONTAINER"
+remove_container_if_exists "$STAGE_CONTAINER"
+
+echo "[INFO] removing target live container if exists: $NEW_CONTAINER"
+remove_container_if_exists "$NEW_CONTAINER"
+
+run_live_container "$NEW_CONTAINER"
 
 if ! wait_for_health "$NEW_CONTAINER"; then
-  echo "[ERROR] deployment aborted"
+  echo "[ERROR] new live container health check failed"
+  docker logs "$NEW_CONTAINER" || true
+  exit 1
+fi
+
+if ! verify_alias "$NEW_CONTAINER"; then
+  docker logs "$NEW_CONTAINER" || true
   exit 1
 fi
 
 if [ -n "$OLD_CONTAINER" ] && container_running "$OLD_CONTAINER"; then
-  echo "[INFO] stopping old container before switching alias: $OLD_CONTAINER"
+  echo "[INFO] stopping old container: $OLD_CONTAINER"
   docker stop -t 10 "$OLD_CONTAINER" >/dev/null 2>&1 || true
   docker rm "$OLD_CONTAINER" >/dev/null 2>&1 || true
 fi
 
-echo "[INFO] connecting new container to service network with alias: $SERVICE_ALIAS"
-docker network connect --alias "$SERVICE_ALIAS" "$SERVICE_NETWORK" "$NEW_CONTAINER"
-
-echo "[INFO] inspecting connected networks"
-docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{printf "%s -> %v\n" $k $v.Aliases}}{{end}}' "$NEW_CONTAINER"
-
-if ! docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{println $k}}{{end}}' "$NEW_CONTAINER" | grep -qx "$SERVICE_NETWORK"; then
-  echo "[ERROR] service network was not attached: $SERVICE_NETWORK"
-  exit 1
-fi
-
-if ! docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{if eq $k "'"$SERVICE_NETWORK"'"}}{{range $v.Aliases}}{{println .}}{{end}}{{end}}{{end}}' "$NEW_CONTAINER" | grep -qx "$SERVICE_ALIAS"; then
-  echo "[ERROR] service alias was not attached: $SERVICE_ALIAS"
-  exit 1
-fi
-
-echo "[INFO] disconnecting stage network"
-docker network disconnect "$STAGE_NETWORK" "$NEW_CONTAINER" >/dev/null 2>&1 || true
-
-echo "[INFO] final network state"
-docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{printf "%s -> %v\n" $k $v.Aliases}}{{end}}' "$NEW_CONTAINER"
-
-docker images "farm-flow-api" --format "{{.Repository}}:{{.Tag}}" \
-| grep -v ":latest$" \
-| while read -r image; do
-    if ! docker ps --format "{{.Image}}" | grep -q "^${image}\$"; then
-      docker rmi "$image" >/dev/null 2>&1 || true
-    fi
-  done
+cleanup_unused_images
 
 echo "[INFO] deploy completed: active=$NEXT_COLOR"
 echo "[INFO] active container: $NEW_CONTAINER"
