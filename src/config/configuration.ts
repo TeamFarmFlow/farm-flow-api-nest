@@ -72,10 +72,11 @@ export class Configuration extends ConfigService {
       username: this.getOrThrow<string>('DB_USERNAME'),
       password: this.getOrThrow<string>('DB_PASSWORD'),
       database: this.getOrThrow<string>('DB_DATABASE'),
-      synchronize: isLocal,
+      synchronize: false,
       namingStrategy: new SnakeNamingStrategy(),
       logging: isLocal ? true : ['error', 'warn'],
       entities: [process.cwd() + '/dist/**/*.entity.{js,ts}'],
+      migrations: [process.cwd() + '/dist/**/*-migration.{js,ts}'],
     };
   }
 
