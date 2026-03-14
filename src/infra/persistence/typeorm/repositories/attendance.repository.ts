@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { DeepPartial, EntityManager, Repository } from 'typeorm';
+import { And, DeepPartial, EntityManager, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
 import { AttendanceStatus } from '@app/shared/domain';
 
@@ -14,6 +14,17 @@ export class AttendanceRepository extends TransactionalRepository<Attendance> {
     repository: Repository<Attendance>,
   ) {
     super(repository);
+  }
+
+  async findByFarmIdAndUserIdAndDateRange(farmId: string, userId: string, startDate: string, endDate: string, em?: EntityManager) {
+    return this.getRepository(em).findAndCount({
+      where: {
+        farmId,
+        userId,
+        workDate: And(MoreThanOrEqual(startDate), LessThanOrEqual(endDate)),
+      },
+      order: { workDate: 'DESC' },
+    });
   }
 
   async findByWorkDate(farmId: string, userId: string, workDate: string, em?: EntityManager) {

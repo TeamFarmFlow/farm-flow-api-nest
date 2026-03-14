@@ -6,7 +6,7 @@ import { Farm } from './farm.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'attendances' })
-@Index('ATTENDANCES_UQ', ['workDate', 'farmId', 'userId'], { unique: true })
+@Index('ATTENDANCES_UQ', ['farmId', 'userId', 'workDate'], { unique: true })
 export class Attendance {
   @PrimaryGeneratedColumn('uuid', { primaryKeyConstraintName: 'ATTENDANCES_PK' })
   readonly id: string;

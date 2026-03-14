@@ -6,6 +6,7 @@ import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 import { AppModule } from './app.module';
 import { Configuration } from './config';
+import { NodeEnv } from './config/enums';
 import { setupDocumet } from './document';
 
 async function bootstrap() {
@@ -18,7 +19,9 @@ async function bootstrap() {
   app.enableCors(configuration.corsOptions);
   app.use(cookieParser());
 
-  setupDocumet(app);
+  if (configuration.nodeEnv === NodeEnv.Local) {
+    setupDocumet(app);
+  }
 
   await app.listen(configuration.listenPort, '0.0.0.0');
 }

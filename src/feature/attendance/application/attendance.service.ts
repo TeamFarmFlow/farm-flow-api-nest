@@ -8,6 +8,8 @@ import { RedisClient, RedisPublisher } from '@app/infra/redis';
 import { AttendanceQrCode, AttendanceQrCodeGeneratedEvent, InvalidQrCodeException } from '../domain';
 
 import { CheckInAttendanceCommand, CheckOutAttendanceCommand } from './commands';
+import { GetAttendancesQuery } from './queries';
+import { GetAttendancesResult } from './results';
 
 @Injectable()
 export class AttendanceService {
@@ -17,6 +19,12 @@ export class AttendanceService {
     private readonly farmUserRepository: FarmUserRepository,
     private readonly attendanceRepository: AttendanceRepository,
   ) {}
+
+  async getAttendances(query: GetAttendancesQuery): Promise<GetAttendancesResult> {
+    const [rows, total] = await this.attendanceRepository.findByFarmIdAndUserIdAndDateRange(query.farmId, query.userId, query.startDate, query.endDate);
+
+    return { total, rows };
+  }
 
   async getAttendanceByToday(farmId: string, userId: string): Promise<Attendance | null> {
     const farmUser = await this.farmUserRepository.findWithFarm(farmId, userId);

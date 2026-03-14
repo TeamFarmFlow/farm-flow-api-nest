@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { ContextService } from '@app/core/context';
@@ -6,8 +6,8 @@ import { toInstance } from '@app/core/transform';
 
 import { AttendanceService } from '../application';
 
-import { CheckInAttendanceRequest, CheckOutAttendanceRequest } from './dto/request';
-import { AttendanceResponse } from './dto/response';
+import { CheckInAttendanceRequest, CheckOutAttendanceRequest, GetAttendancesRequest } from './dto/request';
+import { AttendanceResponse, AttendancesResponse } from './dto/response';
 
 @ApiTags('출퇴근')
 @Controller('attendances')
@@ -16,6 +16,13 @@ export class AttendanceController {
     private readonly contextService: ContextService,
     private readonly attendanceService: AttendanceService,
   ) {}
+
+  @Get()
+  @ApiOperation({ summary: '출퇴근 기록 조회' })
+  @ApiOkResponse({ type: AttendancesResponse })
+  async getAttendances(@Query() query: GetAttendancesRequest): Promise<AttendancesResponse> {
+    return toInstance(AttendancesResponse, await this.attendanceService.getAttendances(query.toQuery(this.contextService.farmId, this.contextService.userId)));
+  }
 
   @Get('today')
   @ApiOperation({ summary: '오늘 출퇴근 기록 조회' })
