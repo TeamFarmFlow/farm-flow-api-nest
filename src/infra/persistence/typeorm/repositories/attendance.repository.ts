@@ -5,7 +5,19 @@ import { And, DeepPartial, EntityManager, LessThanOrEqual, MoreThanOrEqual, Repo
 import { AttendanceStatus } from '@app/shared/domain';
 
 import { TransactionalRepository, TypeOrmExRepository } from '../common';
-import { Attendance } from '../entities';
+import { Attendance, FarmUser, Role, User } from '../entities';
+
+type AttendanceStatisticRawRow = {
+  user_id: string;
+  user_name: string;
+  role_id: string | null;
+  role_name: string | null;
+  role_super: boolean | null;
+  role_required: boolean | null;
+  pay_rate_per_hour: number;
+  pay_deduction_amount: number;
+  seconds: string | number;
+};
 
 @TypeOrmExRepository(Attendance)
 export class AttendanceRepository extends TransactionalRepository<Attendance> {
@@ -25,6 +37,38 @@ export class AttendanceRepository extends TransactionalRepository<Attendance> {
       },
       order: { workDate: 'DESC' },
     });
+  }
+
+  async findAttendanceStatisticsByFarmIdAndDateRange(farmId: string, startDate: string, endDate: string, em?: EntityManager) {
+    return this.getRepository(em)
+      .createQueryBuilder('a')
+      .innerJoin(FarmUser, 'fu', 'fu.farmId = a.farmId AND fu.userId = a.userId')
+      .innerJoin(User, 'u', 'u.id = a.userId')
+      .leftJoin(Role, 'r', 'r.id = fu.roleId')
+      .select([
+        'u.id as user_id',
+        'u.name as user_name',
+        'r.id as role_id',
+        'r.name as role_name',
+        'r.super as role_super',
+        'r.required as role_required',
+        'fu.payRatePerHour as pay_rate_per_hour',
+        'fu.payDeductionAmount as pay_deduction_amount',
+        'SUM(a.seconds) as seconds',
+      ])
+      .where('a.farmId = :farmId', { farmId })
+      .andWhere('a.workDate >= :startDate', { startDate })
+      .andWhere('a.workDate <= :endDate', { endDate })
+      .groupBy('u.id')
+      .addGroupBy('u.name')
+      .addGroupBy('r.id')
+      .addGroupBy('r.name')
+      .addGroupBy('r.super')
+      .addGroupBy('r.required')
+      .addGroupBy('fu.payRatePerHour')
+      .addGroupBy('fu.payDeductionAmount')
+      .orderBy('u.id', 'ASC')
+      .getRawMany<AttendanceStatisticRawRow>();
   }
 
   async findByWorkDate(farmId: string, userId: string, workDate: string, em?: EntityManager) {

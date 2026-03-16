@@ -4,7 +4,7 @@ import { Expose, Type } from 'class-transformer';
 
 import { AttendanceResponse } from './attendance.response';
 
-export class AttendancesResponse {
+export class MyAttendancesResponse {
   @ApiProperty({ type: Number })
   @Expose()
   total: number;

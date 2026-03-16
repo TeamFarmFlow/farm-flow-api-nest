@@ -3,9 +3,9 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsDate, IsOptional } from 'class-validator';
 
 import { dayjs } from '@app/core/time';
-import { GetAttendancesQuery } from '@app/feature/attendance/application';
+import { GetAttendanceStatisticsQuery } from '@app/feature/attendance/application';
 
-export class GetAttendancesRequest {
+export class GetAttendanceStatisticsRequest {
   @ApiPropertyOptional({ type: Date })
   @IsDate()
   @IsOptional()
@@ -16,10 +16,9 @@ export class GetAttendancesRequest {
   @IsOptional()
   readonly endDate: Date = dayjs().toDate();
 
-  toQuery(farmId: string, userId: string): GetAttendancesQuery {
+  toQuery(farmId: string): GetAttendanceStatisticsQuery {
     return {
       farmId,
-      userId,
       startDate: dayjs(this.startDate).format('YYYY-MM-DD'),
       endDate: dayjs(this.endDate).format('YYYY-MM-DD'),
     };
