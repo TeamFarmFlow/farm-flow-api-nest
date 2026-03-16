@@ -10,7 +10,7 @@ import { PermissionKey } from '@app/shared/domain';
 import { FarmService } from '../application';
 
 import { CreateFarmRequest, GetFarmsRequest, UpdateFarmRequest } from './dto/request';
-import { CreateFarmResponse, FarmsResponse } from './dto/response';
+import { CreateFarmResponse, FarmResponse, FarmsResponse } from './dto/response';
 
 @SkipFarmAuth()
 @ApiTags('농장')
@@ -29,10 +29,10 @@ export class FarmController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: '현재 접속한 농장 정보 조회' })
-  @ApiOkResponse({ type: FarmsResponse })
+  @ApiOperation({ summary: '농장 정보 조회' })
+  @ApiOkResponse({ type: FarmResponse })
   async getFarm(@Param('id', new ParseUuidStringPipe()) farmId: string) {
-    return toInstance(FarmsResponse, await this.farmService.getFarm({ farmId, userId: this.contextService.userId }));
+    return toInstance(FarmResponse, await this.farmService.getFarm({ farmId, userId: this.contextService.userId }));
   }
 
   @Post()
