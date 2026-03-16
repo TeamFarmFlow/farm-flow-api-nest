@@ -5,6 +5,6 @@ import { ErrorCode } from '@app/shared/domain';
 
 export class ForbiddenFarmUserException extends DomainException {
   constructor() {
-    super(ErrorCode.ForbiddenFarmUser, HttpStatus.FORBIDDEN, 'Forbidden farm user');
+    super(ErrorCode.ForbiddenPermission, HttpStatus.FORBIDDEN, 'Forbidden farm user');
   }
 }

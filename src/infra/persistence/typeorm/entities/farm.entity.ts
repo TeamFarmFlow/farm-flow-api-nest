@@ -16,6 +16,12 @@ export class Farm {
   @Column({ type: 'varchar', length: 20, default: 'Asia/Seoul' })
   timezone: string;
 
+  @Column({ type: 'int', default: 0 })
+  payRatePerHour: number;
+
+  @Column({ type: 'int', default: 0 })
+  payDeductionAmount: number;
+
   @CreateDateColumn({ type: 'timestamptz' })
   readonly createdAt: Date;
 

@@ -5,7 +5,6 @@ export enum ErrorCode {
   ExpiredToken = 'EXPIRED_TOKEN',
   InvalidQrCode = 'INVALID_QR_CODE',
   ExceedFarmCount = 'EXCEED_FARM_COUNT',
-  ForbiddenFarmUser = 'FORBIDDEN_FARM_USER',
   FarmNotFound = 'FARM_NOT_FOUND',
   InvalidInvitationCode = 'INVALID_INVITATION_CODE',
   ForbiddenPermission = 'FORBIDDEN_PERMISSION',

@@ -22,6 +22,12 @@ export class FarmUser {
   @Column({ type: 'uuid', nullable: true })
   roleId: string | null;
 
+  @Column({ type: 'int', default: 0 })
+  payRatePerHour: number;
+
+  @Column({ type: 'int', default: 0 })
+  payDeductionAmount: number;
+
   @ManyToOne(() => Farm, (e) => e.farmUsers, { onDelete: 'CASCADE' })
   @JoinColumn({ foreignKeyConstraintName: 'FARM_USERS_FARM_FK' })
   farm: Farm;

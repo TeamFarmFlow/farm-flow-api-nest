@@ -5,8 +5,8 @@ export enum PermissionKeyWildCard {
 export enum PermissionKey {
   InvitationCreate = 'invitation.create',
   AttendanceQrCreate = 'attendance.qr.create',
-  Update = 'update',
-  Delete = 'delete',
+  FarmUpdate = 'farm.update',
+  FarmDelete = 'farm.delete',
   RoleRead = 'role.read',
   RoleCreate = 'role.create',
   RoleUpdate = 'role.update',

@@ -28,6 +28,13 @@ export class FarmController {
     return toInstance(FarmsResponse, await this.farmService.getFarms(new GetFarmsRequest().toQuery(this.contextService.userId)));
   }
 
+  @Get(':id')
+  @ApiOperation({ summary: '현재 접속한 농장 정보 조회' })
+  @ApiOkResponse({ type: FarmsResponse })
+  async getFarm(@Param('id', new ParseUuidStringPipe()) farmId: string) {
+    return toInstance(FarmsResponse, await this.farmService.getFarm({ farmId, userId: this.contextService.userId }));
+  }
+
   @Post()
   @ApiOperation({ summary: '농장 생성' })
   @ApiCreatedResponse({ type: CreateFarmResponse })
@@ -35,7 +42,7 @@ export class FarmController {
     return toInstance(CreateFarmResponse, await this.farmService.createFarm(body.toCommand(this.contextService.userId)));
   }
 
-  @RequiredPermissions([PermissionKey.Update])
+  @RequiredPermissions([PermissionKey.FarmUpdate])
   @Patch(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: '농장 수정' })
@@ -44,7 +51,7 @@ export class FarmController {
     return this.farmService.updateFarm(body.toCommand(farmId, this.contextService.userId));
   }
 
-  @RequiredPermissions([PermissionKey.Delete])
+  @RequiredPermissions([PermissionKey.FarmDelete])
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: '농장 삭제' })
