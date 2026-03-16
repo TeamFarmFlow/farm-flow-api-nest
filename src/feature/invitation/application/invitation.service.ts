@@ -56,9 +56,9 @@ export class InvitationService {
     }
 
     await this.redisClient.del(invitationKey);
-    const hasFarm = await this.farmRepository.hasById(invitation.farmId);
+    const farm = await this.farmRepository.findOneById(invitation.farmId);
 
-    if (!hasFarm) {
+    if (!farm) {
       throw new InvitationFarmNotFoundException();
     }
 
@@ -66,7 +66,7 @@ export class InvitationService {
 
     if (!hasFarmUser) {
       const defaultRole = await this.roleRepository.findDefault(invitation.farmId);
-      await this.farmUserRepository.upsertOrIgnore(FarmUser.of(invitation.farmId, command.userId, defaultRole.id));
+      await this.farmUserRepository.upsertOrIgnore(FarmUser.of(farm, command.userId, defaultRole.id));
     }
 
     return { farmId: invitation.farmId };

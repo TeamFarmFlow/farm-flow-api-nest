@@ -40,10 +40,12 @@ export class FarmUser {
   @JoinColumn({ foreignKeyConstraintName: 'FARM_USERS_ROLE_FK' })
   role: Role | null;
 
-  public static of(farmId: string, userId: string, roleId: string | null = null) {
+  public static of(farm: Farm, userId: string, roleId: string | null = null) {
     const farmUser = new FarmUser();
 
-    farmUser.farmId = farmId;
+    farmUser.farmId = farm.id;
+    farmUser.payRatePerHour = farm.payRatePerHour;
+    farmUser.payDeductionAmount = farm.payDeductionAmount;
     farmUser.userId = userId;
     farmUser.roleId = roleId;
 
