@@ -17,14 +17,7 @@ export class AttendanceController {
     private readonly attendanceService: AttendanceService,
   ) {}
 
-  @Get('statistics')
-  @ApiOperation({ summary: '출퇴근 통계 조회' })
-  @ApiOkResponse({ type: [AttendanceStatisticsResponse] })
-  async getAttendanceStatistics(@Query() query: GetAttendanceStatisticsRequest): Promise<AttendanceStatisticsResponse> {
-    return toInstance(AttendanceStatisticsResponse, await this.attendanceService.getAttendanceStatistics(query.toQuery(this.contextService.farmId)));
-  }
-
-  @Get('me')
+  @Get()
   @ApiOperation({ summary: '나의 출퇴근 기록 조회' })
   @ApiOkResponse({ type: MyAttendancesResponse })
   async getMyAttendances(@Query() query: GetMyAttendancesRequest): Promise<MyAttendancesResponse> {
@@ -36,6 +29,13 @@ export class AttendanceController {
   @ApiOkResponse({ type: AttendanceResponse })
   async getAttendanceByToday() {
     return toInstance(AttendanceResponse, await this.attendanceService.getAttendanceByToday(this.contextService.farmId, this.contextService.userId));
+  }
+
+  @Get('statistics')
+  @ApiOperation({ summary: '출퇴근 통계 조회' })
+  @ApiOkResponse({ type: [AttendanceStatisticsResponse] })
+  async getAttendanceStatistics(@Query() query: GetAttendanceStatisticsRequest): Promise<AttendanceStatisticsResponse> {
+    return toInstance(AttendanceStatisticsResponse, await this.attendanceService.getAttendanceStatistics(query.toQuery(this.contextService.farmId)));
   }
 
   @Post('checkin')
