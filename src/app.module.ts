@@ -16,6 +16,7 @@ import { FarmModule } from './feature/farm';
 import { HealthModule } from './feature/health';
 import { InvitationModule } from './feature/invitation';
 import { MemberModule } from './feature/member';
+import { PayrollModule } from './feature/payroll';
 import { RoleModule } from './feature/role';
 import { RedisModule } from './infra/redis';
 @Module({
@@ -49,6 +50,7 @@ import { RedisModule } from './infra/redis';
     MemberModule,
     InvitationModule,
     AttendanceModule,
+    PayrollModule,
   ],
   providers: [GlobalValidationPipeProvider, GlobalExceptionFilterProvider, GlobalClassSerializerInterceptorProvider],
 })

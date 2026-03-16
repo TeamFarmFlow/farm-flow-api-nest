@@ -1,4 +1,4 @@
-export type GetMyAttendancesQuery = {
+export type GetAttendancesQuery = {
   farmId: string;
   userId: string;
   startDate: string;

@@ -1,6 +1,6 @@
 import { Attendance } from '@app/infra/persistence/typeorm';
 
-export type GetMyAttendancesResult = {
+export type GetAttendancesResult = {
   total: number;
   rows: Attendance[];
 };

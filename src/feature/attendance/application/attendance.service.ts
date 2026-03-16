@@ -8,8 +8,8 @@ import { RedisClient, RedisPublisher } from '@app/infra/redis';
 import { AttendanceQrCode, AttendanceQrCodeGeneratedEvent, InvalidQrCodeException } from '../domain';
 
 import { CheckInAttendanceCommand, CheckOutAttendanceCommand } from './commands';
-import { GetAttendanceStatisticsQuery, GetMyAttendancesQuery } from './queries';
-import { GetAttendanceStatisticResult, GetMyAttendancesResult } from './results';
+import { GetAttendancesQuery } from './queries';
+import { GetAttendancesResult } from './results';
 
 @Injectable()
 export class AttendanceService {
@@ -20,32 +20,7 @@ export class AttendanceService {
     private readonly attendanceRepository: AttendanceRepository,
   ) {}
 
-  async getAttendanceStatistics(query: GetAttendanceStatisticsQuery): Promise<GetAttendanceStatisticResult> {
-    const rows = await this.attendanceRepository.findAttendanceStatisticsByFarmIdAndDateRange(query.farmId, query.startDate, query.endDate);
-
-    return {
-      total: rows.length,
-      rows: rows.map((row) => ({
-        user: {
-          id: row.user_id,
-          name: row.user_name,
-        },
-        role: row.role_id
-          ? {
-              id: row.role_id,
-              name: row.role_name!,
-              super: row.role_super!,
-              required: row.role_required!,
-            }
-          : null,
-        payRatePerHour: row.pay_rate_per_hour,
-        payDeductionAmount: row.pay_deduction_amount,
-        seconds: Number(row.seconds),
-      })),
-    };
-  }
-
-  async getMyAttendances(query: GetMyAttendancesQuery): Promise<GetMyAttendancesResult> {
+  async getAttendances(query: GetAttendancesQuery): Promise<GetAttendancesResult> {
     const [rows, total] = await this.attendanceRepository.findByFarmIdAndUserIdAndDateRange(query.farmId, query.userId, query.startDate, query.endDate);
 
     return { total, rows };

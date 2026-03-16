@@ -6,8 +6,8 @@ import { toInstance } from '@app/core/transform';
 
 import { AttendanceService } from '../application';
 
-import { CheckInAttendanceRequest, CheckOutAttendanceRequest, GetAttendanceStatisticsRequest, GetMyAttendancesRequest } from './dto/request';
-import { AttendanceResponse, AttendanceStatisticsResponse, MyAttendancesResponse } from './dto/response';
+import { CheckInAttendanceRequest, CheckOutAttendanceRequest, GetAttendancesRequest } from './dto/request';
+import { AttendanceResponse, AttendancesResponse } from './dto/response';
 
 @ApiTags('출퇴근')
 @Controller('attendances')
@@ -18,10 +18,10 @@ export class AttendanceController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: '나의 출퇴근 기록 조회' })
-  @ApiOkResponse({ type: MyAttendancesResponse })
-  async getMyAttendances(@Query() query: GetMyAttendancesRequest): Promise<MyAttendancesResponse> {
-    return toInstance(MyAttendancesResponse, await this.attendanceService.getMyAttendances(query.toQuery(this.contextService.farmId, this.contextService.userId)));
+  @ApiOperation({ summary: '출퇴근 기록 조회' })
+  @ApiOkResponse({ type: AttendancesResponse })
+  async getAttendances(@Query() query: GetAttendancesRequest): Promise<AttendancesResponse> {
+    return toInstance(AttendancesResponse, await this.attendanceService.getAttendances(query.toQuery(this.contextService.farmId, this.contextService.userId)));
   }
 
   @Get('today')
@@ -29,13 +29,6 @@ export class AttendanceController {
   @ApiOkResponse({ type: AttendanceResponse })
   async getAttendanceByToday() {
     return toInstance(AttendanceResponse, await this.attendanceService.getAttendanceByToday(this.contextService.farmId, this.contextService.userId));
-  }
-
-  @Get('statistics')
-  @ApiOperation({ summary: '출퇴근 통계 조회' })
-  @ApiOkResponse({ type: [AttendanceStatisticsResponse] })
-  async getAttendanceStatistics(@Query() query: GetAttendanceStatisticsRequest): Promise<AttendanceStatisticsResponse> {
-    return toInstance(AttendanceStatisticsResponse, await this.attendanceService.getAttendanceStatistics(query.toQuery(this.contextService.farmId)));
   }
 
   @Post('checkin')

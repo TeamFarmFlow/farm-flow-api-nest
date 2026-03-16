@@ -39,7 +39,7 @@ export class AttendanceRepository extends TransactionalRepository<Attendance> {
     });
   }
 
-  async findAttendanceStatisticsByFarmIdAndDateRange(farmId: string, startDate: string, endDate: string, em?: EntityManager) {
+  async findPayrollsByFarmIdAndDateRange(farmId: string, startDate: string, endDate: string, em?: EntityManager) {
     return this.getRepository(em)
       .createQueryBuilder('a')
       .innerJoin(FarmUser, 'fu', 'fu.farmId = a.farmId AND fu.userId = a.userId')
