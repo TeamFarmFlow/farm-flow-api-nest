@@ -14,4 +14,12 @@ export class MemberUserResponse {
   @ApiProperty({ type: String })
   @Expose()
   name: string;
+
+  @ApiProperty({ type: Number })
+  @Expose()
+  payRatePerHour: number;
+
+  @ApiProperty({ type: Number })
+  @Expose()
+  payDeductionAmount: number;
 }

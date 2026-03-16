@@ -4,7 +4,7 @@ import { FarmUserRepository, RoleRepository } from '@app/infra/persistence/typeo
 
 import { MemberNotFoundException, MemberProtectedException, MemberRoleNotFoundException } from '../domain';
 
-import { RemoveMemberCommand, UpdateMemberRoleCommand } from './commands';
+import { RemoveMemberCommand, UpdateMemberCommand } from './commands';
 import { GetMembersQuery } from './queries';
 import { GetMembersResult } from './results';
 
@@ -21,7 +21,7 @@ export class MemberService {
     return { total, rows };
   }
 
-  async updateMemberRole(command: UpdateMemberRoleCommand): Promise<void> {
+  async updateMember(command: UpdateMemberCommand): Promise<void> {
     const farmUser = await this.farmUserRepository.findOneWithRole(command.farmId, command.userId);
 
     if (!farmUser) {
@@ -32,17 +32,23 @@ export class MemberService {
       throw new MemberProtectedException();
     }
 
-    const role = await this.roleRepository.findById(command.roleId);
+    if (command.roleId) {
+      const role = await this.roleRepository.findById(command.roleId);
 
-    if (!role || role.farmId !== command.farmId) {
-      throw new MemberRoleNotFoundException();
+      if (!role || role.farmId !== command.farmId) {
+        throw new MemberRoleNotFoundException();
+      }
+
+      if (role.super) {
+        throw new MemberProtectedException();
+      }
     }
 
-    if (role.super) {
-      throw new MemberProtectedException();
-    }
-
-    await this.farmUserRepository.update(command.farmId, command.userId, { role });
+    await this.farmUserRepository.update(command.farmId, command.userId, {
+      roleId: command.roleId,
+      payRatePerHour: command.payRatePerHour,
+      payDeductionAmount: command.payDeductionAmount,
+    });
   }
 
   async removeMember(command: RemoveMemberCommand): Promise<void> {

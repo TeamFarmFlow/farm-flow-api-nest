@@ -13,6 +13,7 @@ export enum PermissionKey {
   RoleRemove = 'role.remove',
   MemberRead = 'member.read',
   MemberRoleUpdate = 'member.role.update',
+  MemberPayUpdate = 'member.pay.update',
   MemberRemove = 'member.remove',
 }
 

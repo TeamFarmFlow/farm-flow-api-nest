@@ -1,2 +1,2 @@
-export * from './update-member-role.command';
+export * from './update-member.command';
 export * from './remove-member.command';

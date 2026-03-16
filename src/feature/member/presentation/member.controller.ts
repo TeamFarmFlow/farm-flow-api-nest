@@ -9,7 +9,7 @@ import { PermissionKey } from '@app/shared/domain';
 
 import { MemberService } from '../application';
 
-import { GetMembersRequest, UpdateMemberRoleRequest } from './dto/request';
+import { GetMembersRequest, UpdateMemberRequest } from './dto/request';
 import { MembersResponse } from './dto/response';
 
 @ApiTags('멤버')
@@ -28,13 +28,13 @@ export class MemberController {
     return toInstance(MembersResponse, await this.memberService.getMembers(query.toQuery(this.contextService.farmId)));
   }
 
-  @RequiredPermissions([PermissionKey.MemberRoleUpdate])
+  @RequiredPermissions([PermissionKey.MemberRoleUpdate, PermissionKey.MemberPayUpdate])
   @Patch(':userId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: '농장 멤버 역할 변경' })
+  @ApiOperation({ summary: '농장 멤버 정보 수정' })
   @ApiNoContentResponse()
-  async updateMemberRole(@Param('userId', new ParseUuidStringPipe()) userId: string, @Body() body: UpdateMemberRoleRequest) {
-    return this.memberService.updateMemberRole(body.toCommand(this.contextService.farmId, userId));
+  async updateMember(@Param('userId', new ParseUuidStringPipe()) userId: string, @Body() body: UpdateMemberRequest) {
+    return this.memberService.updateMember(body.toCommand(this.contextService.farmId, userId));
   }
 
   @RequiredPermissions([PermissionKey.MemberRemove])
