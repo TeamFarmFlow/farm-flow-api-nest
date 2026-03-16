@@ -15,4 +15,12 @@ export class MemberResponse {
   @Type(() => MemberRoleResponse)
   @Expose()
   role: MemberRoleResponse;
+
+  @ApiProperty({ type: Number })
+  @Expose()
+  payRatePerHour: number;
+
+  @ApiProperty({ type: Number })
+  @Expose()
+  payDeductionAmount: number;
 }
