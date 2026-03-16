@@ -52,7 +52,15 @@ export class FarmService {
         throw new ExceedFarmCountException();
       }
 
-      const farm = await this.farmRepository.save({ name: command.name }, em);
+      const farm = await this.farmRepository.save(
+        {
+          name: command.name,
+          payRatePerHour: command.payRatePerHour,
+          payDeductionAmount: command.payDeductionAmount,
+        },
+        em,
+      );
+
       const role = await this.roleRepository.save(
         { name: '관리자', permissions: FARM_ADMIN_DEFAULT_PERMISSION_KEYS.map((key) => ({ key })), required: true, super: true, farm },
         em,
