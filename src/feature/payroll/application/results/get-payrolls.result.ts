@@ -16,6 +16,7 @@ export type GetPayrollRow = {
   seconds: number;
   payRatePerHour: number;
   payDeductionAmount: number;
+  needCheck: boolean;
 };
 
 export type GetPayrollsResult = {

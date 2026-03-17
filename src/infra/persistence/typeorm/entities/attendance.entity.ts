@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 import { AttendanceStatus } from '@app/shared/domain';
 
@@ -6,7 +6,7 @@ import { Farm } from './farm.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'attendances' })
-@Index('ATTENDANCES_UQ', ['farmId', 'userId', 'workDate'], { unique: true })
+@Index('ATTENDANCES_UQ', ['farmId', 'userId', 'workDate'], { unique: true, where: 'deleted_at IS NULL' })
 export class Attendance {
   @PrimaryGeneratedColumn('uuid', { primaryKeyConstraintName: 'ATTENDANCES_PK' })
   readonly id: string;
@@ -32,11 +32,17 @@ export class Attendance {
   @Column({ type: 'int', default: 0 })
   seconds: number;
 
+  @Column({ type: 'boolean', default: false })
+  payrolled: boolean;
+
   @CreateDateColumn({ type: 'timestamptz' })
   readonly createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamptz' })
   readonly updatedAt: Date;
+
+  @DeleteDateColumn({ type: 'timestamptz' })
+  readonly deletedAt: Date | null;
 
   @ManyToOne(() => Farm, { onDelete: 'CASCADE' })
   @JoinColumn({ foreignKeyConstraintName: 'ATTENDANCES_FARM_FK' })

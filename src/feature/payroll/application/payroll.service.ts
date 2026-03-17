@@ -1,13 +1,19 @@
 import { Injectable } from '@nestjs/common';
 
-import { AttendanceRepository } from '@app/infra/persistence/typeorm';
+import { AttendanceRepository, FarmUserRepository } from '@app/infra/persistence/typeorm';
 
-import { GetPayrollsQuery } from './queries';
-import { GetPayrollsResult } from './results';
+import { PayrollMemberNotFoundException } from '../domain';
+
+import { DeletePayrollAttendanceCommand, UpdatePayrollAttendanceCommand } from './commands';
+import { GetPayrollsByUserIdQuery, GetPayrollsQuery } from './queries';
+import { GetPayrollsByUserIdResult, GetPayrollsResult } from './results';
 
 @Injectable()
 export class PayrollService {
-  constructor(private readonly attendanceRepository: AttendanceRepository) {}
+  constructor(
+    private readonly farmUserRepository: FarmUserRepository,
+    private readonly attendanceRepository: AttendanceRepository,
+  ) {}
 
   async getPayrolls(query: GetPayrollsQuery): Promise<GetPayrollsResult> {
     const rows = await this.attendanceRepository.findPayrollsByFarmIdAndDateRange(query.farmId, query.startDate, query.endDate);
@@ -30,7 +36,33 @@ export class PayrollService {
         payRatePerHour: row.pay_rate_per_hour,
         payDeductionAmount: row.pay_deduction_amount,
         seconds: Number(row.seconds),
+        needCheck: row.need_check,
       })),
     };
+  }
+
+  async getPayrollsByUserId(query: GetPayrollsByUserIdQuery): Promise<GetPayrollsByUserIdResult> {
+    const farmUser = await this.farmUserRepository.findOne(query.farmId, query.userId);
+
+    if (!farmUser) {
+      throw new PayrollMemberNotFoundException();
+    }
+
+    const rows = await this.attendanceRepository.findPayrollsByFarmIdAndUserIdAndDateRange(query.farmId, query.userId, query.startDate, query.endDate);
+
+    return {
+      total: rows.length,
+      payRatePerHour: farmUser.payRatePerHour,
+      payDeductionAmount: farmUser.payDeductionAmount,
+      rows,
+    };
+  }
+
+  async updatePayrollAttendance(command: UpdatePayrollAttendanceCommand): Promise<void> {
+    await this.attendanceRepository.update(command.id, command.farmId, command.userId, command.checkedInAt, command.checkedOutAt);
+  }
+
+  async deletePayrollAttendance(command: DeletePayrollAttendanceCommand): Promise<void> {
+    await this.attendanceRepository.delete(command.id, command.userId, command.farmId);
   }
 }

@@ -27,4 +27,8 @@ export class PayrollResponse {
   @ApiProperty({ type: Number })
   @Expose()
   payDeductionAmount: number;
+
+  @ApiProperty({ type: Boolean })
+  @Expose()
+  needCheck: boolean;
 }
