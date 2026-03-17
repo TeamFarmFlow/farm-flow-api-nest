@@ -27,6 +27,13 @@ export class UserRepository extends TransactionalRepository<User> {
     return this.getRepository(em).findOneByOrFail({ id });
   }
 
+  async update(id: string, entityLike: DeepPartial<User>, em?: EntityManager) {
+    return this.getRepository(em).update(id, {
+      ...entityLike,
+      updatedAt: () => 'NOW()',
+    });
+  }
+
   async save(user: DeepPartial<User>, em?: EntityManager) {
     return this.getRepository(em).save(user);
   }
