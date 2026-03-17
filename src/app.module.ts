@@ -15,6 +15,7 @@ import { AuthModule } from './feature/auth';
 import { FarmModule } from './feature/farm';
 import { HealthModule } from './feature/health';
 import { InvitationModule } from './feature/invitation';
+import { MeModule } from './feature/me';
 import { MemberModule } from './feature/member';
 import { PayrollModule } from './feature/payroll';
 import { RoleModule } from './feature/role';
@@ -45,6 +46,7 @@ import { RedisModule } from './infra/redis';
     EventEmitterModule.forRoot(),
     HealthModule,
     AuthModule,
+    MeModule,
     FarmModule,
     RoleModule,
     MemberModule,
