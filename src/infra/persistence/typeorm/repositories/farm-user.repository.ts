@@ -23,16 +23,6 @@ export class FarmUserRepository extends TransactionalRepository<FarmUser> {
     return this.getRepository(em).findOneBy({ farmId, userId });
   }
 
-  async findWithFarmAndRole(farmId: string, userId: string, em?: EntityManager) {
-    return this.getRepository(em)
-      .createQueryBuilder('fu')
-      .innerJoinAndMapOne('fu.farm', 'fu.farm', 'farm')
-      .leftJoinAndMapOne('fu.role', 'fu.role', 'role')
-      .where('fu.farmId = :farmId', { farmId })
-      .andWhere('fu.userId = :userId', { userId })
-      .getOne();
-  }
-
   async findWithRole(farmId: string, userId: string, em?: EntityManager) {
     return this.getRepository(em)
       .createQueryBuilder('fu')

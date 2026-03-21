@@ -4,8 +4,10 @@ import { Request, Response } from 'express';
 
 import { Configuration } from '@app/config';
 
+import { CookieServicePort } from './ports';
+
 @Injectable()
-export class CookieService {
+export class CookieService implements CookieServicePort {
   public readonly ACCESS_TOKEN_KEY = 'x-farm-flow-access-token';
   public readonly REFRESH_TOKEN_KEY = 'x-farm-flow-refresh-token';
 
@@ -19,11 +21,21 @@ export class CookieService {
     return ((request.cookies[this.REFRESH_TOKEN_KEY] as string) ?? '').trim();
   }
 
-  setCacheControl(response: Response) {
+  setCacheControl(response: Response): void {
     response.setHeader('Cache-Control', 'no-store');
   }
 
-  setAccessToken(response: Response, accessToken: string) {
+  setAuthSession(response: Response, accessToken: string, refreshToken: string): void {
+    this.setAccessToken(response, accessToken);
+    this.setRefreshToken(response, refreshToken);
+  }
+
+  clearAuthSession(response: Response): void {
+    this.clearAccessToken(response);
+    this.clearRefreshToken(response);
+  }
+
+  setAccessToken(response: Response, accessToken: string): void {
     response.cookie(this.ACCESS_TOKEN_KEY, accessToken, {
       ...this.configuration.cookieOptions,
       maxAge: 1000 * 60 * 60 * 24 * 20,
@@ -31,7 +43,7 @@ export class CookieService {
     });
   }
 
-  clearAccessToken(response: Response) {
+  clearAccessToken(response: Response): void {
     response.cookie(this.ACCESS_TOKEN_KEY, '', {
       ...this.configuration.cookieOptions,
       expires: new Date(0),

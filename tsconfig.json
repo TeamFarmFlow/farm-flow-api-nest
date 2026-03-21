@@ -4,7 +4,7 @@
     "moduleResolution": "nodenext",
     "resolvePackageJsonExports": true,
     "esModuleInterop": true,
-    "isolatedModules": true,
+    "isolatedModules": false,
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
@@ -30,8 +30,8 @@
       "@app/shared/*": ["src/shared/*"],
       "@app/infra": ["src/infra"],
       "@app/infra/*": ["src/infra/*"],
-      "@app/feature": ["src/feature"],
-      "@app/feature/*": ["src/feature/*"]
+      "@app/module": ["src/module"],
+      "@app/module/*": ["src/module/*"]
     }
   }
 }

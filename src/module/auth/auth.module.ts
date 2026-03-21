@@ -1,0 +1,91 @@
+import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { Configuration } from '@app/config';
+import { CookieModule } from '@app/core/cookies';
+import { FarmUser, FarmUserRepository, RolePermission, RolePermissionRepository, TypeOrmExModule, User, UserRepository } from '@app/infra/persistence/typeorm';
+
+import {
+  AUTH_ACCESS_TOKEN_ISSUER,
+  AUTH_FARM_USER_REPOSITORY,
+  AUTH_PASSWORD_HASHER,
+  AUTH_REFRESH_TOKEN_STORE,
+  AUTH_ROLE_PERMISSION_REPOSITORY,
+  AUTH_USER_REPOSITORY,
+  AuthSessionService,
+  CheckInCommandHandler,
+  GetAuthContextQueryHandler,
+  LoginCommandHandler,
+  LogoutCommandHandler,
+  RefreshCommandHandler,
+  RegisterCommandHandler,
+} from './application';
+import { JwtAuthGuardProvider, JwtStrategy } from './guards';
+import {
+  BcryptPasswordHasher,
+  JwtAccessTokenIssuer,
+  RedisRefreshTokenStore,
+  TypeOrmAuthFarmUserRepository,
+  TypeOrmAuthRolePermissionRepository,
+  TypeOrmAuthUserRepository,
+} from './infra';
+import { AuthController, ClearAuthSessionOnInvalidTokenInterceptor } from './presentation';
+
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([User, FarmUser, RolePermission]),
+    TypeOrmExModule.forFeature([User, FarmUser, RolePermission], [UserRepository, FarmUserRepository, RolePermissionRepository]),
+    CookieModule,
+    JwtModule.registerAsync({
+      inject: [Configuration],
+      useFactory(configuration: Configuration) {
+        return configuration.jwtModuleOptions;
+      },
+    }),
+  ],
+  controllers: [AuthController],
+  providers: [
+    {
+      provide: AUTH_USER_REPOSITORY,
+      useExisting: TypeOrmAuthUserRepository,
+    },
+    {
+      provide: AUTH_FARM_USER_REPOSITORY,
+      useExisting: TypeOrmAuthFarmUserRepository,
+    },
+    {
+      provide: AUTH_ROLE_PERMISSION_REPOSITORY,
+      useExisting: TypeOrmAuthRolePermissionRepository,
+    },
+    {
+      provide: AUTH_REFRESH_TOKEN_STORE,
+      useExisting: RedisRefreshTokenStore,
+    },
+    {
+      provide: AUTH_ACCESS_TOKEN_ISSUER,
+      useExisting: JwtAccessTokenIssuer,
+    },
+    {
+      provide: AUTH_PASSWORD_HASHER,
+      useExisting: BcryptPasswordHasher,
+    },
+    AuthSessionService,
+    RegisterCommandHandler,
+    LoginCommandHandler,
+    RefreshCommandHandler,
+    CheckInCommandHandler,
+    LogoutCommandHandler,
+    GetAuthContextQueryHandler,
+    ClearAuthSessionOnInvalidTokenInterceptor,
+    RedisRefreshTokenStore,
+    JwtAccessTokenIssuer,
+    BcryptPasswordHasher,
+    TypeOrmAuthUserRepository,
+    TypeOrmAuthFarmUserRepository,
+    TypeOrmAuthRolePermissionRepository,
+    JwtStrategy,
+    JwtAuthGuardProvider,
+  ],
+})
+export class AuthModule {}

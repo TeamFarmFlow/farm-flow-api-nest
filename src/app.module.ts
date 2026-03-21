@@ -10,16 +10,16 @@ import { ContextModule } from './core/context';
 import { GlobalExceptionFilterProvider } from './core/filters';
 import { GlobalClassSerializerInterceptorProvider } from './core/interceptors';
 import { GlobalValidationPipeProvider } from './core/pipes';
-import { AttendanceModule } from './feature/attendance';
-import { AuthModule } from './feature/auth';
-import { FarmModule } from './feature/farm';
-import { HealthModule } from './feature/health';
-import { InvitationModule } from './feature/invitation';
-import { MeModule } from './feature/me';
-import { MemberModule } from './feature/member';
-import { PayrollModule } from './feature/payroll';
-import { RoleModule } from './feature/role';
 import { RedisModule } from './infra/redis';
+import { AttendanceModule } from './module/attendance';
+import { AuthModule } from './module/auth';
+import { FarmModule } from './module/farm';
+import { HealthModule } from './module/health';
+import { InvitationModule } from './module/invitation';
+import { MeModule } from './module/me';
+import { MemberModule } from './module/member';
+import { PayrollModule } from './module/payroll';
+import { RoleModule } from './module/role';
 @Module({
   imports: [
     ConfigurationModule.forRoot(),
