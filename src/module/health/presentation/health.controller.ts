@@ -2,8 +2,9 @@ import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { Public } from '@app/core/security';
+import { toInstance } from '@app/core/transform';
 
-import { HealthService } from '../application/health.service';
+import { GetHealthQueryHandler } from '../application';
 
 import { HealthResponse } from './dto/response';
 
@@ -11,11 +12,11 @@ import { HealthResponse } from './dto/response';
 @Public()
 @Controller()
 export class HealthController {
-  constructor(private readonly healthService: HealthService) {}
+  constructor(private readonly getHealthQueryHandler: GetHealthQueryHandler) {}
 
   @Get()
   @ApiOkResponse({ type: HealthResponse })
   health(): HealthResponse {
-    return HealthResponse.from(this.healthService.health());
+    return toInstance(HealthResponse, this.getHealthQueryHandler.execute());
   }
 }
