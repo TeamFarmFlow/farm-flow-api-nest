@@ -5,6 +5,7 @@ import { DataSource, EntityManager } from 'typeorm';
 import { FarmUser } from '@app/infra/persistence/typeorm';
 
 import { AuthFarmUserRepositoryPort } from '../../application';
+import { AuthFarmUser } from '../../domain';
 import { AuthTypeOrmMapper } from '../mappers';
 
 @Injectable()
@@ -15,7 +16,7 @@ export class TypeOrmAuthFarmUserRepository implements AuthFarmUserRepositoryPort
     return (em ?? this.dataSource).getRepository(FarmUser);
   }
 
-  async findOneByFarmIdAndUserId(farmId: string, userId: string, em?: EntityManager) {
+  async findOneByFarmIdAndUserId(farmId: string, userId: string, em?: EntityManager): Promise<AuthFarmUser | null> {
     const farmUser = await this.getRepository(em)
       .createQueryBuilder('fu')
       .innerJoinAndMapOne('fu.farm', 'fu.farm', 'farm')

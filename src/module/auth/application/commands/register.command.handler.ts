@@ -27,6 +27,7 @@ export class RegisterCommandHandler {
       name: command.name,
       passwordHash: await this.passwordHasher.hash(command.password),
     });
+
     const tokens = await this.authSessionService.issueAuthTokens(user.id);
 
     return { ...tokens, user, farm: null, role: null };
