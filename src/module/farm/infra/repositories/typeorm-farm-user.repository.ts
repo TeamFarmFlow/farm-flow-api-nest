@@ -16,6 +16,10 @@ export class TypeOrmFarmUserRepositoryAdapter implements FarmUserRepositoryPort 
     return (em ?? this.dataSource).getRepository(FarmUserEntity);
   }
 
+  async has(farmId: string, userId: string, em?: EntityManager) {
+    return this.getRepository(em).existsBy({ farmId, userId });
+  }
+
   async findAndCountByUserIdWithFarmAndRole(userId: string, em?: EntityManager): Promise<[FarmUser[], number]> {
     const [rows, total] = await this.getRepository(em)
       .createQueryBuilder('fu')
