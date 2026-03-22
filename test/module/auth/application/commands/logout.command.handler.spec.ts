@@ -1,12 +1,11 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import { LogoutCommandHandler } from '@app/module/auth/application';
-import { AuthSessionService } from '@app/module/auth/application/services';
+import { AuthSessionServicePort, LogoutCommandHandler } from '@app/module/auth/application';
 
 import { authSessionServiceFixture } from '../fixtures/auth-session.service.fixture';
 
 describe('LogoutCommandHandler', () => {
-  let sessionService: AuthSessionService;
+  let sessionService: AuthSessionServicePort;
   let handler: LogoutCommandHandler;
 
   beforeAll(() => {

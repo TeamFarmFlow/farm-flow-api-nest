@@ -1,9 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { DuplicatedEmailEXception } from '../../domain';
-import { AUTH_PASSWORD_HASHER, AUTH_USER_REPOSITORY, AuthPasswordHasherPort, AuthUserRepositoryPort } from '../ports';
+import { AUTH_PASSWORD_HASHER, AUTH_SESSION_SERVICE, AUTH_USER_REPOSITORY, AuthPasswordHasherPort, AuthSessionServicePort, AuthUserRepositoryPort } from '../ports';
 import { AuthSessionResult } from '../result';
-import { AuthSessionService } from '../services';
 
 import { RegisterCommand } from './register.command';
 
@@ -14,7 +13,8 @@ export class RegisterCommandHandler {
     private readonly userRepository: AuthUserRepositoryPort,
     @Inject(AUTH_PASSWORD_HASHER)
     private readonly passwordHasher: AuthPasswordHasherPort,
-    private readonly authSessionService: AuthSessionService,
+    @Inject(AUTH_SESSION_SERVICE)
+    private readonly authSessionService: AuthSessionServicePort,
   ) {}
 
   async execute(command: RegisterCommand): Promise<AuthSessionResult> {
@@ -28,7 +28,7 @@ export class RegisterCommandHandler {
       passwordHash: await this.passwordHasher.hash(command.password),
     });
 
-    const tokens = await this.authSessionService.issueAuthTokens(user.id);
+    const tokens = await this.authSessionService.issueAuthTokens(user.id, null);
 
     return { ...tokens, user, farm: null, role: null };
   }

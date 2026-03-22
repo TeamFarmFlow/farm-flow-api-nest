@@ -1,15 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { AUTH_SESSION_SERVICE, AuthSessionServicePort } from '../ports';
 import { GetAuthContextQueryHandler } from '../queries';
 import { AuthSessionResult } from '../result';
-import { AuthSessionService } from '../services';
 
 import { CheckInCommand } from './checkin.command';
 
 @Injectable()
 export class CheckInCommandHandler {
   constructor(
-    private readonly authSessionService: AuthSessionService,
+    @Inject(AUTH_SESSION_SERVICE)
+    private readonly authSessionService: AuthSessionServicePort,
     private readonly getAuthContextQueryHandler: GetAuthContextQueryHandler,
   ) {}
 

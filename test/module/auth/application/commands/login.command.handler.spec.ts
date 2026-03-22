@@ -1,8 +1,7 @@
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { LoginCommandHandler } from '@app/module/auth/application';
-import { AuthPasswordHasherPort, AuthUserRepositoryPort } from '@app/module/auth/application/ports';
-import { AuthSessionService } from '@app/module/auth/application/services';
+import { AuthPasswordHasherPort, AuthSessionServicePort, AuthUserRepositoryPort } from '@app/module/auth/application/ports';
 import { AuthUser, WrongEmailOrPasswordException } from '@app/module/auth/domain';
 import { BcryptPasswordHasher } from '@app/module/auth/infra';
 import { UserStatus } from '@app/shared/domain';
@@ -13,26 +12,20 @@ import { authUserRepositoryFixture } from '../fixtures/auth-user.repository.fixt
 describe('LoginCommandHandler', () => {
   let userRepository: AuthUserRepositoryPort;
   let passwordHasher: AuthPasswordHasherPort;
-  let sessionService: AuthSessionService;
+  let sessionService: AuthSessionServicePort;
   let handler: LoginCommandHandler;
 
   beforeAll(() => {
     userRepository = authUserRepositoryFixture;
     sessionService = authSessionServiceFixture;
     passwordHasher = new BcryptPasswordHasher();
-
     handler = new LoginCommandHandler(userRepository, passwordHasher, sessionService);
   });
 
   it('사용자가 없으면 예외를 던진다', async () => {
     userRepository.findOneByEmail = vi.fn().mockResolvedValue(null);
 
-    await expect(
-      handler.execute({
-        email: 'user@example.com',
-        password: 'hashed-password',
-      }),
-    ).rejects.toBeInstanceOf(WrongEmailOrPasswordException);
+    await expect(handler.execute({ email: 'user@example.com', password: 'hashed-password' })).rejects.toBeInstanceOf(WrongEmailOrPasswordException);
   });
 
   it('비밀번호가 다르면 예외를 던진다', async () => {
@@ -44,12 +37,7 @@ describe('LoginCommandHandler', () => {
       status: UserStatus.Activated,
     });
 
-    await expect(
-      handler.execute({
-        email: 'user@example.com',
-        password: 'wrong-password',
-      }),
-    ).rejects.toBeInstanceOf(WrongEmailOrPasswordException);
+    await expect(handler.execute({ email: 'user@example.com', password: 'wrong-password' })).rejects.toBeInstanceOf(WrongEmailOrPasswordException);
   });
 
   it('로그인에 성공하면 새로운 세션을 발급한다', async () => {
@@ -75,6 +63,6 @@ describe('LoginCommandHandler', () => {
       role: null,
     });
 
-    expect(sessionService.issueAuthTokens).toHaveBeenCalledWith(user.id);
+    expect(sessionService.issueAuthTokens).toHaveBeenCalledWith(user.id, null);
   });
 });

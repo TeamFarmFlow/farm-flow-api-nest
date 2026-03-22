@@ -1,77 +1,82 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { RefreshCommandHandler } from '@app/module/auth/application';
-import { AuthSessionService } from '@app/module/auth/application/services';
-import { AuthFarm, AuthRole, AuthUser, RefreshToken } from '@app/module/auth/domain';
+import { AuthSessionServicePort, GetAuthContextQueryHandler, RefreshCommandHandler } from '@app/module/auth/application';
 import { PermissionKey, UserStatus } from '@app/shared/domain';
 
-function createAuthResult() {
-  const user = new AuthUser();
-  const farm = new AuthFarm();
-  const role = new AuthRole();
-
-  user.id = 'user-1';
-  user.email = 'farmer@example.com';
-  user.passwordHash = 'hashed-password';
-  user.name = 'Farmer Kim';
-  user.status = UserStatus.Activated;
-
-  farm.id = 'farm-1';
-  farm.name = 'Morning Farm';
-
-  role.id = 'role-1';
-  role.name = 'Manager';
-  role.required = true;
-  role.super = false;
-  role.permissionKeys = [PermissionKey.MemberRead];
-
-  return { user, farm, role };
-}
-
-function createRefreshToken() {
-  const refreshToken = RefreshToken.from('refresh-token-1');
-
-  refreshToken.userId = 'user-1';
-  refreshToken.farmId = 'farm-1';
-
-  return refreshToken;
-}
-
-function createAuthSessionService() {
-  return {
-    getRefreshTokenOrThrow: vi.fn(),
-    issueAuthTokens: vi.fn(),
-    rotateRefreshToken: vi.fn(),
-    revokeRefreshToken: vi.fn(),
-  } as unknown as AuthSessionService;
-}
+import { authFarmUserRepositoryFixture } from '../fixtures/auth-farm-user.repository.fixture';
+import { authRolePermissionRepositoryFixture } from '../fixtures/auth-role-permission.repository.fixture';
+import { authSessionServiceFixture } from '../fixtures/auth-session.service.fixture';
+import { authUserRepositoryFixture } from '../fixtures/auth-user.repository.fixture';
 
 describe('RefreshCommandHandler', () => {
-  it('리프레시 토큰으로 인증 컨텍스트를 조회하고 세션을 회전한다', async () => {
-    const refreshToken = createRefreshToken();
-    const authResult = createAuthResult();
-    const authSessionService = createAuthSessionService();
-    const getAuthContextQueryHandler = {
-      execute: vi.fn().mockResolvedValue(authResult),
-    };
+  let sessionService: AuthSessionServicePort;
+  let getAuthContextQueryHandler: GetAuthContextQueryHandler;
+  let handler: RefreshCommandHandler;
 
-    authSessionService.getRefreshTokenOrThrow = vi.fn().mockResolvedValue(refreshToken);
-    authSessionService.rotateRefreshToken = vi.fn().mockResolvedValue({
+  beforeAll(() => {
+    sessionService = authSessionServiceFixture;
+    getAuthContextQueryHandler = new GetAuthContextQueryHandler(authUserRepositoryFixture, authFarmUserRepositoryFixture, authRolePermissionRepositoryFixture);
+    handler = new RefreshCommandHandler(sessionService, getAuthContextQueryHandler);
+  });
+
+  it('리프레시 토큰으로 인증 컨텍스트를 조회하고 세션을 회전한다', async () => {
+    getAuthContextQueryHandler.execute = vi.fn().mockResolvedValue({
+      user: {
+        id: 'user-1',
+        email: 'farmer@example.com',
+        passwordHash: 'hashed-password',
+        name: 'Farmer Kim',
+        status: UserStatus.Activated,
+      },
+      farm: {
+        id: 'farm-1',
+        name: 'Morning Farm',
+      },
+      role: {
+        id: 'role-1',
+        name: 'Manager',
+        required: true,
+        super: false,
+        permissionKeys: [PermissionKey.MemberRead],
+      },
+    });
+
+    sessionService.getRefreshTokenOrThrow = vi.fn().mockResolvedValue({
+      id: 'refresh-token-1',
+      userId: 'user-1',
+      farmId: 'farm-1',
+    });
+    sessionService.rotateRefreshToken = vi.fn().mockResolvedValue({
       accessToken: 'access-token',
       refreshToken: 'refresh-token',
     });
 
-    const handler = new RefreshCommandHandler(authSessionService, getAuthContextQueryHandler);
-
-    await expect(handler.execute({ refreshTokenId: refreshToken.id })).resolves.toEqual({
-      ...authResult,
+    await expect(handler.execute({ refreshTokenId: 'refresh-token-1' })).resolves.toMatchObject({
       accessToken: 'access-token',
       refreshToken: 'refresh-token',
+      user: {
+        id: 'user-1',
+        email: 'farmer@example.com',
+        passwordHash: 'hashed-password',
+        name: 'Farmer Kim',
+        status: UserStatus.Activated,
+      },
+      farm: {
+        id: 'farm-1',
+        name: 'Morning Farm',
+      },
+      role: {
+        id: 'role-1',
+        name: 'Manager',
+        required: true,
+        super: false,
+        permissionKeys: [PermissionKey.MemberRead],
+      },
     });
     expect(getAuthContextQueryHandler.execute).toHaveBeenCalledWith({
-      userId: refreshToken.userId,
-      farmId: refreshToken.farmId,
+      userId: 'user-1',
+      farmId: 'farm-1',
     });
-    expect(authSessionService.rotateRefreshToken).toHaveBeenCalledWith(refreshToken.id, refreshToken.userId, refreshToken.farmId);
+    expect(sessionService.rotateRefreshToken).toHaveBeenCalledWith('refresh-token-1', 'user-1', 'farm-1');
   });
 });

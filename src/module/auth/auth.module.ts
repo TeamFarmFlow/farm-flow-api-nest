@@ -12,6 +12,7 @@ import {
   AUTH_PASSWORD_HASHER,
   AUTH_REFRESH_TOKEN_STORE,
   AUTH_ROLE_PERMISSION_REPOSITORY,
+  AUTH_SESSION_SERVICE,
   AUTH_USER_REPOSITORY,
   AuthSessionService,
   CheckInCommandHandler,
@@ -69,6 +70,10 @@ import { AuthController, ClearAuthSessionOnInvalidTokenInterceptor } from './pre
     {
       provide: AUTH_PASSWORD_HASHER,
       useExisting: BcryptPasswordHasher,
+    },
+    {
+      provide: AUTH_SESSION_SERVICE,
+      useExisting: AuthSessionService,
     },
     AuthSessionService,
     RegisterCommandHandler,
