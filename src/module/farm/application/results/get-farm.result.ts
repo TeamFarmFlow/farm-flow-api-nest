@@ -1,6 +1,3 @@
-import { FarmEntity, RoleEntity } from '@app/infra/persistence/typeorm';
+import { Farm } from '../../domain';
 
-export type GetFarmResult = {
-  farm: FarmEntity;
-  role: RoleEntity | null;
-};
+export type GetFarmResult = Farm;

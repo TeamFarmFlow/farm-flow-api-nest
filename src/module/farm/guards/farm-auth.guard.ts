@@ -2,10 +2,9 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
 import { ContextService } from '@app/core/context';
-import { IS_PUBLIC_KEY } from '@app/core/security';
+import { IS_PUBLIC_KEY, IS_SKIP_FARM_AUTH } from '@app/core/security';
 import { FarmUserRepository } from '@app/infra/persistence/typeorm';
 
-import { IS_SKIP_FARM_AUTH } from '../../../core/security/constants';
 import { ForbiddenFarmUserException } from '../domain';
 
 @Injectable()
