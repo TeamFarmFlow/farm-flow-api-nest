@@ -1,13 +1,33 @@
 import { Module } from '@nestjs/common';
 
-import { AttendanceEntity, AttendanceRepository, FarmUserEntity, FarmUserRepository, TypeOrmExModule } from '@app/infra/persistence/typeorm';
-
-import { PayrollService } from './application';
+import {
+  DeletePayrollAttendanceCommandHandler,
+  GetPayrollsByUserIdQueryHandler,
+  GetPayrollsQueryHandler,
+  PAYROLL_ATTENDANCE_REPOSITORY,
+  PAYROLL_FARM_USER_REPOSITORY,
+  UpdatePayrollAttendanceCommandHandler,
+} from './application';
+import { TypeOrmPayrollAttendanceRepository, TypeOrmPayrollFarmUserRepository } from './infra';
 import { PayrollController } from './presentation';
 
 @Module({
-  imports: [TypeOrmExModule.forFeature([FarmUserEntity, AttendanceEntity], [FarmUserRepository, AttendanceRepository])],
   controllers: [PayrollController],
-  providers: [PayrollService],
+  providers: [
+    {
+      provide: PAYROLL_ATTENDANCE_REPOSITORY,
+      useExisting: TypeOrmPayrollAttendanceRepository,
+    },
+    {
+      provide: PAYROLL_FARM_USER_REPOSITORY,
+      useExisting: TypeOrmPayrollFarmUserRepository,
+    },
+    GetPayrollsQueryHandler,
+    GetPayrollsByUserIdQueryHandler,
+    UpdatePayrollAttendanceCommandHandler,
+    DeletePayrollAttendanceCommandHandler,
+    TypeOrmPayrollAttendanceRepository,
+    TypeOrmPayrollFarmUserRepository,
+  ],
 })
 export class PayrollModule {}

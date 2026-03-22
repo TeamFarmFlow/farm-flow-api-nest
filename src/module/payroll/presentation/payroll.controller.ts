@@ -7,7 +7,7 @@ import { RequiredPermissions } from '@app/core/security';
 import { toInstance } from '@app/core/transform';
 import { PermissionKey } from '@app/shared/domain';
 
-import { PayrollService } from '../application';
+import { DeletePayrollAttendanceCommandHandler, GetPayrollsByUserIdQueryHandler, GetPayrollsQueryHandler, UpdatePayrollAttendanceCommandHandler } from '../application';
 
 import { GetPayrollsByUserIdRequest, GetPayrollsRequest, UpdatePayrollAttendanceRequest } from './dto/request';
 import { PayrollsByUserIdResponse, PayrollsResponse } from './dto/response';
@@ -17,7 +17,10 @@ import { PayrollsByUserIdResponse, PayrollsResponse } from './dto/response';
 export class PayrollController {
   constructor(
     private readonly contextService: ContextService,
-    private readonly payrollService: PayrollService,
+    private readonly getPayrollsQueryHandler: GetPayrollsQueryHandler,
+    private readonly getPayrollsByUserIdQueryHandler: GetPayrollsByUserIdQueryHandler,
+    private readonly updatePayrollAttendanceCommandHandler: UpdatePayrollAttendanceCommandHandler,
+    private readonly deletePayrollAttendanceCommandHandler: DeletePayrollAttendanceCommandHandler,
   ) {}
 
   @RequiredPermissions([PermissionKey.PayrollRead])
@@ -25,7 +28,7 @@ export class PayrollController {
   @ApiOperation({ summary: '급여 정산 목록 조회' })
   @ApiOkResponse({ type: PayrollsResponse })
   async getPayrolls(@Query() query: GetPayrollsRequest): Promise<PayrollsResponse> {
-    return toInstance(PayrollsResponse, await this.payrollService.getPayrolls(query.toQuery(this.contextService.farmId)));
+    return toInstance(PayrollsResponse, await this.getPayrollsQueryHandler.execute(query.toQuery(this.contextService.farmId)));
   }
 
   @RequiredPermissions([PermissionKey.PayrollRead])
@@ -33,7 +36,7 @@ export class PayrollController {
   @ApiOperation({ summary: '급여 정산 대상 목록 조회' })
   @ApiOkResponse({ type: PayrollsByUserIdResponse })
   async getPayrollsByUserId(@Param('userId', new ParseUuidStringPipe()) userId: string, @Query() query: GetPayrollsByUserIdRequest) {
-    return toInstance(PayrollsByUserIdResponse, await this.payrollService.getPayrollsByUserId(query.toQuery(userId, this.contextService.farmId)));
+    return toInstance(PayrollsByUserIdResponse, await this.getPayrollsByUserIdQueryHandler.execute(query.toQuery(userId, this.contextService.farmId)));
   }
 
   @RequiredPermissions([PermissionKey.PayrollAttendanceHistoryUpdate])
@@ -46,7 +49,7 @@ export class PayrollController {
     @Param('id', new ParseUuidStringPipe()) id: string,
     @Body() body: UpdatePayrollAttendanceRequest,
   ) {
-    return this.payrollService.updatePayrollAttendance(body.toCommand(id, userId, this.contextService.farmId));
+    return this.updatePayrollAttendanceCommandHandler.execute(body.toCommand(id, userId, this.contextService.farmId));
   }
 
   @RequiredPermissions([PermissionKey.PayrollAttendanceHistoryDelete])
@@ -55,7 +58,7 @@ export class PayrollController {
   @ApiOperation({ summary: '급여 정산 대상 출퇴근 기록 삭제' })
   @ApiNoContentResponse()
   async deletePayrollAttendance(@Param('userId', new ParseUuidStringPipe()) userId: string, @Param('id', new ParseUuidStringPipe()) id: string) {
-    return this.payrollService.deletePayrollAttendance({ id, userId, farmId: this.contextService.farmId });
+    return this.deletePayrollAttendanceCommandHandler.execute({ id, userId, farmId: this.contextService.farmId });
   }
 
   @RequiredPermissions([PermissionKey.PayrollCheck])
