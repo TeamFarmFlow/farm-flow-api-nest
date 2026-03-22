@@ -22,16 +22,25 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@app/config": ["src/config"],
-      "@app/config/*": ["src/config/*"],
-      "@app/core": ["src/core"],
-      "@app/core/*": ["src/core/*"],
-      "@app/shared": ["src/shared"],
-      "@app/shared/*": ["src/shared/*"],
-      "@app/infra": ["src/infra"],
-      "@app/infra/*": ["src/infra/*"],
-      "@app/module": ["src/module"],
-      "@app/module/*": ["src/module/*"]
+      "@apps/api/*": ["apps/api/src/*"],
+      "@apps/worker/*": ["apps/worker/src/*"],
+      "@apps/migration/*": ["apps/migration/src/*"],
+      "@libs/config": ["libs/config/src"],
+      "@libs/config/*": ["libs/config/src/*"],
+      "@libs/cookie": ["libs/cookie/src"],
+      "@libs/cookie/*": ["libs/cookie/src/*"],
+      "@libs/datetime": ["libs/datetime/src"],
+      "@libs/datetime/*": ["libs/datetime/src/*"],
+      "@libs/email": ["libs/email/src"],
+      "@libs/email/*": ["libs/email/src/*"],
+      "@libs/http": ["libs/http/src"],
+      "@libs/http/*": ["libs/http/src/*"],
+      "@libs/persistence": ["libs/persistence/src"],
+      "@libs/persistence/*": ["libs/persistence/src/*"],
+      "@libs/redis": ["libs/redis/src"],
+      "@libs/redis/*": ["libs/redis/src/*"],
+      "@libs/shared": ["libs/shared/src"],
+      "@libs/shared/*": ["libs/shared/src/*"]
     }
   }
 }
