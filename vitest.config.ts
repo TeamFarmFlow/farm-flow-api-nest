@@ -7,7 +7,7 @@ export default defineConfig({
     globals: false,
     root: './',
     environment: 'node',
-    exclude: ['node_modules', 'dist', 'data-source/fetch-data-source.spec.ts'],
+    exclude: ['node_modules', 'dist'],
     coverage: {
       exclude: ['src/**/enum.ts', 'src/**/index.ts', 'src/**/types.ts', 'src/**/*.port.ts'],
     },
