@@ -6,7 +6,7 @@ import { RequiredPermissions, SkipFarmAuth } from '@app/core/security';
 import { toInstance } from '@app/core/transform';
 import { PermissionKey } from '@app/shared/domain';
 
-import { InvitationService } from '../application';
+import { CreateInvitationCommandHandler, ValidateInvitationCodeCommandHandler } from '../application';
 
 import { CreateInvitationRequest, ValidateInvitationCodeRequest } from './dto/request';
 import { ValidateInvitationCodeResponse } from './dto/response';
@@ -16,7 +16,8 @@ import { ValidateInvitationCodeResponse } from './dto/response';
 export class InvitationController {
   constructor(
     private readonly contextService: ContextService,
-    private readonly invitationService: InvitationService,
+    private readonly createInvitationCommandHandler: CreateInvitationCommandHandler,
+    private readonly validateInvitationCodeCommandHandler: ValidateInvitationCodeCommandHandler,
   ) {}
 
   @RequiredPermissions([PermissionKey.InvitationCreate])
@@ -24,7 +25,7 @@ export class InvitationController {
   @ApiOperation({ summary: '초대장 발급' })
   @ApiCreatedResponse()
   async createInvitation(@Body() body: CreateInvitationRequest): Promise<void> {
-    return this.invitationService.createInvitation(body.toCommand(this.contextService.farmId));
+    return this.createInvitationCommandHandler.execute(body.toCommand(this.contextService.farmId));
   }
 
   @SkipFarmAuth()
@@ -33,6 +34,6 @@ export class InvitationController {
   @ApiOperation({ summary: '초대장 사용' })
   @ApiOkResponse({ type: ValidateInvitationCodeResponse })
   async validateInvitationCode(@Body() body: ValidateInvitationCodeRequest): Promise<ValidateInvitationCodeResponse> {
-    return toInstance(ValidateInvitationCodeResponse, await this.invitationService.validateInvitationCode(body.toCommand(this.contextService.userId)));
+    return toInstance(ValidateInvitationCodeResponse, await this.validateInvitationCodeCommandHandler.execute(body.toCommand(this.contextService.userId)));
   }
 }
