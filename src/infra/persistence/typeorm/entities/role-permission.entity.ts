@@ -2,11 +2,11 @@ import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, Primary
 
 import { PermissionKey } from '@app/shared/domain';
 
-import { Role } from './role.entity';
+import { RoleEntity } from './role.entity';
 
 @Entity({ name: 'role_permissions' })
 @Index('ROLE_PERMISSIONS_UK', ['roleId', 'key'], { unique: true })
-export class RolePermission {
+export class RolePermissionEntity {
   @PrimaryGeneratedColumn('uuid', { primaryKeyConstraintName: 'ROLE_PERMISSIONS_PK' })
   id: string;
 
@@ -19,12 +19,12 @@ export class RolePermission {
   @Column('uuid')
   roleId: string;
 
-  @ManyToOne(() => Role, { onDelete: 'CASCADE' })
+  @ManyToOne(() => RoleEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ foreignKeyConstraintName: 'ROLE_PERMISSIONS_ROLE_FK' })
-  role: Role;
+  role: RoleEntity;
 
   public static of(roleId: string, key: PermissionKey) {
-    const rolePermission = new RolePermission();
+    const rolePermission = new RolePermissionEntity();
 
     rolePermission.roleId = roleId;
     rolePermission.key = key;

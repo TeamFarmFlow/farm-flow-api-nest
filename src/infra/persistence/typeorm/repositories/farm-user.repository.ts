@@ -2,15 +2,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { DeepPartial, EntityManager, Repository } from 'typeorm';
 
-import { FarmUser } from '@app/infra/persistence/typeorm';
+import { FarmUserEntity } from '@app/infra/persistence/typeorm';
 
 import { TransactionalRepository, TypeOrmExRepository } from '../common';
 
-@TypeOrmExRepository(FarmUser)
-export class FarmUserRepository extends TransactionalRepository<FarmUser> {
+@TypeOrmExRepository(FarmUserEntity)
+export class FarmUserRepository extends TransactionalRepository<FarmUserEntity> {
   constructor(
-    @InjectRepository(FarmUser)
-    repository: Repository<FarmUser>,
+    @InjectRepository(FarmUserEntity)
+    repository: Repository<FarmUserEntity>,
   ) {
     super(repository);
   }
@@ -101,15 +101,15 @@ export class FarmUserRepository extends TransactionalRepository<FarmUser> {
     });
   }
 
-  async save(entityLike: DeepPartial<FarmUser>, em?: EntityManager) {
+  async save(entityLike: DeepPartial<FarmUserEntity>, em?: EntityManager) {
     return this.getRepository(em).save(entityLike);
   }
 
-  async insert(entityLike: DeepPartial<FarmUser>, em?: EntityManager) {
+  async insert(entityLike: DeepPartial<FarmUserEntity>, em?: EntityManager) {
     return this.getRepository(em).insert(entityLike);
   }
 
-  async upsertOrIgnore(entityLike: DeepPartial<FarmUser>, em?: EntityManager) {
+  async upsertOrIgnore(entityLike: DeepPartial<FarmUserEntity>, em?: EntityManager) {
     return this.getRepository(em).createQueryBuilder().insert().values(entityLike).orIgnore().execute();
   }
 
@@ -117,7 +117,7 @@ export class FarmUserRepository extends TransactionalRepository<FarmUser> {
     return this.getRepository(em).update({ roleId: currentRoleId }, { roleId: updateRoleId, updatedAt: () => 'NOW()' });
   }
 
-  async update(farmId: string, userId: string, entityLike: DeepPartial<FarmUser>, em?: EntityManager) {
+  async update(farmId: string, userId: string, entityLike: DeepPartial<FarmUserEntity>, em?: EntityManager) {
     return this.getRepository(em).update({ farmId, userId }, { ...entityLike, updatedAt: () => 'NOW()' });
   }
 

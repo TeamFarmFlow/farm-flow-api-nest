@@ -2,11 +2,11 @@ import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Up
 
 import { dayjs } from '@app/core/time';
 
-import { FarmUser } from './farm-user.entity';
-import { Role } from './role.entity';
+import { FarmUserEntity } from './farm-user.entity';
+import { RoleEntity } from './role.entity';
 
 @Entity({ name: 'farms' })
-export class Farm {
+export class FarmEntity {
   @PrimaryGeneratedColumn('uuid', { primaryKeyConstraintName: 'FARMS_PK' })
   readonly id: string;
 
@@ -28,14 +28,14 @@ export class Farm {
   @UpdateDateColumn({ type: 'timestamptz' })
   readonly updatedAt: Date;
 
-  @OneToMany(() => Role, (e) => e.farm, { cascade: ['insert', 'remove'] })
-  roles: Role[];
+  @OneToMany(() => RoleEntity, (e) => e.farm, { cascade: ['insert', 'remove'] })
+  roles: RoleEntity[];
 
-  @OneToMany(() => FarmUser, (e) => e.farm, { cascade: ['insert', 'remove'] })
-  farmUsers: FarmUser[];
+  @OneToMany(() => FarmUserEntity, (e) => e.farm, { cascade: ['insert', 'remove'] })
+  farmUsers: FarmUserEntity[];
 
-  @OneToMany(() => FarmUser, (e) => e.farm, { cascade: ['insert', 'remove'] })
-  farmUser: FarmUser | null;
+  @OneToMany(() => FarmUserEntity, (e) => e.farm, { cascade: ['insert', 'remove'] })
+  farmUser: FarmUserEntity | null;
 
   get dateOfTimeZone() {
     return dayjs(new Date()).tz(this.timezone).format('YYYY-MM-DD');

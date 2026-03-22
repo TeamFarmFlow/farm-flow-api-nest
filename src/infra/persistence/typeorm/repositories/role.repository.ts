@@ -3,13 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, EntityManager, Repository } from 'typeorm';
 
 import { TransactionalRepository, TypeOrmExRepository } from '../common';
-import { Role } from '../entities';
+import { RoleEntity } from '../entities';
 
-@TypeOrmExRepository(Role)
-export class RoleRepository extends TransactionalRepository<Role> {
+@TypeOrmExRepository(RoleEntity)
+export class RoleRepository extends TransactionalRepository<RoleEntity> {
   constructor(
-    @InjectRepository(Role)
-    repository: Repository<Role>,
+    @InjectRepository(RoleEntity)
+    repository: Repository<RoleEntity>,
   ) {
     super(repository);
   }
@@ -47,15 +47,15 @@ export class RoleRepository extends TransactionalRepository<Role> {
     });
   }
 
-  async insert(entityLike: DeepPartial<Role>, em?: EntityManager) {
+  async insert(entityLike: DeepPartial<RoleEntity>, em?: EntityManager) {
     return this.getRepository(em).insert(entityLike);
   }
 
-  async save(entityLike: DeepPartial<Role>, em?: EntityManager) {
+  async save(entityLike: DeepPartial<RoleEntity>, em?: EntityManager) {
     return this.getRepository(em).save(entityLike);
   }
 
-  async update(id: string, entityLike: DeepPartial<Role>, em?: EntityManager) {
+  async update(id: string, entityLike: DeepPartial<RoleEntity>, em?: EntityManager) {
     return this.getRepository(em).update(id, { ...entityLike, updatedAt: () => 'NOW()' });
   }
 

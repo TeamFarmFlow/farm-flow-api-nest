@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { DataSource, EntityManager } from 'typeorm';
 
-import { RolePermission } from '@app/infra/persistence/typeorm';
+import { RolePermissionEntity } from '@app/infra/persistence/typeorm';
 import { PermissionKey } from '@app/shared/domain';
 
 import { AuthRolePermissionRepositoryPort } from '../../application';
@@ -12,7 +12,7 @@ export class TypeOrmAuthRolePermissionRepository implements AuthRolePermissionRe
   constructor(private readonly dataSource: DataSource) {}
 
   private getRepository(em?: EntityManager) {
-    return (em ?? this.dataSource).getRepository(RolePermission);
+    return (em ?? this.dataSource).getRepository(RolePermissionEntity);
   }
 
   async findKeysByRoleId(roleId: string): Promise<PermissionKey[]> {

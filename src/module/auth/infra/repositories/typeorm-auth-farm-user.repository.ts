@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { DataSource, EntityManager } from 'typeorm';
 
-import { FarmUser } from '@app/infra/persistence/typeorm';
+import { FarmUserEntity } from '@app/infra/persistence/typeorm';
 
 import { AuthFarmUserRepositoryPort } from '../../application';
 import { AuthFarmUser } from '../../domain';
@@ -13,7 +13,7 @@ export class TypeOrmAuthFarmUserRepository implements AuthFarmUserRepositoryPort
   constructor(private readonly dataSource: DataSource) {}
 
   private getRepository(em?: EntityManager) {
-    return (em ?? this.dataSource).getRepository(FarmUser);
+    return (em ?? this.dataSource).getRepository(FarmUserEntity);
   }
 
   async findOneByFarmIdAndUserId(farmId: string, userId: string, em?: EntityManager): Promise<AuthFarmUser | null> {

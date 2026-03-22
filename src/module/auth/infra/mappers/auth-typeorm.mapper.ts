@@ -1,9 +1,9 @@
-import { Farm, FarmUser, Role, User } from '@app/infra/persistence/typeorm';
+import { FarmEntity, FarmUserEntity, RoleEntity, UserEntity } from '@app/infra/persistence/typeorm';
 
 import { AuthFarm, AuthFarmUser, AuthRole, AuthUser } from '../../domain';
 
 export class AuthTypeOrmMapper {
-  static toAuthUser(user: User): AuthUser {
+  static toAuthUser(user: UserEntity): AuthUser {
     const authUser = new AuthUser();
 
     authUser.id = user.id;
@@ -15,7 +15,7 @@ export class AuthTypeOrmMapper {
     return authUser;
   }
 
-  static toAuthFarm(farm: Farm): AuthFarm {
+  static toAuthFarm(farm: FarmEntity): AuthFarm {
     const authFarm = new AuthFarm();
 
     authFarm.id = farm.id;
@@ -24,7 +24,7 @@ export class AuthTypeOrmMapper {
     return authFarm;
   }
 
-  static toAuthRole(role: Role): AuthRole {
+  static toAuthRole(role: RoleEntity): AuthRole {
     const authRole = new AuthRole();
 
     authRole.id = role.id;
@@ -36,7 +36,7 @@ export class AuthTypeOrmMapper {
     return authRole;
   }
 
-  static toAuthFarmUser(farmUser: FarmUser): AuthFarmUser {
+  static toAuthFarmUser(farmUser: FarmUserEntity): AuthFarmUser {
     const authFarmUser = new AuthFarmUser();
 
     authFarmUser.farm = this.toAuthFarm(farmUser.farm);

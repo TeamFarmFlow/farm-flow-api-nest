@@ -2,20 +2,20 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { DeepPartial, EntityManager, Repository, UpdateResult } from 'typeorm';
 
-import { UserUsage } from '@app/infra/persistence/typeorm';
+import { UserUsageEntity } from '@app/infra/persistence/typeorm';
 
 import { TransactionalRepository, TypeOrmExRepository } from '../common';
 
-@TypeOrmExRepository(UserUsage)
-export class UserUsageRepository extends TransactionalRepository<UserUsage> {
+@TypeOrmExRepository(UserUsageEntity)
+export class UserUsageRepository extends TransactionalRepository<UserUsageEntity> {
   constructor(
-    @InjectRepository(UserUsage)
-    repository: Repository<UserUsage>,
+    @InjectRepository(UserUsageEntity)
+    repository: Repository<UserUsageEntity>,
   ) {
     super(repository);
   }
 
-  async save(entityLike: DeepPartial<UserUsage>, em?: EntityManager) {
+  async save(entityLike: DeepPartial<UserUsageEntity>, em?: EntityManager) {
     return this.getRepository(em).save(entityLike);
   }
 

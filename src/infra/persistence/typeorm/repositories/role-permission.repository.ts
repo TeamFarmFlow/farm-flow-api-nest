@@ -3,13 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, EntityManager, In, Repository } from 'typeorm';
 
 import { TransactionalRepository, TypeOrmExRepository } from '../common';
-import { RolePermission } from '../entities';
+import { RolePermissionEntity } from '../entities';
 
-@TypeOrmExRepository(RolePermission)
-export class RolePermissionRepository extends TransactionalRepository<RolePermission> {
+@TypeOrmExRepository(RolePermissionEntity)
+export class RolePermissionRepository extends TransactionalRepository<RolePermissionEntity> {
   constructor(
-    @InjectRepository(RolePermission)
-    repository: Repository<RolePermission>,
+    @InjectRepository(RolePermissionEntity)
+    repository: Repository<RolePermissionEntity>,
   ) {
     super(repository);
   }
@@ -32,13 +32,13 @@ export class RolePermissionRepository extends TransactionalRepository<RolePermis
     });
   }
 
-  async upsert(entityLikes: DeepPartial<RolePermission> | DeepPartial<RolePermission>[], em?: EntityManager) {
+  async upsert(entityLikes: DeepPartial<RolePermissionEntity> | DeepPartial<RolePermissionEntity>[], em?: EntityManager) {
     return this.getRepository(em).upsert(entityLikes, {
       conflictPaths: { roleId: true, key: true },
     });
   }
 
-  async saves(entityLikes: DeepPartial<RolePermission>[], em?: EntityManager) {
+  async saves(entityLikes: DeepPartial<RolePermissionEntity>[], em?: EntityManager) {
     return this.getRepository(em).save(entityLikes);
   }
 

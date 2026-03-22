@@ -1,12 +1,12 @@
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 
-import { Farm } from './farm.entity';
-import { Role } from './role.entity';
-import { User } from './user.entity';
+import { FarmEntity } from './farm.entity';
+import { RoleEntity } from './role.entity';
+import { UserEntity } from './user.entity';
 
 @Entity({ name: 'farm_users' })
 @Index('FARM_USERS_ROLE_ID_IDX', ['roleId'], { where: 'role_id IS NOT NULL' })
-export class FarmUser {
+export class FarmUserEntity {
   @PrimaryColumn('uuid', { primaryKeyConstraintName: 'FARM_USERS_PK' })
   farmId: string;
 
@@ -28,20 +28,20 @@ export class FarmUser {
   @Column({ type: 'int', default: 0 })
   payDeductionAmount: number;
 
-  @ManyToOne(() => Farm, (e) => e.farmUsers, { onDelete: 'CASCADE' })
+  @ManyToOne(() => FarmEntity, (e) => e.farmUsers, { onDelete: 'CASCADE' })
   @JoinColumn({ foreignKeyConstraintName: 'FARM_USERS_FARM_FK' })
-  farm: Farm;
+  farm: FarmEntity;
 
-  @ManyToOne(() => User, (e) => e.farmUsers, { onDelete: 'CASCADE' })
+  @ManyToOne(() => UserEntity, (e) => e.farmUsers, { onDelete: 'CASCADE' })
   @JoinColumn({ foreignKeyConstraintName: 'FARM_USERS_USER_FK' })
-  user: User;
+  user: UserEntity;
 
-  @ManyToOne(() => Role, (e) => e.farmUsers, { onDelete: 'SET NULL', nullable: true })
+  @ManyToOne(() => RoleEntity, (e) => e.farmUsers, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ foreignKeyConstraintName: 'FARM_USERS_ROLE_FK' })
-  role: Role | null;
+  role: RoleEntity | null;
 
-  public static of(farm: Farm, userId: string, roleId: string | null = null) {
-    const farmUser = new FarmUser();
+  public static of(farm: FarmEntity, userId: string, roleId: string | null = null) {
+    const farmUser = new FarmUserEntity();
 
     farmUser.farmId = farm.id;
     farmUser.payRatePerHour = farm.payRatePerHour;

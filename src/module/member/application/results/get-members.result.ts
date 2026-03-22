@@ -1,6 +1,6 @@
-import { Role, User } from '@app/infra/persistence/typeorm';
+import { RoleEntity, UserEntity } from '@app/infra/persistence/typeorm';
 
 export type GetMembersResult = {
   total: number;
-  rows: { user: User; role: Role | null }[];
+  rows: { user: UserEntity; role: RoleEntity | null }[];
 };

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { DataSource } from 'typeorm';
 
-import { FarmUserRepository, RolePermission, RolePermissionRepository, RoleRepository } from '@app/infra/persistence/typeorm';
+import { FarmUserRepository, RolePermissionEntity, RolePermissionRepository, RoleRepository } from '@app/infra/persistence/typeorm';
 
 import { RoleNotFoundException, RoleProtectedException } from '../domain';
 
@@ -66,7 +66,7 @@ export class RoleService {
 
     const permissions = [
       ...role.permissions.filter(({ key }) => permissionSet.has(key)),
-      ...command.permissionKeys.filter((key) => !role.permissions.some((permission) => permission.key === key)).map((key) => RolePermission.of(command.roleId, key)),
+      ...command.permissionKeys.filter((key) => !role.permissions.some((permission) => permission.key === key)).map((key) => RolePermissionEntity.of(command.roleId, key)),
     ];
 
     await this.dataSource.transaction(async (em) => {

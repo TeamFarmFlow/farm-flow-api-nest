@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common';
 
 import {
-  Farm,
+  FarmEntity,
   FarmRepository,
-  FarmUser,
+  FarmUserEntity,
   FarmUserRepository,
-  Role,
-  RolePermission,
+  RoleEntity,
+  RolePermissionEntity,
   RolePermissionRepository,
   RoleRepository,
   TypeOrmExModule,
-  UserUsage,
+  UserUsageEntity,
   UserUsageRepository,
 } from '@app/infra/persistence/typeorm';
 
@@ -21,7 +21,7 @@ import { FarmController } from './presentation';
 @Module({
   imports: [
     TypeOrmExModule.forFeature(
-      [UserUsage, Farm, FarmUser, Role, RolePermission],
+      [UserUsageEntity, FarmEntity, FarmUserEntity, RoleEntity, RolePermissionEntity],
       [UserUsageRepository, FarmRepository, FarmUserRepository, RoleRepository, RolePermissionRepository],
     ),
   ],

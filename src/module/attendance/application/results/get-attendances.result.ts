@@ -1,4 +1,4 @@
-import { Attendance } from '@app/infra/persistence/typeorm';
+import { Attendance } from '../../domain';
 
 export type GetAttendancesResult = {
   total: number;

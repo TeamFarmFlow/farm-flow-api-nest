@@ -1,10 +1,8 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { Configuration } from '@app/config';
 import { CookieModule } from '@app/core/cookies';
-import { FarmUser, FarmUserRepository, RolePermission, RolePermissionRepository, TypeOrmExModule, User, UserRepository } from '@app/infra/persistence/typeorm';
 
 import {
   AUTH_ACCESS_TOKEN_ISSUER,
@@ -35,8 +33,6 @@ import { AuthController, ClearAuthSessionOnInvalidTokenInterceptor } from './pre
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, FarmUser, RolePermission]),
-    TypeOrmExModule.forFeature([User, FarmUser, RolePermission], [UserRepository, FarmUserRepository, RolePermissionRepository]),
     CookieModule,
     JwtModule.registerAsync({
       inject: [Configuration],

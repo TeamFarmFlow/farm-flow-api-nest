@@ -5,7 +5,7 @@ import { And, DeepPartial, EntityManager, LessThanOrEqual, MoreThanOrEqual, Repo
 import { AttendanceStatus } from '@app/shared/domain';
 
 import { TransactionalRepository, TypeOrmExRepository } from '../common';
-import { Attendance, FarmUser, Role, User } from '../entities';
+import { AttendanceEntity, FarmUserEntity, RoleEntity, UserEntity } from '../entities';
 
 type AttendancePayrollRawRow = {
   user_id: string;
@@ -20,11 +20,11 @@ type AttendancePayrollRawRow = {
   need_check: boolean;
 };
 
-@TypeOrmExRepository(Attendance)
-export class AttendanceRepository extends TransactionalRepository<Attendance> {
+@TypeOrmExRepository(AttendanceEntity)
+export class AttendanceRepository extends TransactionalRepository<AttendanceEntity> {
   constructor(
-    @InjectRepository(Attendance)
-    repository: Repository<Attendance>,
+    @InjectRepository(AttendanceEntity)
+    repository: Repository<AttendanceEntity>,
   ) {
     super(repository);
   }
@@ -43,9 +43,9 @@ export class AttendanceRepository extends TransactionalRepository<Attendance> {
   async findPayrollsByFarmIdAndDateRange(farmId: string, startDate: string, endDate: string, em?: EntityManager) {
     return this.getRepository(em)
       .createQueryBuilder('a')
-      .innerJoin(FarmUser, 'fu', 'fu.farmId = a.farmId AND fu.userId = a.userId')
-      .innerJoin(User, 'u', 'u.id = a.userId')
-      .leftJoin(Role, 'r', 'r.id = fu.roleId')
+      .innerJoin(FarmUserEntity, 'fu', 'fu.farmId = a.farmId AND fu.userId = a.userId')
+      .innerJoin(UserEntity, 'u', 'u.id = a.userId')
+      .leftJoin(RoleEntity, 'r', 'r.id = fu.roleId')
       .select([
         'u.id as user_id',
         'u.name as user_name',
@@ -112,7 +112,7 @@ export class AttendanceRepository extends TransactionalRepository<Attendance> {
     });
   }
 
-  async upsertOrIgnore(entityLike: DeepPartial<Attendance>, em?: EntityManager) {
+  async upsertOrIgnore(entityLike: DeepPartial<AttendanceEntity>, em?: EntityManager) {
     return this.getRepository(em).createQueryBuilder().insert().values(entityLike).orIgnore().execute();
   }
 

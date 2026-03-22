@@ -2,14 +2,24 @@ import { Module } from '@nestjs/common';
 
 import { Configuration } from '@app/config';
 import { MailModule } from '@app/infra/mail';
-import { Farm, FarmRepository, FarmUser, FarmUserRepository, Role, RoleRepository, TypeOrmExModule, User, UserRepository } from '@app/infra/persistence/typeorm';
+import {
+  FarmEntity,
+  FarmRepository,
+  FarmUserEntity,
+  FarmUserRepository,
+  RoleEntity,
+  RoleRepository,
+  TypeOrmExModule,
+  UserEntity,
+  UserRepository,
+} from '@app/infra/persistence/typeorm';
 
 import { InvitationService } from './application';
 import { InvitationController } from './presentation';
 
 @Module({
   imports: [
-    TypeOrmExModule.forFeature([User, Role, Farm, FarmUser], [UserRepository, RoleRepository, FarmRepository, FarmUserRepository]),
+    TypeOrmExModule.forFeature([UserEntity, RoleEntity, FarmEntity, FarmUserEntity], [UserRepository, RoleRepository, FarmRepository, FarmUserRepository]),
     MailModule.registerAsync({
       inject: [Configuration],
       useFactory(configuration: Configuration) {

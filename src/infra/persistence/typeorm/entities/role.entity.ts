@@ -1,13 +1,13 @@
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
-import { Farm } from './farm.entity';
-import { FarmUser } from './farm-user.entity';
-import { RolePermission } from './role-permission.entity';
+import { FarmEntity } from './farm.entity';
+import { FarmUserEntity } from './farm-user.entity';
+import { RolePermissionEntity } from './role-permission.entity';
 
 @Entity({ name: 'roles' })
 @Index('ROLES_FARM_ID_NAME_UK', ['farm', 'name'], { unique: true })
 @Index('ROLES_FARM_ID_IDX', ['farm'])
-export class Role {
+export class RoleEntity {
   @PrimaryGeneratedColumn('uuid', { primaryKeyConstraintName: 'ROLES_PK' })
   readonly id: string;
 
@@ -29,15 +29,15 @@ export class Role {
   @Column({ type: 'uuid' })
   farmId: string;
 
-  @ManyToOne(() => Farm, (e) => e.roles, { onDelete: 'CASCADE' })
+  @ManyToOne(() => FarmEntity, (e) => e.roles, { onDelete: 'CASCADE' })
   @JoinColumn({ foreignKeyConstraintName: 'ROLES_FARM_FK' })
-  farm: Farm;
+  farm: FarmEntity;
 
-  @OneToMany(() => FarmUser, (e) => e.role, { cascade: ['remove'] })
-  farmUsers: FarmUser[];
+  @OneToMany(() => FarmUserEntity, (e) => e.role, { cascade: ['remove'] })
+  farmUsers: FarmUserEntity[];
 
-  @OneToMany(() => RolePermission, (e) => e.role, { cascade: true })
-  permissions: RolePermission[];
+  @OneToMany(() => RolePermissionEntity, (e) => e.role, { cascade: true })
+  permissions: RolePermissionEntity[];
 
   get permissionKeys() {
     return (this.permissions ?? []).map(({ key }) => key);

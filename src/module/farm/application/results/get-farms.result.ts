@@ -1,6 +1,6 @@
-import { Farm, Role } from '@app/infra/persistence/typeorm';
+import { FarmEntity, RoleEntity } from '@app/infra/persistence/typeorm';
 
 export type GetFarmsResult = {
   total: number;
-  rows: { farm: Farm; role: Role | null }[];
+  rows: { farm: FarmEntity; role: RoleEntity | null }[];
 };

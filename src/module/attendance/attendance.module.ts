@@ -1,16 +1,45 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-import { Attendance, AttendanceRepository, FarmUser, FarmUserRepository, TypeOrmExModule } from '@app/infra/persistence/typeorm';
 import { RedisSubscriber } from '@app/infra/redis';
 
-import { AttendanceQrCodeService, AttendanceService } from './application';
+import {
+  ATTENDANCE_FARM_USER_REPOSITORY,
+  ATTENDANCE_QR_CODE_STORE,
+  ATTENDANCE_REPOSITORY,
+  CheckInAttendanceCommandHandler,
+  CheckOutAttendanceCommandHandler,
+  CreateAttendanceQrCodeCommandHandler,
+  GetAttendanceByTodayQueryHandler,
+  GetAttendancesQueryHandler,
+} from './application';
+import { AttendanceQrCodeStore, TypeOrmAttendanceFarmUserRepository, TypeOrmAttendanceRepository } from './infra';
 import { AttendanceController, AttendanceQrCodeController } from './presentation';
 
 @Module({
-  imports: [TypeOrmExModule.forFeature([FarmUser, Attendance], [FarmUserRepository, AttendanceRepository])],
   controllers: [AttendanceController, AttendanceQrCodeController],
-  providers: [AttendanceService, AttendanceQrCodeService],
+  providers: [
+    {
+      provide: ATTENDANCE_FARM_USER_REPOSITORY,
+      useExisting: TypeOrmAttendanceFarmUserRepository,
+    },
+    {
+      provide: ATTENDANCE_REPOSITORY,
+      useExisting: TypeOrmAttendanceRepository,
+    },
+    {
+      provide: ATTENDANCE_QR_CODE_STORE,
+      useExisting: AttendanceQrCodeStore,
+    },
+    GetAttendancesQueryHandler,
+    GetAttendanceByTodayQueryHandler,
+    CheckInAttendanceCommandHandler,
+    CheckOutAttendanceCommandHandler,
+    CreateAttendanceQrCodeCommandHandler,
+    TypeOrmAttendanceFarmUserRepository,
+    TypeOrmAttendanceRepository,
+    AttendanceQrCodeStore,
+  ],
 })
 export class AttendanceModule implements OnModuleInit {
   constructor(

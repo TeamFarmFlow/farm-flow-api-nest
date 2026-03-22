@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 
 import { MailService } from '@app/infra/mail';
-import { FarmRepository, FarmUser, FarmUserRepository, RoleRepository, UserRepository } from '@app/infra/persistence/typeorm';
+import { FarmRepository, FarmUserEntity, FarmUserRepository, RoleRepository, UserRepository } from '@app/infra/persistence/typeorm';
 import { RedisClient } from '@app/infra/redis';
 
 import { InvalidInvitationCodeException, Invitation, InvitationDuplicatedException, InvitationFarmNotFoundException } from '../domain';
@@ -66,7 +66,7 @@ export class InvitationService {
 
     if (!hasFarmUser) {
       const defaultRole = await this.roleRepository.findDefault(invitation.farmId);
-      await this.farmUserRepository.upsertOrIgnore(FarmUser.of(farm, command.userId, defaultRole.id));
+      await this.farmUserRepository.upsertOrIgnore(FarmUserEntity.of(farm, command.userId, defaultRole.id));
     }
 
     return { farmId: invitation.farmId };

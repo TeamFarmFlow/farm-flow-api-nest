@@ -2,15 +2,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { DeepPartial, EntityManager, Repository } from 'typeorm';
 
-import { User } from '@app/infra/persistence/typeorm';
+import { UserEntity } from '@app/infra/persistence/typeorm';
 
 import { TransactionalRepository, TypeOrmExRepository } from '../common';
 
-@TypeOrmExRepository(User)
-export class UserRepository extends TransactionalRepository<User> {
+@TypeOrmExRepository(UserEntity)
+export class UserRepository extends TransactionalRepository<UserEntity> {
   constructor(
-    @InjectRepository(User)
-    repository: Repository<User>,
+    @InjectRepository(UserEntity)
+    repository: Repository<UserEntity>,
   ) {
     super(repository);
   }
@@ -32,7 +32,7 @@ export class UserRepository extends TransactionalRepository<User> {
   /**
    * @deprecated
    */
-  async update(id: string, entityLike: DeepPartial<User>, em?: EntityManager) {
+  async update(id: string, entityLike: DeepPartial<UserEntity>, em?: EntityManager) {
     return this.getRepository(em).update(id, {
       ...entityLike,
       updatedAt: () => 'NOW()',

@@ -2,11 +2,11 @@ import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, OneToOne
 
 import { UserStatus } from '@app/shared/domain';
 
-import { FarmUser } from './farm-user.entity';
-import { UserUsage } from './user-usage.entity';
+import { FarmUserEntity } from './farm-user.entity';
+import { UserUsageEntity } from './user-usage.entity';
 
 @Entity({ name: 'users' })
-export class User {
+export class UserEntity {
   @PrimaryGeneratedColumn('uuid', { primaryKeyConstraintName: 'USERS_PK' })
   readonly id: string;
 
@@ -31,9 +31,9 @@ export class User {
   @DeleteDateColumn({ type: 'timestamptz' })
   deletedAt: Date | null;
 
-  @OneToOne(() => UserUsage, (e) => e.user, { cascade: ['insert', 'remove'] })
-  usage: UserUsage;
+  @OneToOne(() => UserUsageEntity, (e) => e.user, { cascade: ['insert', 'remove'] })
+  usage: UserUsageEntity;
 
-  @OneToMany(() => FarmUser, (e) => e.user, { cascade: ['insert', 'remove'] })
-  farmUsers: FarmUser[];
+  @OneToMany(() => FarmUserEntity, (e) => e.user, { cascade: ['insert', 'remove'] })
+  farmUsers: FarmUserEntity[];
 }
