@@ -1,6 +1,6 @@
-import { RoleEntity, UserEntity } from '@app/infra/persistence/typeorm';
+import { Role, RoleUser } from '../../domain';
 
 export type GetRoleDetailsResult = {
-  role: RoleEntity;
-  users: UserEntity[];
+  role: Role;
+  users: RoleUser[];
 };

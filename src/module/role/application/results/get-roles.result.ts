@@ -1,6 +1,6 @@
-import { RoleEntity } from '@app/infra/persistence/typeorm';
+import { Role } from '../../domain';
 
 export type GetRolesResult = {
   total: number;
-  rows: RoleEntity[];
+  rows: Role[];
 };

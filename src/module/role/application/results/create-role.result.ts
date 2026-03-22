@@ -1,3 +1,3 @@
-export class CreateRoleResult {
+export type CreateRoleResult = {
   id: string;
-}
+};

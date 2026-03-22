@@ -1,11 +1,11 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Inject, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
 import { ContextService } from '@app/core/context';
 import { IS_PUBLIC_KEY, REQUIRED_PERMISSIONS_KEY, RequiredPermissionMetadata } from '@app/core/security';
-import { FarmUserRepository, RolePermissionRepository } from '@app/infra/persistence/typeorm';
 import { PermissionKey, PermissionKeyWildCard } from '@app/shared/domain';
 
+import { ROLE_FARM_USER_REPOSITORY, ROLE_PERMISSION_REPOSITORY, RoleFarmUserRepositoryPort, RolePermissionRepositoryPort } from '../application';
 import { ForbiddenPermissionException } from '../domain';
 
 @Injectable()
@@ -13,8 +13,11 @@ export class PermissionGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly contextService: ContextService,
-    private readonly farmUserRepository: FarmUserRepository,
-    private readonly rolePermissionRepository: RolePermissionRepository,
+
+    @Inject(ROLE_FARM_USER_REPOSITORY)
+    private readonly farmUserRepository: RoleFarmUserRepositoryPort,
+    @Inject(ROLE_PERMISSION_REPOSITORY)
+    private readonly rolePermissionRepository: RolePermissionRepositoryPort,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -48,9 +51,8 @@ export class PermissionGuard implements CanActivate {
     }
 
     const permissions = await this.rolePermissionRepository.findKeysByRoleId(farmUser.role.id);
-    const userPermissions = permissions.map(({ key }) => key);
 
-    const allowed = this.checkPermissions(userPermissions, metadata.permissions, metadata.options.mode);
+    const allowed = this.checkPermissions(permissions, metadata.permissions, metadata.options.mode);
 
     if (!allowed) {
       throw new ForbiddenPermissionException();

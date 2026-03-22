@@ -1,14 +1,43 @@
 import { Module } from '@nestjs/common';
 
-import { FarmUserEntity, FarmUserRepository, RoleEntity, RolePermissionEntity, RolePermissionRepository, RoleRepository, TypeOrmExModule } from '@app/infra/persistence/typeorm';
-
-import { RoleService } from './application';
+import {
+  CreateRoleCommandHandler,
+  DeleteRoleCommandHandler,
+  GetRoleDetailsQueryHandler,
+  GetRolesQueryHandler,
+  ROLE_FARM_USER_REPOSITORY,
+  ROLE_PERMISSION_REPOSITORY,
+  ROLE_REPOSITORY,
+  UpdateRoleCommandHandler,
+} from './application';
 import { PermissionGuardProvider } from './guards';
+import { TypeOrmRoleFarmUserRepository, TypeOrmRolePermissionRepository, TypeOrmRoleRepository } from './infra';
 import { RoleController } from './presentation/role.controller';
 
 @Module({
-  imports: [TypeOrmExModule.forFeature([RoleEntity, RolePermissionEntity, FarmUserEntity], [RoleRepository, RolePermissionRepository, FarmUserRepository])],
   controllers: [RoleController],
-  providers: [RoleService, PermissionGuardProvider],
+  providers: [
+    {
+      provide: ROLE_REPOSITORY,
+      useExisting: TypeOrmRoleRepository,
+    },
+    {
+      provide: ROLE_PERMISSION_REPOSITORY,
+      useExisting: TypeOrmRolePermissionRepository,
+    },
+    {
+      provide: ROLE_FARM_USER_REPOSITORY,
+      useExisting: TypeOrmRoleFarmUserRepository,
+    },
+    GetRoleDetailsQueryHandler,
+    GetRolesQueryHandler,
+    CreateRoleCommandHandler,
+    UpdateRoleCommandHandler,
+    DeleteRoleCommandHandler,
+    TypeOrmRoleRepository,
+    TypeOrmRolePermissionRepository,
+    TypeOrmRoleFarmUserRepository,
+    PermissionGuardProvider,
+  ],
 })
 export class RoleModule {}
