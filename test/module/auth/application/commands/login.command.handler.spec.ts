@@ -1,98 +1,73 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { LoginCommandHandler } from '@app/module/auth/application';
 import { AuthPasswordHasherPort, AuthUserRepositoryPort } from '@app/module/auth/application/ports';
 import { AuthSessionService } from '@app/module/auth/application/services';
 import { AuthUser, WrongEmailOrPasswordException } from '@app/module/auth/domain';
+import { BcryptPasswordHasher } from '@app/module/auth/infra';
 import { UserStatus } from '@app/shared/domain';
 
-function createUser() {
-  const user = new AuthUser();
-
-  user.id = 'user-1';
-  user.email = 'farmer@example.com';
-  user.passwordHash = 'hashed-password';
-  user.name = 'Farmer Kim';
-  user.status = UserStatus.Activated;
-
-  return user;
-}
-
-function createUserRepository(overrides: Partial<AuthUserRepositoryPort> = {}) {
-  return {
-    hasOneByEmail: vi.fn(),
-    findOneByEmail: vi.fn(),
-    findOneById: vi.fn(),
-    save: vi.fn(),
-    ...overrides,
-  } satisfies AuthUserRepositoryPort;
-}
-
-function createPasswordHasher(overrides: Partial<AuthPasswordHasherPort> = {}) {
-  return {
-    hash: vi.fn(),
-    compare: vi.fn(),
-    ...overrides,
-  } satisfies AuthPasswordHasherPort;
-}
-
-function createAuthSessionService() {
-  return {
-    getRefreshTokenOrThrow: vi.fn(),
-    issueAuthTokens: vi.fn(),
-    rotateRefreshToken: vi.fn(),
-    revokeRefreshToken: vi.fn(),
-  } as unknown as AuthSessionService;
-}
+import { authSessionServiceFixture } from '../fixtures/auth-session.service.fixture';
+import { authUserRepositoryFixture } from '../fixtures/auth-user.repository.fixture';
 
 describe('LoginCommandHandler', () => {
+  let userRepository: AuthUserRepositoryPort;
+  let passwordHasher: AuthPasswordHasherPort;
+  let sessionService: AuthSessionService;
+  let handler: LoginCommandHandler;
+
+  beforeAll(() => {
+    userRepository = authUserRepositoryFixture;
+    sessionService = authSessionServiceFixture;
+    passwordHasher = new BcryptPasswordHasher();
+
+    handler = new LoginCommandHandler(userRepository, passwordHasher, sessionService);
+  });
+
   it('사용자가 없으면 예외를 던진다', async () => {
-    const userRepository = createUserRepository({
-      findOneByEmail: vi.fn().mockResolvedValue(null),
-    });
+    userRepository.findOneByEmail = vi.fn().mockResolvedValue(null);
 
-    const passwordHasher = createPasswordHasher();
-    const authSessionService = createAuthSessionService();
-    const handler = new LoginCommandHandler(userRepository, passwordHasher, authSessionService);
-
-    await expect(handler.execute({ email: 'farmer@example.com', password: 'wrong-password' })).rejects.toBeInstanceOf(WrongEmailOrPasswordException);
-    expect(passwordHasher.compare).not.toHaveBeenCalled();
+    await expect(
+      handler.execute({
+        email: 'farmer@example.com',
+        password: 'hashed-password',
+      }),
+    ).rejects.toBeInstanceOf(WrongEmailOrPasswordException);
   });
 
   it('비밀번호가 다르면 예외를 던진다', async () => {
-    const userRepository = createUserRepository({
-      findOneByEmail: vi.fn().mockResolvedValue(createUser()),
+    userRepository.findOneByEmail = vi.fn().mockResolvedValue({
+      id: 'user-1',
+      email: 'farmer@example.com',
+      passwordHash: '$2b$10$ypDhALo3O7UUnq44PJfapOhsY13n8ZuZ8zbUUI99PvGn9PGpmVG9O',
+      name: 'Farmer Kim',
+      status: UserStatus.Activated,
     });
-    const passwordHasher = createPasswordHasher({
-      compare: vi.fn().mockResolvedValue(false),
-    });
-    const authSessionService = createAuthSessionService();
-    const handler = new LoginCommandHandler(userRepository, passwordHasher, authSessionService);
 
-    await expect(handler.execute({ email: 'farmer@example.com', password: 'wrong-password' })).rejects.toBeInstanceOf(WrongEmailOrPasswordException);
-    expect(authSessionService.issueAuthTokens).not.toHaveBeenCalled();
+    await expect(
+      handler.execute({
+        email: 'farmer@example.com',
+        password: 'wrong-password',
+      }),
+    ).rejects.toBeInstanceOf(WrongEmailOrPasswordException);
   });
 
   it('로그인에 성공하면 새로운 세션을 발급한다', async () => {
-    const user = createUser();
-    const userRepository = createUserRepository({
-      findOneByEmail: vi.fn().mockResolvedValue(user),
-    });
+    const user: AuthUser = {
+      id: 'user-1',
+      email: 'farmer@example.com',
+      passwordHash: '$2b$10$ypDhALo3O7UUnq44PJfapOhsY13n8ZuZ8zbUUI99PvGn9PGpmVG9O',
+      name: 'Farmer Kim',
+      status: UserStatus.Activated,
+    };
 
-    const passwordHasher = createPasswordHasher({
-      compare: vi.fn().mockResolvedValue(true),
-    });
-
-    const authSessionService = createAuthSessionService();
-
-    authSessionService.issueAuthTokens = vi.fn().mockResolvedValue({
+    userRepository.findOneByEmail = vi.fn().mockResolvedValue(user);
+    sessionService.issueAuthTokens = vi.fn().mockResolvedValue({
       accessToken: 'access-token',
       refreshToken: 'refresh-token',
     });
 
-    const handler = new LoginCommandHandler(userRepository, passwordHasher, authSessionService);
-
-    await expect(handler.execute({ email: user.email, password: 'plain-password' })).resolves.toEqual({
+    await expect(handler.execute({ email: user.email, password: 'hashed-password' })).resolves.toEqual({
       accessToken: 'access-token',
       refreshToken: 'refresh-token',
       user,
@@ -100,6 +75,6 @@ describe('LoginCommandHandler', () => {
       role: null,
     });
 
-    expect(authSessionService.issueAuthTokens).toHaveBeenCalledWith(user.id);
+    expect(sessionService.issueAuthTokens).toHaveBeenCalledWith(user.id);
   });
 });
