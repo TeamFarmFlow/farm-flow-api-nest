@@ -15,8 +15,10 @@ export enum PermissionKey {
   MemberRoleUpdate = 'member.role.update',
   MemberPayUpdate = 'member.pay.update',
   MemberRemove = 'member.remove',
-  AttendanceHistoryUpdate = 'attendance.history.update',
   PayrollRead = 'payroll.read',
+  PayrollCheck = 'payroll.check',
+  PayrollAttendanceHistoryUpdate = 'payroll.attendance.history.update',
+  PayrollAttendanceHistoryDelete = 'payroll.attendance.history.delete',
 }
 
 export const FARM_ADMIN_DEFAULT_PERMISSION_KEYS = Object.values(PermissionKey);

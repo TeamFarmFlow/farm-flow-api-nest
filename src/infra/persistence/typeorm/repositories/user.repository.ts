@@ -15,26 +15,27 @@ export class UserRepository extends TransactionalRepository<User> {
     super(repository);
   }
 
-  async hasOneByEmail(email: string, em?: EntityManager) {
-    return this.getRepository(em).existsBy({ email });
-  }
-
+  /**
+   * @deprecated
+   */
   async findOneByEmail(email: string, em?: EntityManager) {
     return this.getRepository(em).findOneBy({ email });
   }
 
+  /**
+   * @deprecated
+   */
   async findOneById(id: string, em?: EntityManager) {
     return this.getRepository(em).findOneByOrFail({ id });
   }
 
+  /**
+   * @deprecated
+   */
   async update(id: string, entityLike: DeepPartial<User>, em?: EntityManager) {
     return this.getRepository(em).update(id, {
       ...entityLike,
       updatedAt: () => 'NOW()',
     });
-  }
-
-  async save(user: DeepPartial<User>, em?: EntityManager) {
-    return this.getRepository(em).save(user);
   }
 }

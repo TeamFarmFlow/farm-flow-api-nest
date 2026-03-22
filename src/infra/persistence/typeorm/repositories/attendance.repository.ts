@@ -7,7 +7,7 @@ import { AttendanceStatus } from '@app/shared/domain';
 import { TransactionalRepository, TypeOrmExRepository } from '../common';
 import { Attendance, FarmUser, Role, User } from '../entities';
 
-type AttendanceStatisticRawRow = {
+type AttendancePayrollRawRow = {
   user_id: string;
   user_name: string;
   role_id: string | null;
@@ -17,6 +17,7 @@ type AttendanceStatisticRawRow = {
   pay_rate_per_hour: number;
   pay_deduction_amount: number;
   seconds: string | number;
+  need_check: boolean;
 };
 
 @TypeOrmExRepository(Attendance)
@@ -55,10 +56,13 @@ export class AttendanceRepository extends TransactionalRepository<Attendance> {
         'fu.payRatePerHour as pay_rate_per_hour',
         'fu.payDeductionAmount as pay_deduction_amount',
         'SUM(a.seconds) as seconds',
+        'BOOL_OR(a.checkedOutAt IS NULL) as "need_check"',
       ])
       .where('a.farmId = :farmId', { farmId })
       .andWhere('a.workDate >= :startDate', { startDate })
       .andWhere('a.workDate <= :endDate', { endDate })
+      .andWhere('a.payrolled IS FALSE')
+      .andWhere('a.deletedAt IS NULL')
       .groupBy('u.id')
       .addGroupBy('u.name')
       .addGroupBy('r.id')
@@ -68,7 +72,28 @@ export class AttendanceRepository extends TransactionalRepository<Attendance> {
       .addGroupBy('fu.payRatePerHour')
       .addGroupBy('fu.payDeductionAmount')
       .orderBy('u.id', 'ASC')
-      .getRawMany<AttendanceStatisticRawRow>();
+      .getRawMany<AttendancePayrollRawRow>();
+  }
+
+  async findPayrollsByFarmIdAndUserIdAndDateRange(farmId: string, userId: string, startDate: string, endDate: string, em?: EntityManager) {
+    return this.getRepository(em).find({
+      select: {
+        id: true,
+        workDate: true,
+        status: true,
+        checkedInAt: true,
+        checkedOutAt: true,
+        seconds: true,
+      },
+      where: {
+        farmId,
+        userId,
+        workDate: And(MoreThanOrEqual(startDate), LessThanOrEqual(endDate)),
+      },
+      order: {
+        workDate: 'ASC',
+      },
+    });
   }
 
   async findByWorkDate(farmId: string, userId: string, workDate: string, em?: EntityManager) {
@@ -91,6 +116,19 @@ export class AttendanceRepository extends TransactionalRepository<Attendance> {
     return this.getRepository(em).createQueryBuilder().insert().values(entityLike).orIgnore().execute();
   }
 
+  async update(id: string, farmId: string, userId: string, checkedInAt: Date, checkedOutAt: Date, em?: EntityManager) {
+    return this.getRepository(em).update(
+      { id, farmId, userId },
+      {
+        status: AttendanceStatus.CheckOut,
+        checkedInAt,
+        checkedOutAt,
+        seconds: () => 'EXTRACT(EPOCH FROM (NOW() - "checked_in_at"))::int',
+        updatedAt: () => 'NOW()',
+      },
+    );
+  }
+
   async updateToCheckOutByWorkDate(farmId: string, userId: string, workDate: string, em?: EntityManager) {
     return this.getRepository(em).update(
       { farmId, userId, workDate },
@@ -101,5 +139,9 @@ export class AttendanceRepository extends TransactionalRepository<Attendance> {
         updatedAt: () => 'NOW()',
       },
     );
+  }
+
+  async delete(id: string, farmId: string, userId: string, em?: EntityManager) {
+    return this.getRepository(em).softDelete({ id, farmId, userId });
   }
 }
