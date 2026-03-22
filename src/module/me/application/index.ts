@@ -1,2 +1,2 @@
 export * from './commands';
-export * from './me.service';
+export * from './ports';

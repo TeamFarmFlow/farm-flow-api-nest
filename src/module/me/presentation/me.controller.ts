@@ -3,7 +3,7 @@ import { ApiNoContentResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { ContextService } from '@app/core/context';
 
-import { MeService } from '../application';
+import { UpdateMyProfileCommandHandler } from '../application';
 
 import { UpdateMyProfileRequest } from './dto/request';
 
@@ -12,7 +12,7 @@ import { UpdateMyProfileRequest } from './dto/request';
 export class MeController {
   constructor(
     private readonly contextService: ContextService,
-    private readonly meService: MeService,
+    private readonly updateMyProfileCommandHandler: UpdateMyProfileCommandHandler,
   ) {}
 
   @Patch('profile')
@@ -20,6 +20,6 @@ export class MeController {
   @ApiOperation({ summary: '내 프로필 수정' })
   @ApiNoContentResponse()
   async updateMyProfile(@Body() body: UpdateMyProfileRequest) {
-    return this.meService.updateMyProfile(body.toCommand(this.contextService.userId));
+    return this.updateMyProfileCommandHandler.execute(body.toCommand(this.contextService.userId));
   }
 }
