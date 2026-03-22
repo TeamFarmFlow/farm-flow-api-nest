@@ -29,7 +29,7 @@ describe('LoginCommandHandler', () => {
 
     await expect(
       handler.execute({
-        email: 'farmer@example.com',
+        email: 'user@example.com',
         password: 'hashed-password',
       }),
     ).rejects.toBeInstanceOf(WrongEmailOrPasswordException);
@@ -38,15 +38,15 @@ describe('LoginCommandHandler', () => {
   it('비밀번호가 다르면 예외를 던진다', async () => {
     userRepository.findOneByEmail = vi.fn().mockResolvedValue({
       id: 'user-1',
-      email: 'farmer@example.com',
+      email: 'user@example.com',
       passwordHash: '$2b$10$ypDhALo3O7UUnq44PJfapOhsY13n8ZuZ8zbUUI99PvGn9PGpmVG9O',
-      name: 'Farmer Kim',
+      name: 'User',
       status: UserStatus.Activated,
     });
 
     await expect(
       handler.execute({
-        email: 'farmer@example.com',
+        email: 'user@example.com',
         password: 'wrong-password',
       }),
     ).rejects.toBeInstanceOf(WrongEmailOrPasswordException);
@@ -55,9 +55,9 @@ describe('LoginCommandHandler', () => {
   it('로그인에 성공하면 새로운 세션을 발급한다', async () => {
     const user: AuthUser = {
       id: 'user-1',
-      email: 'farmer@example.com',
+      email: 'user@example.com',
       passwordHash: '$2b$10$ypDhALo3O7UUnq44PJfapOhsY13n8ZuZ8zbUUI99PvGn9PGpmVG9O',
-      name: 'Farmer Kim',
+      name: 'User',
       status: UserStatus.Activated,
     };
 
