@@ -19,11 +19,14 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@app/config': resolve(__dirname, './src/config'),
-      '@app/core': resolve(__dirname, './src/core'),
-      '@app/shared': resolve(__dirname, './src/shared'),
-      '@app/infra': resolve(__dirname, './src/infra'),
-      '@app/module': resolve(__dirname, './src/module'),
+      '@app/core': resolve(__dirname, './apps/api/core'),
+      '@libs/shared': resolve(__dirname, './libs/shared/src'),
+      '@libs/config': resolve(__dirname, './libs/config/src'),
+      '@libs/http': resolve(__dirname, './libs/http/src'),
+      '@libs/datetime': resolve(__dirname, './libs/datetime/src'),
+      '@libs/email': resolve(__dirname, './libs/email/src'),
+      '@libs/persistence': resolve(__dirname, './libs/persistence/src'),
+      '@libs/redis': resolve(__dirname, './libs/redis/src'),
     },
   },
 });

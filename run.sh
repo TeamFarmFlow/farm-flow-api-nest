@@ -2,6 +2,13 @@
 
 set -eu
 
+ROOT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+APP_DIR="$ROOT_DIR/apps/api"
+ROOT_ENV_FILE="$ROOT_DIR/.env"
+APP_ENV_FILE="$APP_DIR/.env"
+ROOT_DOCKER_ENV_FILE=""
+APP_DOCKER_ENV_FILE=""
+
 IMAGE_NAME="farm-flow-api:latest"
 NETWORK_NAME="farm-flow_farm-flow"
 SERVICE_ALIAS="farm-flow-api"
@@ -11,6 +18,32 @@ CONTAINER_GREEN="${SERVICE_ALIAS}-green"
 
 STAGE_BLUE="${CONTAINER_BLUE}-stage"
 STAGE_GREEN="${CONTAINER_GREEN}-stage"
+
+require_env_file() {
+  FILE_PATH="$1"
+
+  if [ ! -f "$FILE_PATH" ]; then
+    echo "[ERROR] env file not found: $FILE_PATH"
+    exit 1
+  fi
+}
+
+prepare_docker_env_file() {
+  SOURCE_FILE="$1"
+  TARGET_FILE="$2"
+
+  sed -E 's/^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)[[:space:]]*=[[:space:]]*(.*)$/\1=\2/' "$SOURCE_FILE" >"$TARGET_FILE"
+}
+
+cleanup_temp_env_files() {
+  if [ -n "$ROOT_DOCKER_ENV_FILE" ] && [ -f "$ROOT_DOCKER_ENV_FILE" ]; then
+    rm -f "$ROOT_DOCKER_ENV_FILE"
+  fi
+
+  if [ -n "$APP_DOCKER_ENV_FILE" ] && [ -f "$APP_DOCKER_ENV_FILE" ]; then
+    rm -f "$APP_DOCKER_ENV_FILE"
+  fi
+}
 
 get_active_color() {
   if docker ps --format '{{.Names}}' | grep -qx "$CONTAINER_BLUE"; then
@@ -96,6 +129,8 @@ run_stage_container() {
 
   docker run -d \
     --name "$NAME" \
+    --env-file "$ROOT_DOCKER_ENV_FILE" \
+    --env-file "$APP_DOCKER_ENV_FILE" \
     --network "$NETWORK_NAME" \
     --restart unless-stopped \
     --log-opt max-size=10m \
@@ -110,6 +145,8 @@ run_live_container() {
 
   docker run -d \
     --name "$NAME" \
+    --env-file "$ROOT_DOCKER_ENV_FILE" \
+    --env-file "$APP_DOCKER_ENV_FILE" \
     --network "$NETWORK_NAME" \
     --network-alias "$SERVICE_ALIAS" \
     --restart unless-stopped \
@@ -141,6 +178,16 @@ cleanup_unused_images() {
       fi
     done
 }
+
+require_env_file "$ROOT_ENV_FILE"
+require_env_file "$APP_ENV_FILE"
+
+ROOT_DOCKER_ENV_FILE=$(mktemp)
+APP_DOCKER_ENV_FILE=$(mktemp)
+trap cleanup_temp_env_files EXIT
+
+prepare_docker_env_file "$ROOT_ENV_FILE" "$ROOT_DOCKER_ENV_FILE"
+prepare_docker_env_file "$APP_ENV_FILE" "$APP_DOCKER_ENV_FILE"
 
 ensure_network
 

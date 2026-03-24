@@ -1,0 +1,9 @@
+{
+  "name": "@farm-flow/worker",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "env-cmd -f ../../.env -f .env pnpm -C ../../ exec nest start worker --watch",
+    "build": "pnpm -C ../../ exec nest build worker",
+    "start": "node ../../dist/apps/worker/src/main"
+  }
+}
