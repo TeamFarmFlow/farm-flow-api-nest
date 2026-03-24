@@ -19,7 +19,9 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@app/core': resolve(__dirname, './apps/api/core'),
+      '@apps/api': resolve(__dirname, './apps/api/src'),
+      '@apps/worker': resolve(__dirname, './apps/worker/src'),
+      '@apps/migration': resolve(__dirname, './apps/migration/src'),
       '@libs/shared': resolve(__dirname, './libs/shared/src'),
       '@libs/config': resolve(__dirname, './libs/config/src'),
       '@libs/http': resolve(__dirname, './libs/http/src'),

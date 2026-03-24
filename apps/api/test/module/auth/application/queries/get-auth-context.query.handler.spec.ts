@@ -23,20 +23,25 @@ describe('GetAuthContextQueryHandler', () => {
   });
 
   it('farmId가 없으면 유저 정보만 반환한다', async () => {
-    const user = {
+    userRepository.findOneById = vi.fn().mockResolvedValue({
       id: 'user-1',
-      email: 'farmer@example.com',
+      email: 'user@example.com',
       passwordHash: 'hashed-password',
-      name: 'Farmer Kim',
+      name: 'User',
       status: UserStatus.Activated,
-    };
+    });
 
-    userRepository.findOneById = vi.fn().mockResolvedValue(user);
     farmUserRepository.findOneByFarmIdAndUserId = vi.fn();
     rolePermissionRepository.findKeysByRoleId = vi.fn();
 
-    await expect(handler.execute({ userId: user.id, farmId: null })).resolves.toEqual({
-      user,
+    await expect(handler.execute({ userId: 'user-1', farmId: null })).resolves.toEqual({
+      user: {
+        id: 'user-1',
+        email: 'user@example.com',
+        passwordHash: 'hashed-password',
+        name: 'User',
+        status: UserStatus.Activated,
+      },
       farm: null,
       role: null,
     });
@@ -45,44 +50,50 @@ describe('GetAuthContextQueryHandler', () => {
   });
 
   it('farmId가 있으면 역할 권한까지 채운 인증 컨텍스트를 반환한다', async () => {
-    const user = {
+    userRepository.findOneById = vi.fn().mockResolvedValue({
       id: 'user-1',
-      email: 'farmer@example.com',
+      email: 'user@example.com',
       passwordHash: 'hashed-password',
-      name: 'Farmer Kim',
+      name: 'User',
       status: UserStatus.Activated,
-    };
+    });
 
-    userRepository.findOneById = vi.fn().mockResolvedValue(user);
     farmUserRepository.findOneByFarmIdAndUserId = vi.fn().mockResolvedValue({
       farm: {
         id: 'farm-1',
-        name: 'Morning Farm',
+        name: 'Farm',
       },
       role: {
         id: 'role-1',
-        name: 'Manager',
+        name: 'Administrator',
         required: true,
-        super: false,
+        super: true,
         permissionKeys: [PermissionKey.MemberRead],
       },
     });
     rolePermissionRepository.findKeysByRoleId = vi.fn().mockResolvedValue([PermissionKey.MemberRead, PermissionKey.MemberRemove]);
 
-    await expect(handler.execute({ userId: user.id, farmId: 'farm-1' })).resolves.toEqual({
-      user,
+    await expect(handler.execute({ userId: 'user-1', farmId: 'farm-1' })).resolves.toEqual({
+      user: {
+        id: 'user-1',
+        email: 'user@example.com',
+        passwordHash: 'hashed-password',
+        name: 'User',
+        status: UserStatus.Activated,
+      },
       farm: {
         id: 'farm-1',
-        name: 'Morning Farm',
+        name: 'Farm',
       },
       role: {
         id: 'role-1',
-        name: 'Manager',
+        name: 'Administrator',
         required: true,
-        super: false,
+        super: true,
         permissionKeys: [PermissionKey.MemberRead, PermissionKey.MemberRemove],
       },
     });
+
     expect(rolePermissionRepository.findKeysByRoleId).toHaveBeenCalledWith('role-1');
   });
 });

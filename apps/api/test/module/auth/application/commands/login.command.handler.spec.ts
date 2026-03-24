@@ -23,13 +23,13 @@ describe('LoginCommandHandler', () => {
     handler = new LoginCommandHandler(userRepository, passwordHasher, sessionService);
   });
 
-  it('사용자가 없으면 예외를 던진다', async () => {
+  it('이메일 계정을 찾을 수 없으면 WrongEmailOrPasswordException를 던진다.', async () => {
     userRepository.findOneByEmail = vi.fn().mockResolvedValue(null);
 
     await expect(handler.execute({ email: 'user@example.com', password: 'hashed-password' })).rejects.toBeInstanceOf(WrongEmailOrPasswordException);
   });
 
-  it('비밀번호가 다르면 예외를 던진다', async () => {
+  it('비밀번호가 다르면 WrongEmailOrPasswordException를를 던진다.', async () => {
     userRepository.findOneByEmail = vi.fn().mockResolvedValue({
       id: 'user-1',
       email: 'user@example.com',
@@ -41,7 +41,7 @@ describe('LoginCommandHandler', () => {
     await expect(handler.execute({ email: 'user@example.com', password: 'wrong-password' })).rejects.toBeInstanceOf(WrongEmailOrPasswordException);
   });
 
-  it('로그인에 성공하면 새로운 세션을 발급한다', async () => {
+  it('로그인에 성공하면 JWT를 발급한다', async () => {
     const user: AuthUser = {
       id: 'user-1',
       email: 'user@example.com',

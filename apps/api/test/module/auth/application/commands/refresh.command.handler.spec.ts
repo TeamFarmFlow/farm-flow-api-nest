@@ -20,7 +20,18 @@ describe('RefreshCommandHandler', () => {
     handler = new RefreshCommandHandler(sessionService, getAuthContextQueryHandler);
   });
 
-  it('리프레시 토큰으로 인증 컨텍스트를 조회하고 세션을 회전한다', async () => {
+  it('리프레시 토큰으로 인증 컨텍스트를 조회하고 새로운 JWT를 발급한다.', async () => {
+    sessionService.getRefreshTokenOrThrow = vi.fn().mockResolvedValue({
+      id: 'refresh-token-1',
+      userId: 'user-1',
+      farmId: 'farm-1',
+    });
+
+    sessionService.rotateRefreshToken = vi.fn().mockResolvedValue({
+      accessToken: 'access-token',
+      refreshToken: 'refresh-token',
+    });
+
     getAuthContextQueryHandler.execute = vi.fn().mockResolvedValue({
       user: {
         id: 'user-1',
@@ -35,21 +46,11 @@ describe('RefreshCommandHandler', () => {
       },
       role: {
         id: 'role-1',
-        name: 'Manager',
+        name: 'Administrator',
         required: true,
-        super: false,
+        super: true,
         permissionKeys: [PermissionKey.MemberRead],
       },
-    });
-
-    sessionService.getRefreshTokenOrThrow = vi.fn().mockResolvedValue({
-      id: 'refresh-token-1',
-      userId: 'user-1',
-      farmId: 'farm-1',
-    });
-    sessionService.rotateRefreshToken = vi.fn().mockResolvedValue({
-      accessToken: 'access-token',
-      refreshToken: 'refresh-token',
     });
 
     await expect(handler.execute({ refreshTokenId: 'refresh-token-1' })).resolves.toMatchObject({
@@ -68,16 +69,18 @@ describe('RefreshCommandHandler', () => {
       },
       role: {
         id: 'role-1',
-        name: 'Manager',
+        name: 'Administrator',
         required: true,
-        super: false,
+        super: true,
         permissionKeys: [PermissionKey.MemberRead],
       },
     });
+
     expect(getAuthContextQueryHandler.execute).toHaveBeenCalledWith({
       userId: 'user-1',
       farmId: 'farm-1',
     });
+
     expect(sessionService.rotateRefreshToken).toHaveBeenCalledWith('refresh-token-1', 'user-1', 'farm-1');
   });
 });

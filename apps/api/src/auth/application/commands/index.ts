@@ -1,5 +1,5 @@
-export * from './checkin.command';
-export * from './checkin.command.handler';
+export * from './check-in.command';
+export * from './check-in.command.handler';
 export * from './login.command';
 export * from './login.command.handler';
 export * from './logout.command';

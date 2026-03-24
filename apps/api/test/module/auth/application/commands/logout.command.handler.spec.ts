@@ -13,7 +13,7 @@ describe('LogoutCommandHandler', () => {
     handler = new LogoutCommandHandler(sessionService);
   });
 
-  it('로그아웃 시 리프레시 토큰 폐기를 위임한다', async () => {
+  it('로그아웃 시 리프레시 토큰 폐기를 위임한다.', async () => {
     await handler.execute({ refreshTokenId: 'refresh-token-1' });
 
     expect(sessionService.revokeRefreshToken).toHaveBeenCalledWith('refresh-token-1');

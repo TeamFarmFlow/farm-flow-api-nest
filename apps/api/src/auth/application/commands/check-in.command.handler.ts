@@ -4,7 +4,7 @@ import { AUTH_SESSION_SERVICE, AuthSessionServicePort } from '../ports';
 import { GetAuthContextQueryHandler } from '../queries';
 import { AuthSessionResult } from '../result';
 
-import { CheckInCommand } from './checkin.command';
+import { CheckInCommand } from './check-in.command';
 
 @Injectable()
 export class CheckInCommandHandler {

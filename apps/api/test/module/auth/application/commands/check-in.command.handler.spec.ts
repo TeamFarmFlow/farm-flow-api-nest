@@ -20,7 +20,17 @@ describe('CheckInCommandHandler', () => {
     handler = new CheckInCommandHandler(sessionService, getAuthContextQueryHandler);
   });
 
-  it('리프레시 토큰을 확인하고 농장 체크인 세션으로 교체한다', async () => {
+  it('리프레시 토큰을 확인하고 농장 체크인 세션으로 교체한다.', async () => {
+    sessionService.getRefreshTokenOrThrow = vi.fn().mockResolvedValue({
+      userId: 'user-1',
+      farmId: null,
+    });
+
+    sessionService.rotateRefreshToken = vi.fn().mockResolvedValue({
+      accessToken: 'access-token',
+      refreshToken: 'refresh-token',
+    });
+
     getAuthContextQueryHandler.execute = vi.fn().mockResolvedValue({
       user: {
         id: 'user-1',
@@ -40,15 +50,6 @@ describe('CheckInCommandHandler', () => {
         super: true,
         permissionKeys: [PermissionKey.MemberRead],
       },
-    });
-
-    sessionService.getRefreshTokenOrThrow = vi.fn().mockResolvedValue({
-      userId: 'user-1',
-      farmId: null,
-    });
-    sessionService.rotateRefreshToken = vi.fn().mockResolvedValue({
-      accessToken: 'access-token',
-      refreshToken: 'refresh-token',
     });
 
     await expect(
