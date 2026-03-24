@@ -45,14 +45,13 @@ export class PermissionGuard implements CanActivate {
       throw new ForbiddenPermissionException();
     }
 
-    const farmUser = await this.farmUserRepository.findWithRole(farmId, userId);
+    const role = await this.farmUserRepository.findRole(farmId, userId);
 
-    if (!farmUser?.role?.id) {
+    if (!role?.id) {
       throw new ForbiddenPermissionException();
     }
 
-    const permissions = await this.rolePermissionRepository.findKeysByRoleId(farmUser.role.id);
-
+    const permissions = await this.rolePermissionRepository.findKeysByRoleId(role.id);
     const allowed = this.checkPermissions(permissions, metadata.permissions, metadata.options.mode);
 
     if (!allowed) {

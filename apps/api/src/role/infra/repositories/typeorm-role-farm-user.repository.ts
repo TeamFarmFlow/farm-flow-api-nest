@@ -5,6 +5,7 @@ import { DataSource, EntityManager } from 'typeorm';
 import { FarmUserEntity } from '@libs/persistence/typeorm';
 
 import { RoleFarmUserRepositoryPort } from '../../application';
+import { Role } from '../../domain';
 import { RoleTypeOrmMapper } from '../mappers';
 
 @Injectable()
@@ -15,7 +16,7 @@ export class TypeOrmRoleFarmUserRepository implements RoleFarmUserRepositoryPort
     return (em ?? this.dataSource).getRepository(FarmUserEntity);
   }
 
-  async findWithRole(farmId: string, userId: string) {
+  async findRole(farmId: string, userId: string): Promise<Role | null> {
     const farmUser = await this.getRepository()
       .createQueryBuilder('fu')
       .innerJoinAndMapOne('fu.role', 'fu.role', 'role')
@@ -23,10 +24,7 @@ export class TypeOrmRoleFarmUserRepository implements RoleFarmUserRepositoryPort
       .andWhere('fu.userId = :userId', { userId })
       .getOneOrFail();
 
-    return {
-      user: RoleTypeOrmMapper.toRoleUser(farmUser.user),
-      role: farmUser.role ? RoleTypeOrmMapper.toRole(farmUser.role) : null,
-    };
+    return farmUser.role ? RoleTypeOrmMapper.toRole(farmUser.role) : null;
   }
 
   async findUsersByRoleId(roleId: string, em?: EntityManager) {
