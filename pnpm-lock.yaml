@@ -189,6 +189,8 @@ importers:
 
   apps/api: {}
 
+  apps/migration: {}
+
   apps/worker: {}
 
 packages:

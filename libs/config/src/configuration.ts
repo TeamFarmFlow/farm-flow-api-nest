@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtModuleOptions } from '@nestjs/jwt';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
+import { resolve } from 'node:path';
 import { CookieOptions } from 'express';
 import { RedisOptions } from 'ioredis';
 import { utilities, WinstonModuleOptions } from 'nest-winston';
@@ -63,6 +64,7 @@ export class Configuration extends ConfigService {
   }
 
   get typeormModuleOptions(): TypeOrmModuleOptions {
+    const distRoot = resolve(__dirname, '../../../');
     const isLocal = this.nodeEnv === NodeEnv.Local;
 
     return {
@@ -75,8 +77,8 @@ export class Configuration extends ConfigService {
       synchronize: false,
       namingStrategy: new SnakeNamingStrategy(),
       logging: isLocal ? true : ['error', 'warn'],
-      entities: [process.cwd() + '/dist/**/*.entity.{js,ts}'],
-      migrations: [process.cwd() + '/dist/**/*-migration.{js,ts}'],
+      entities: [resolve(distRoot, 'libs/**/*.entity.{js,ts}')],
+      migrations: [resolve(distRoot, 'apps/**/*-migration.{js,ts}')],
     };
   }
 
