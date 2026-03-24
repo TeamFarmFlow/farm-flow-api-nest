@@ -2,8 +2,8 @@
 
 set -eu
 
-ROOT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
-APP_DIR="$ROOT_DIR/apps/api"
+APP_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+ROOT_DIR=$(CDPATH= cd -- "$APP_DIR/../.." && pwd)
 ROOT_ENV_FILE="$ROOT_DIR/.env"
 APP_ENV_FILE="$APP_DIR/.env"
 ROOT_DOCKER_ENV_FILE=""
