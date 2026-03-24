@@ -1,11 +1,18 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 
-import { WorkerController } from './worker.controller';
-import { WorkerService } from './worker.service';
+import { ConfigurationModule } from '@libs/config';
 
 @Module({
-  imports: [],
-  controllers: [WorkerController],
-  providers: [WorkerService],
+  imports: [ConfigurationModule.forRoot()],
 })
-export class WorkerModule {}
+export class WorkerModule implements OnModuleInit {
+  private async waitFor(seconds: number) {
+    return new Promise<void>((resolve) => setTimeout(resolve, seconds * 1000));
+  }
+
+  async onModuleInit() {
+    while (true) {
+      await this.waitFor(1);
+    }
+  }
+}
