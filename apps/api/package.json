@@ -4,6 +4,6 @@
   "scripts": {
     "dev": "env-cmd -f ../../.env -f .env pnpm -C ../../ exec nest start api --watch",
     "build": "pnpm -C ../../ exec nest build api",
-    "start": "node ../../dist/apps/farm-flow-api/apps/api/src/main"
+    "start": "node ../../dist/apps/api/apps/api/src/main"
   }
 }
