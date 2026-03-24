@@ -31,8 +31,6 @@
       "@libs/cookie/*": ["libs/cookie/src/*"],
       "@libs/datetime": ["libs/datetime/src"],
       "@libs/datetime/*": ["libs/datetime/src/*"],
-      "@libs/email": ["libs/email/src"],
-      "@libs/email/*": ["libs/email/src/*"],
       "@libs/http": ["libs/http/src"],
       "@libs/http/*": ["libs/http/src/*"],
       "@libs/persistence": ["libs/persistence/src"],

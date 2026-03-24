@@ -1,3 +1,4 @@
+import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -24,6 +25,7 @@ import { RoleModule } from './role';
   imports: [
     ConfigurationModule.forRoot(),
     ContextModule.forRoot(),
+    EventEmitterModule.forRoot(),
     WinstonModule.forRootAsync({
       inject: [Configuration],
       useFactory(configuration: Configuration) {
@@ -43,7 +45,12 @@ import { RoleModule } from './role';
         return configuration.redisOptions;
       },
     }),
-    EventEmitterModule.forRoot(),
+    BullModule.forRootAsync({
+      inject: [Configuration],
+      useFactory(configuration: Configuration) {
+        return { connection: configuration.redisOptions };
+      },
+    }),
     HealthModule,
     AttendanceModule,
     AuthModule,

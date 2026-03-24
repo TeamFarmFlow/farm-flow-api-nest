@@ -1,28 +1,32 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { createTransport, Transporter } from 'nodemailer';
-import SMTPTransport from 'nodemailer/lib/smtp-transport';
 
-import { EmailSendResult } from './types';
+import { InvitationEmailSenderPort } from '../../application';
+import { EMAIL_TRANSPORT_OPTIONS } from '../tokens';
+import { EmailTransportOptions } from '../types';
 
 @Injectable()
-export class EmailService {
-  private transporter: Transporter;
+export class NodemailerInvitationEmailSender implements InvitationEmailSenderPort {
+  private readonly transporter: Transporter;
 
-  constructor(readonly options: SMTPTransport.Options) {
+  constructor(
+    @Inject(EMAIL_TRANSPORT_OPTIONS)
+    private readonly options: EmailTransportOptions,
+  ) {
     this.transporter = createTransport(options);
   }
 
-  async sendInvitationMail(email: string, code: string, url: string, farmName: string) {
-    return this.transporter.sendMail({
+  async send(email: string, code: string, url: string, farmName: string): Promise<void> {
+    await this.transporter.sendMail({
       from: `"Farm Flow" <${this.options.auth?.user}>`,
       to: email,
       subject: `[Farm Flow] ${farmName} 농장의 초대권이 도착했습니다`,
-      html: this.buildInvitationTemplate(url, code, farmName),
-    }) as Promise<EmailSendResult>;
+      html: this.createTemplate(url, code, farmName),
+    });
   }
 
-  private buildInvitationTemplate(url: string, code: string, farmName: string) {
+  private createTemplate(url: string, code: string, farmName: string): string {
     return `
     <div style="font-family: Arial, sans-serif; padding: 24px; background:#f7f7f7">
       <div style="max-width:520px;margin:0 auto;background:white;padding:32px;border-radius:10px">

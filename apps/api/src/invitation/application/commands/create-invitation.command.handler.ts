@@ -2,14 +2,14 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { InvitationDuplicatedException, InvitationFarmNotFoundException } from '../../domain';
 import {
+  INVITATION_EMAIL_QUEUE,
   INVITATION_FARM_REPOSITORY,
   INVITATION_FARM_USER_REPOSITORY,
-  INVITATION_MAILER,
   INVITATION_STORE,
   INVITATION_USER_REPOSITORY,
+  InvitationEmailQueuePort,
   InvitationFarmRepositoryPort,
   InvitationFarmUserRepositoryPort,
-  InvitationMailerPort,
   InvitationStorePort,
   InvitationUserRepositoryPort,
 } from '../ports';
@@ -27,8 +27,8 @@ export class CreateInvitationCommandHandler {
     private readonly farmRepository: InvitationFarmRepositoryPort,
     @Inject(INVITATION_FARM_USER_REPOSITORY)
     private readonly farmUserRepository: InvitationFarmUserRepositoryPort,
-    @Inject(INVITATION_MAILER)
-    private readonly invitationMailer: InvitationMailerPort,
+    @Inject(INVITATION_EMAIL_QUEUE)
+    private readonly invitationEmailQueue: InvitationEmailQueuePort,
   ) {}
 
   async execute(command: CreateInvitationCommand): Promise<void> {
@@ -50,6 +50,6 @@ export class CreateInvitationCommandHandler {
 
     const invitation = await this.invitationStore.issue(command.email, command.url, command.farmId);
 
-    await this.invitationMailer.sendInvitation(invitation.email, invitation.code, invitation.url, farm.name);
+    await this.invitationEmailQueue.add(invitation.email, invitation.code, invitation.url, farm.name);
   }
 }

@@ -24,7 +24,6 @@ export default defineConfig({
       '@libs/config': resolve(__dirname, './libs/config/src'),
       '@libs/http': resolve(__dirname, './libs/http/src'),
       '@libs/datetime': resolve(__dirname, './libs/datetime/src'),
-      '@libs/email': resolve(__dirname, './libs/email/src'),
       '@libs/persistence': resolve(__dirname, './libs/persistence/src'),
       '@libs/redis': resolve(__dirname, './libs/redis/src'),
     },

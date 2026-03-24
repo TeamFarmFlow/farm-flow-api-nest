@@ -1,20 +1,20 @@
+import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 
-import { Configuration } from '@libs/config';
-import { EmailModule } from '@libs/email';
+import { QueueNames } from '@libs/shared';
 
 import {
   CreateInvitationCommandHandler,
+  INVITATION_EMAIL_QUEUE,
   INVITATION_FARM_REPOSITORY,
   INVITATION_FARM_USER_REPOSITORY,
-  INVITATION_MAILER,
   INVITATION_ROLE_REPOSITORY,
   INVITATION_STORE,
   INVITATION_USER_REPOSITORY,
   ValidateInvitationCodeCommandHandler,
 } from './application';
 import {
-  MailInvitationMailer,
+  InvitationEmailQueue,
   RedisInvitationStore,
   TypeOrmInvitationFarmRepository,
   TypeOrmInvitationFarmUserRepository,
@@ -24,14 +24,7 @@ import {
 import { InvitationController } from './presentation';
 
 @Module({
-  imports: [
-    EmailModule.registerAsync({
-      inject: [Configuration],
-      useFactory(configuration: Configuration) {
-        return configuration.mailOptions;
-      },
-    }),
-  ],
+  imports: [BullModule.registerQueue({ name: QueueNames.Email })],
   controllers: [InvitationController],
   providers: [
     {
@@ -39,8 +32,8 @@ import { InvitationController } from './presentation';
       useExisting: RedisInvitationStore,
     },
     {
-      provide: INVITATION_MAILER,
-      useExisting: MailInvitationMailer,
+      provide: INVITATION_EMAIL_QUEUE,
+      useExisting: InvitationEmailQueue,
     },
     {
       provide: INVITATION_USER_REPOSITORY,
@@ -61,7 +54,7 @@ import { InvitationController } from './presentation';
     CreateInvitationCommandHandler,
     ValidateInvitationCodeCommandHandler,
     RedisInvitationStore,
-    MailInvitationMailer,
+    InvitationEmailQueue,
     TypeOrmInvitationUserRepository,
     TypeOrmInvitationFarmRepository,
     TypeOrmInvitationFarmUserRepository,
