@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RedisClient } from '@libs/redis';
 
+import { RefreshToken } from '@apps/api/auth/domain';
 import { RedisRefreshTokenStore } from '@apps/api/auth/infra';
 
 describe('RedisRefreshTokenStore', () => {
@@ -22,6 +23,28 @@ describe('RedisRefreshTokenStore', () => {
     expect(redisClient.setJSON).toHaveBeenCalledTimes(1);
     expect(redisClient.expire).toHaveBeenCalledTimes(1);
     expect(refreshTokenId).toEqual(expect.any(String));
+  });
+
+  it('리프레시 토큰이 없으면 null을 반환한다.', async () => {
+    redisClient.getJSON = vi.fn().mockResolvedValue(null);
+
+    const refreshToken = await redisRefreshTokenStore.get('refresh-token-id');
+
+    expect(redisClient.getJSON).toHaveBeenCalledWith('jwt:refresh-token-id');
+    expect(refreshToken).toBe(null);
+  });
+
+  it('리프레시 토큰을 조회한다.', async () => {
+    redisClient.getJSON = vi.fn().mockResolvedValue({
+      id: 'refresh-token-id',
+      userId: 'user-1',
+      farmId: null,
+    });
+
+    const refreshToken = await redisRefreshTokenStore.get('refresh-token-id');
+
+    expect(redisClient.getJSON).toHaveBeenCalledWith('jwt:refresh-token-id');
+    expect(refreshToken).toBeInstanceOf(RefreshToken);
   });
 
   it('리프레시 토큰을 폐기한다.', async () => {
