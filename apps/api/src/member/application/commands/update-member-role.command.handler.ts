@@ -3,10 +3,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { MemberNotFoundException, MemberProtectedException, MemberRoleNotFoundException } from '../../domain';
 import { MEMBER_FARM_USER_REPOSITORY, MEMBER_ROLE_REPOSITORY, MemberFarmUserRepositoryPort, MemberRoleRepositoryPort } from '../ports';
 
-import { UpdateMemberCommand } from './update-member.command';
+import { UpdateMemberRoleCommand } from './update-member-role.command';
 
 @Injectable()
-export class UpdateMemberCommandHandler {
+export class UpdateMemberRoleCommandHandler {
   constructor(
     @Inject(MEMBER_ROLE_REPOSITORY)
     private readonly memberRoleRepository: MemberRoleRepositoryPort,
@@ -14,7 +14,7 @@ export class UpdateMemberCommandHandler {
     private readonly memberFarmUserRepository: MemberFarmUserRepositoryPort,
   ) {}
 
-  async execute(command: UpdateMemberCommand): Promise<void> {
+  async execute(command: UpdateMemberRoleCommand): Promise<void> {
     const farmUser = await this.memberFarmUserRepository.findOneWithRole(command.farmId, command.userId);
 
     if (!farmUser) {
@@ -39,8 +39,6 @@ export class UpdateMemberCommandHandler {
 
     await this.memberFarmUserRepository.update(command.farmId, command.userId, {
       roleId: command.roleId,
-      payRatePerHour: command.payRatePerHour,
-      payDeductionAmount: command.payDeductionAmount,
     });
   }
 }

@@ -7,9 +7,9 @@ import { PermissionKey } from '@libs/shared';
 
 import { ContextService } from '@apps/api/context';
 
-import { GetMembersQueryHandler, RemoveMemberCommandHandler, UpdateMemberCommandHandler } from '../application';
+import { GetMembersQueryHandler, RemoveMemberCommandHandler, UpdateMemberRoleCommandHandler } from '../application';
 
-import { GetMembersRequest, UpdateMemberRequest } from './dto/request';
+import { GetMembersRequest, UpdateMemberRoleRequest } from './dto/request';
 import { MembersResponse } from './dto/response';
 
 @ApiTags('멤버')
@@ -18,7 +18,7 @@ export class MemberController {
   constructor(
     private readonly contextService: ContextService,
     private readonly getMembersQueryHandler: GetMembersQueryHandler,
-    private readonly updateMemberCommandHandler: UpdateMemberCommandHandler,
+    private readonly updateMemberRoleCommandHandler: UpdateMemberRoleCommandHandler,
     private readonly removeMemberCommandHandler: RemoveMemberCommandHandler,
   ) {}
 
@@ -31,12 +31,12 @@ export class MemberController {
   }
 
   @RequiredPermissions([PermissionKey.MemberRoleUpdate, PermissionKey.MemberPayUpdate])
-  @Patch(':userId')
+  @Patch(':userId/role')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: '농장 멤버 정보 수정' })
+  @ApiOperation({ summary: '농장 멤버 역할 수정' })
   @ApiNoContentResponse()
-  async updateMember(@Param('userId', new ParseUuidStringPipe()) userId: string, @Body() body: UpdateMemberRequest) {
-    return this.updateMemberCommandHandler.execute(body.toCommand(this.contextService.farmId, userId));
+  async updateMemberRole(@Param('userId', new ParseUuidStringPipe()) userId: string, @Body() body: UpdateMemberRoleRequest) {
+    return this.updateMemberRoleCommandHandler.execute(body.toCommand(this.contextService.farmId, userId));
   }
 
   @RequiredPermissions([PermissionKey.MemberRemove])

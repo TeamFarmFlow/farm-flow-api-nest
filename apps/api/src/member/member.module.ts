@@ -1,8 +1,12 @@
 import { Module } from '@nestjs/common';
 
-import { GetMembersQueryHandler, MEMBER_FARM_USER_REPOSITORY, MEMBER_ROLE_REPOSITORY, RemoveMemberCommandHandler, UpdateMemberCommandHandler } from './application';
+import { GetMembersQueryHandler, MEMBER_FARM_USER_REPOSITORY, MEMBER_ROLE_REPOSITORY, RemoveMemberCommandHandler, UpdateMemberRoleCommandHandler } from './application';
 import { TypeOrmMemberFarmUserRepository, TypeOrmMemberRoleRepository } from './infra';
 import { MemberController } from './presentation';
+
+const repositories = [TypeOrmMemberRoleRepository, TypeOrmMemberFarmUserRepository];
+const queryHandlers = [GetMembersQueryHandler];
+const commandHandlers = [UpdateMemberRoleCommandHandler, RemoveMemberCommandHandler];
 
 @Module({
   controllers: [MemberController],
@@ -15,11 +19,9 @@ import { MemberController } from './presentation';
       provide: MEMBER_FARM_USER_REPOSITORY,
       useExisting: TypeOrmMemberFarmUserRepository,
     },
-    GetMembersQueryHandler,
-    UpdateMemberCommandHandler,
-    RemoveMemberCommandHandler,
-    TypeOrmMemberRoleRepository,
-    TypeOrmMemberFarmUserRepository,
+    ...repositories,
+    ...queryHandlers,
+    ...commandHandlers,
   ],
 })
 export class MemberModule {}
