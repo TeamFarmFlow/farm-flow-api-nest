@@ -23,6 +23,9 @@ import {
 } from './infra';
 import { InvitationController } from './presentation';
 
+const repositories = [TypeOrmInvitationUserRepository, TypeOrmInvitationFarmRepository, TypeOrmInvitationFarmUserRepository, TypeOrmInvitationRoleRepository];
+const commandHandlers = [CreateInvitationCommandHandler, ValidateInvitationCodeCommandHandler];
+
 @Module({
   imports: [BullModule.registerQueue({ name: QueueNames.Email })],
   controllers: [InvitationController],
@@ -51,14 +54,10 @@ import { InvitationController } from './presentation';
       provide: INVITATION_ROLE_REPOSITORY,
       useExisting: TypeOrmInvitationRoleRepository,
     },
-    CreateInvitationCommandHandler,
-    ValidateInvitationCodeCommandHandler,
     RedisInvitationStore,
     InvitationEmailQueue,
-    TypeOrmInvitationUserRepository,
-    TypeOrmInvitationFarmRepository,
-    TypeOrmInvitationFarmUserRepository,
-    TypeOrmInvitationRoleRepository,
+    ...repositories,
+    ...commandHandlers,
   ],
 })
 export class InvitationModule {}

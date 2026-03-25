@@ -7,7 +7,7 @@ import { UserUsageEntity } from '@libs/persistence/typeorm';
 import { FarmUserUsageRepositoryPort } from '../../application';
 
 @Injectable()
-export class TypeOrmFarmUserUsageRepositoryAdapter implements FarmUserUsageRepositoryPort {
+export class TypeOrmFarmUserUsageRepository implements FarmUserUsageRepositoryPort {
   constructor(private readonly dataSource: DataSource) {}
 
   private getRepository(em?: EntityManager) {

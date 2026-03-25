@@ -8,7 +8,7 @@ import { PermissionKey } from '@libs/shared';
 import { FarmRolePermissionRepositoryPort } from '../../application';
 
 @Injectable()
-export class TypeOrmFarmRolePermissionRepositoryAdapter implements FarmRolePermissionRepositoryPort {
+export class TypeOrmFarmRolePermissionRepository implements FarmRolePermissionRepositoryPort {
   constructor(private readonly dataSource: DataSource) {}
 
   private getRepository(em?: EntityManager) {

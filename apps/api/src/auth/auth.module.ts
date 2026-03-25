@@ -33,6 +33,10 @@ import {
 } from './infra';
 import { AuthController, ClearAuthSessionOnInvalidTokenInterceptor } from './presentation';
 
+const repositories = [TypeOrmAuthUserRepository, TypeOrmAuthFarmUserRepository, TypeOrmAuthRolePermissionRepository];
+const queryHandlers = [GetAuthContextQueryHandler];
+const commandHandlers = [RegisterCommandHandler, LoginCommandHandler, RefreshCommandHandler, CheckInCommandHandler, LogoutCommandHandler];
+
 @Module({
   imports: [
     CookieModule,
@@ -77,21 +81,15 @@ import { AuthController, ClearAuthSessionOnInvalidTokenInterceptor } from './pre
       provide: AUTH_SESSION_SERVICE,
       useExisting: AuthSessionService,
     },
-    AuthSessionService,
-    RegisterCommandHandler,
-    LoginCommandHandler,
-    RefreshCommandHandler,
-    CheckInCommandHandler,
-    LogoutCommandHandler,
-    GetAuthContextQueryHandler,
-    ClearAuthSessionOnInvalidTokenInterceptor,
-    RedisRefreshTokenStore,
+    JwtStrategy,
     JwtAccessTokenIssuer,
     BcryptPasswordHasher,
-    TypeOrmAuthUserRepository,
-    TypeOrmAuthFarmUserRepository,
-    TypeOrmAuthRolePermissionRepository,
-    JwtStrategy,
+    RedisRefreshTokenStore,
+    AuthSessionService,
+    ClearAuthSessionOnInvalidTokenInterceptor,
+    ...repositories,
+    ...queryHandlers,
+    ...commandHandlers,
   ],
 })
 export class AuthModule {}

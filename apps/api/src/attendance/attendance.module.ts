@@ -16,6 +16,10 @@ import {
 import { AttendanceQrCodeStore, TypeOrmAttendanceFarmUserRepository, TypeOrmAttendanceRepository } from './infra';
 import { AttendanceController, AttendanceQrCodeController } from './presentation';
 
+const repositories = [TypeOrmAttendanceFarmUserRepository, TypeOrmAttendanceRepository];
+const queryHandlers = [GetAttendancesQueryHandler, GetAttendanceByTodayQueryHandler];
+const commandHandlers = [CheckInAttendanceCommandHandler, CheckOutAttendanceCommandHandler, CreateAttendanceQrCodeCommandHandler];
+
 @Module({
   controllers: [AttendanceController, AttendanceQrCodeController],
   providers: [
@@ -31,14 +35,10 @@ import { AttendanceController, AttendanceQrCodeController } from './presentation
       provide: ATTENDANCE_QR_CODE_STORE,
       useExisting: AttendanceQrCodeStore,
     },
-    GetAttendancesQueryHandler,
-    GetAttendanceByTodayQueryHandler,
-    CheckInAttendanceCommandHandler,
-    CheckOutAttendanceCommandHandler,
-    CreateAttendanceQrCodeCommandHandler,
-    TypeOrmAttendanceFarmUserRepository,
-    TypeOrmAttendanceRepository,
     AttendanceQrCodeStore,
+    ...repositories,
+    ...queryHandlers,
+    ...commandHandlers,
   ],
 })
 export class AttendanceModule implements OnModuleInit {

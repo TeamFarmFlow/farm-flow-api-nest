@@ -8,7 +8,7 @@ import { FarmRepositoryPort } from '../../application';
 import { FarmTypeOrmMapper } from '../mappers';
 
 @Injectable()
-export class TypeOrmFarmRepositoryAdapter implements FarmRepositoryPort {
+export class TypeOrmFarmRepository implements FarmRepositoryPort {
   constructor(private readonly dataSource: DataSource) {}
 
   private getRepository(em?: EntityManager) {

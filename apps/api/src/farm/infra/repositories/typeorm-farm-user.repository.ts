@@ -9,7 +9,7 @@ import { FarmUser } from '../../domain';
 import { FarmTypeOrmMapper } from '../mappers';
 
 @Injectable()
-export class TypeOrmFarmUserRepositoryAdapter implements FarmUserRepositoryPort {
+export class TypeOrmFarmUserRepository implements FarmUserRepositoryPort {
   constructor(private readonly dataSource: DataSource) {}
 
   getRepository(em?: EntityManager) {

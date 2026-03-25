@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 
 import {
   CreateRoleCommandHandler,
@@ -10,13 +11,21 @@ import {
   ROLE_REPOSITORY,
   UpdateRoleCommandHandler,
 } from './application';
-import { PermissionGuardProvider } from './guards';
+import { PermissionGuard } from './guards';
 import { TypeOrmRoleFarmUserRepository, TypeOrmRolePermissionRepository, TypeOrmRoleRepository } from './infra';
 import { RoleController } from './presentation/role.controller';
+
+const repositories = [TypeOrmRoleRepository, TypeOrmRolePermissionRepository, TypeOrmRoleFarmUserRepository];
+const queryHandlers = [GetRoleDetailsQueryHandler, GetRolesQueryHandler];
+const commandHandlers = [CreateRoleCommandHandler, UpdateRoleCommandHandler, DeleteRoleCommandHandler];
 
 @Module({
   controllers: [RoleController],
   providers: [
+    {
+      provide: APP_GUARD,
+      useClass: PermissionGuard,
+    },
     {
       provide: ROLE_REPOSITORY,
       useExisting: TypeOrmRoleRepository,
@@ -29,15 +38,9 @@ import { RoleController } from './presentation/role.controller';
       provide: ROLE_FARM_USER_REPOSITORY,
       useExisting: TypeOrmRoleFarmUserRepository,
     },
-    GetRoleDetailsQueryHandler,
-    GetRolesQueryHandler,
-    CreateRoleCommandHandler,
-    UpdateRoleCommandHandler,
-    DeleteRoleCommandHandler,
-    TypeOrmRoleRepository,
-    TypeOrmRolePermissionRepository,
-    TypeOrmRoleFarmUserRepository,
-    PermissionGuardProvider,
+    ...repositories,
+    ...queryHandlers,
+    ...commandHandlers,
   ],
 })
 export class RoleModule {}

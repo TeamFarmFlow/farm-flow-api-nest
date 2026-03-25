@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 
 import {
   CreateFarmCommandHandler,
@@ -12,50 +13,44 @@ import {
   GetFarmsQueryHandler,
   UpdateFarmCommandHandler,
 } from './application';
-import { FarmAuthGuardProvider } from './guards';
-import {
-  TypeOrmFarmRepositoryAdapter,
-  TypeOrmFarmRolePermissionRepositoryAdapter,
-  TypeOrmFarmRoleRepositoryAdapter,
-  TypeOrmFarmUserRepositoryAdapter,
-  TypeOrmFarmUserUsageRepositoryAdapter,
-} from './infra';
+import { FarmAuthGuard } from './guards';
+import { TypeOrmFarmRepository, TypeOrmFarmRolePermissionRepository, TypeOrmFarmRoleRepository, TypeOrmFarmUserRepository, TypeOrmFarmUserUsageRepository } from './infra';
 import { FarmController } from './presentation';
+
+const repositories = [TypeOrmFarmRepository, TypeOrmFarmUserRepository, TypeOrmFarmRoleRepository, TypeOrmFarmRolePermissionRepository, TypeOrmFarmUserUsageRepository];
+const queryHandlers = [GetFarmsQueryHandler, GetFarmQueryHandler];
+const commandHandlers = [CreateFarmCommandHandler, UpdateFarmCommandHandler, DeleteFarmCommandHandler];
 
 @Module({
   controllers: [FarmController],
   providers: [
     {
+      provide: APP_GUARD,
+      useClass: FarmAuthGuard,
+    },
+    {
       provide: FARM_REPOSITORY,
-      useExisting: TypeOrmFarmRepositoryAdapter,
+      useExisting: TypeOrmFarmRepository,
     },
     {
       provide: FARM_USER_REPOSITORY,
-      useExisting: TypeOrmFarmUserRepositoryAdapter,
+      useExisting: TypeOrmFarmUserRepository,
     },
     {
       provide: FARM_ROLE_REPOSITORY,
-      useExisting: TypeOrmFarmRoleRepositoryAdapter,
+      useExisting: TypeOrmFarmRoleRepository,
     },
     {
       provide: FARM_ROLE_PERMISSION_REPOSITORY,
-      useExisting: TypeOrmFarmRolePermissionRepositoryAdapter,
+      useExisting: TypeOrmFarmRolePermissionRepository,
     },
     {
       provide: FARM_USER_USAGE_REPOSITORY,
-      useExisting: TypeOrmFarmUserUsageRepositoryAdapter,
+      useExisting: TypeOrmFarmUserUsageRepository,
     },
-    GetFarmsQueryHandler,
-    GetFarmQueryHandler,
-    CreateFarmCommandHandler,
-    UpdateFarmCommandHandler,
-    DeleteFarmCommandHandler,
-    TypeOrmFarmRepositoryAdapter,
-    TypeOrmFarmUserRepositoryAdapter,
-    TypeOrmFarmRoleRepositoryAdapter,
-    TypeOrmFarmRolePermissionRepositoryAdapter,
-    TypeOrmFarmUserUsageRepositoryAdapter,
-    FarmAuthGuardProvider,
+    ...repositories,
+    ...queryHandlers,
+    ...commandHandlers,
   ],
 })
 export class FarmModule {}

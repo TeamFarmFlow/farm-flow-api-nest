@@ -11,6 +11,10 @@ import {
 import { TypeOrmPayrollAttendanceRepository, TypeOrmPayrollFarmUserRepository } from './infra';
 import { PayrollController } from './presentation';
 
+const repositories = [TypeOrmPayrollAttendanceRepository, TypeOrmPayrollFarmUserRepository];
+const queryHandlers = [GetPayrollsQueryHandler, GetPayrollsByUserIdQueryHandler];
+const commandHandlers = [UpdatePayrollAttendanceCommandHandler, DeletePayrollAttendanceCommandHandler];
+
 @Module({
   controllers: [PayrollController],
   providers: [
@@ -22,12 +26,9 @@ import { PayrollController } from './presentation';
       provide: PAYROLL_FARM_USER_REPOSITORY,
       useExisting: TypeOrmPayrollFarmUserRepository,
     },
-    GetPayrollsQueryHandler,
-    GetPayrollsByUserIdQueryHandler,
-    UpdatePayrollAttendanceCommandHandler,
-    DeletePayrollAttendanceCommandHandler,
-    TypeOrmPayrollAttendanceRepository,
-    TypeOrmPayrollFarmUserRepository,
+    ...repositories,
+    ...queryHandlers,
+    ...commandHandlers,
   ],
 })
 export class PayrollModule {}
