@@ -7,12 +7,12 @@ import { AuthAccessTokenIssuerPort } from '../../application';
 
 @Injectable()
 export class JwtAccessTokenIssuer implements AuthAccessTokenIssuerPort {
+  constructor(private readonly jwtService: JwtService) {}
+
   async issue(userId: string, farmId: string | null = null): Promise<string> {
     const payload = JwtClaims.from(userId, farmId).toObject();
     const expiresIn = 10 * 60;
 
     return this.jwtService.signAsync(payload, { expiresIn });
   }
-
-  constructor(private readonly jwtService: JwtService) {}
 }
