@@ -4,6 +4,8 @@ import { Expose } from 'class-transformer';
 
 import { PermissionKey } from '@libs/shared';
 
+import { AuthRole } from '@apps/api/auth/domain';
+
 export class AuthRoleResponse {
   @ApiProperty({ type: String })
   @Expose()
@@ -24,4 +26,16 @@ export class AuthRoleResponse {
   @ApiProperty({ enum: PermissionKey, isArray: true })
   @Expose()
   permissionKeys: PermissionKey[];
+
+  public static fromAuthRole(authRole: AuthRole) {
+    const response = new AuthRoleResponse();
+
+    response.id = authRole.id;
+    response.name = authRole.name;
+    response.required = authRole.required;
+    response.super = authRole.super;
+    response.permissionKeys = authRole.permissionKeys;
+
+    return response;
+  }
 }

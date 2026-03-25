@@ -1,8 +1,6 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { toInstance } from '@libs/http';
-
 import { ContextService } from '@apps/api/context';
 
 import { CheckInAttendanceCommandHandler, CheckOutAttendanceCommandHandler, GetAttendanceByTodayQueryHandler, GetAttendancesQueryHandler } from '../application';
@@ -25,20 +23,19 @@ export class AttendanceController {
   @ApiOperation({ summary: '출퇴근 기록 조회' })
   @ApiOkResponse({ type: AttendancesResponse })
   async getAttendances(@Query() query: GetAttendancesRequest): Promise<AttendancesResponse> {
-    return toInstance(AttendancesResponse, await this.getAttendancesQueryHandler.execute(query.toQuery(this.contextService.farmId, this.contextService.userId)));
+    return AttendancesResponse.fromResult(await this.getAttendancesQueryHandler.execute(query.toQuery(this.contextService.farmId, this.contextService.userId)));
   }
 
   @Get('today')
   @ApiOperation({ summary: '오늘 출퇴근 기록 조회' })
   @ApiOkResponse({ type: AttendanceResponse })
   async getAttendanceByToday() {
-    return toInstance(
-      AttendanceResponse,
-      await this.getAttendanceByTodayQueryHandler.execute({
-        farmId: this.contextService.farmId,
-        userId: this.contextService.userId,
-      }),
-    );
+    const attendance = await this.getAttendanceByTodayQueryHandler.execute({
+      farmId: this.contextService.farmId,
+      userId: this.contextService.userId,
+    });
+
+    return attendance ? AttendanceResponse.fromAttendance(attendance) : null;
   }
 
   @Post('checkin')
@@ -46,7 +43,7 @@ export class AttendanceController {
   @ApiOperation({ summary: '출근' })
   @ApiOkResponse({ type: AttendanceResponse })
   async checkInAttendance(@Body() body: CheckInAttendanceRequest) {
-    return toInstance(AttendanceResponse, await this.checkInAttendanceCommandHandler.execute(body.toCommand(this.contextService.farmId, this.contextService.userId)));
+    return AttendanceResponse.fromAttendance(await this.checkInAttendanceCommandHandler.execute(body.toCommand(this.contextService.farmId, this.contextService.userId)));
   }
 
   @Post('checkout')
@@ -54,6 +51,6 @@ export class AttendanceController {
   @ApiOperation({ summary: '퇴근' })
   @ApiOkResponse({ type: AttendanceResponse })
   async checkOutAttendance(@Body() body: CheckOutAttendanceRequest) {
-    return toInstance(AttendanceResponse, await this.checkOutAttendanceCommandHandler.execute(body.toCommand(this.contextService.farmId, this.contextService.userId)));
+    return AttendanceResponse.fromAttendance(await this.checkOutAttendanceCommandHandler.execute(body.toCommand(this.contextService.farmId, this.contextService.userId)));
   }
 }

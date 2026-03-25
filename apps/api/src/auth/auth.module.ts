@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
+import { AuthGuard } from '@nestjs/passport';
 
 import { Configuration } from '@libs/config';
 import { CookieModule } from '@libs/cookie';
@@ -20,7 +22,7 @@ import {
   RefreshCommandHandler,
   RegisterCommandHandler,
 } from './application';
-import { JwtAuthGuardProvider, JwtStrategy } from './guards';
+import { JwtStrategy } from './guards';
 import {
   BcryptPasswordHasher,
   JwtAccessTokenIssuer,
@@ -43,6 +45,10 @@ import { AuthController, ClearAuthSessionOnInvalidTokenInterceptor } from './pre
   ],
   controllers: [AuthController],
   providers: [
+    {
+      provide: APP_GUARD,
+      useFactory: AuthGuard,
+    },
     {
       provide: AUTH_USER_REPOSITORY,
       useExisting: TypeOrmAuthUserRepository,
@@ -86,7 +92,6 @@ import { AuthController, ClearAuthSessionOnInvalidTokenInterceptor } from './pre
     TypeOrmAuthFarmUserRepository,
     TypeOrmAuthRolePermissionRepository,
     JwtStrategy,
-    JwtAuthGuardProvider,
   ],
 })
 export class AuthModule {}

@@ -1,8 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { FarmNotFoundException } from '../../domain';
+import { Farm, FarmNotFoundException } from '../../domain';
 import { FARM_USER_REPOSITORY, FarmUserRepositoryPort } from '../ports';
-import { GetFarmResult } from '../results';
 
 import { GetFarmQuery } from './get-farm.query';
 
@@ -13,7 +12,7 @@ export class GetFarmQueryHandler {
     private readonly farmUserRepository: FarmUserRepositoryPort,
   ) {}
 
-  async execute(query: GetFarmQuery): Promise<GetFarmResult> {
+  async execute(query: GetFarmQuery): Promise<Farm> {
     const farmUser = await this.farmUserRepository.findOneByFarmIdAndUserIdWithFarmAndRole(query.farmId, query.userId);
 
     if (!farmUser) {

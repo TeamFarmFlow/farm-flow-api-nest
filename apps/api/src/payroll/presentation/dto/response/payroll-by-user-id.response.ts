@@ -4,6 +4,8 @@ import { Expose } from 'class-transformer';
 
 import { AttendanceStatus } from '@libs/shared';
 
+import { PayrollAttendance } from '@apps/api/payroll/domain';
+
 export class PayrollByUserIdResponse {
   @ApiProperty({ type: String })
   @Expose()
@@ -28,4 +30,17 @@ export class PayrollByUserIdResponse {
   @ApiPropertyOptional({ type: Date })
   @Expose()
   checkedOutAt: Date | null;
+
+  public static fromPayrollAttendance(payrollAttendance: PayrollAttendance) {
+    const response = new PayrollByUserIdResponse();
+
+    response.id = payrollAttendance.id;
+    response.workDate = payrollAttendance.workDate;
+    response.status = payrollAttendance.status;
+    response.seconds = payrollAttendance.seconds;
+    response.checkedInAt = payrollAttendance.checkedInAt;
+    response.checkedOutAt = payrollAttendance.checkedOutAt;
+
+    return response;
+  }
 }

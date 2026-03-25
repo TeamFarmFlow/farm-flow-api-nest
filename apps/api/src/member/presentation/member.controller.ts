@@ -3,7 +3,6 @@ import { ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nes
 
 import { ParseUuidStringPipe } from '@libs/http';
 import { RequiredPermissions } from '@libs/http';
-import { toInstance } from '@libs/http';
 import { PermissionKey } from '@libs/shared';
 
 import { ContextService } from '@apps/api/context';
@@ -28,7 +27,7 @@ export class MemberController {
   @ApiOperation({ summary: '농장 멤버 조회' })
   @ApiOkResponse({ type: MembersResponse })
   async getMembers(@Query() query: GetMembersRequest) {
-    return toInstance(MembersResponse, await this.getMembersQueryHandler.execute(query.toQuery(this.contextService.farmId)));
+    return MembersResponse.fromResult(await this.getMembersQueryHandler.execute(query.toQuery(this.contextService.farmId)));
   }
 
   @RequiredPermissions([PermissionKey.MemberRoleUpdate, PermissionKey.MemberPayUpdate])

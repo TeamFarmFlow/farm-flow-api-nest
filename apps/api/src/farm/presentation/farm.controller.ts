@@ -3,7 +3,6 @@ import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, 
 
 import { ParseUuidStringPipe } from '@libs/http';
 import { RequiredPermissions, SkipFarmAuth } from '@libs/http';
-import { toInstance } from '@libs/http';
 import { PermissionKey } from '@libs/shared';
 
 import { ContextService } from '@apps/api/context';
@@ -30,21 +29,21 @@ export class FarmController {
   @ApiOperation({ summary: '내 농장 목록 조회' })
   @ApiOkResponse({ type: FarmsResponse })
   async getFarms() {
-    return toInstance(FarmsResponse, await this.getFarmsQueryHandler.execute(new GetFarmsRequest().toQuery(this.contextService.userId)));
+    return FarmsResponse.fromResult(await this.getFarmsQueryHandler.execute(new GetFarmsRequest().toQuery(this.contextService.userId)));
   }
 
   @Get(':id')
   @ApiOperation({ summary: '농장 정보 조회' })
   @ApiOkResponse({ type: FarmResponse })
   async getFarm(@Param('id', new ParseUuidStringPipe()) farmId: string) {
-    return toInstance(FarmResponse, await this.getFarmQueryHandler.execute({ farmId, userId: this.contextService.userId }));
+    return FarmResponse.fromFarm(await this.getFarmQueryHandler.execute({ farmId, userId: this.contextService.userId }));
   }
 
   @Post()
   @ApiOperation({ summary: '농장 생성' })
   @ApiCreatedResponse({ type: CreateFarmResponse })
   async createFarm(@Body() body: CreateFarmRequest): Promise<CreateFarmResponse> {
-    return toInstance(CreateFarmResponse, await this.createFarmCommandHandler.execute(body.toCommand(this.contextService.userId)));
+    return CreateFarmResponse.fromResult(await this.createFarmCommandHandler.execute(body.toCommand(this.contextService.userId)));
   }
 
   @RequiredPermissions([PermissionKey.FarmUpdate])

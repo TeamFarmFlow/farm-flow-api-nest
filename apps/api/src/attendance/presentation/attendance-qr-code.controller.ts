@@ -5,7 +5,6 @@ import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestj
 import { filter, fromEvent, map, Observable } from 'rxjs';
 
 import { RequiredPermissions } from '@libs/http';
-import { toInstance } from '@libs/http';
 import { PermissionKey } from '@libs/shared';
 
 import { ContextService } from '@apps/api/context';
@@ -32,7 +31,7 @@ export class AttendanceQrCodeController {
   getAttendanceQrCodeByDevice(@Param('deviceId') deviceId: string): Observable<{ data: AttendanceQrCodeResponse }> {
     return fromEvent(this.eventEmitter, 'attendance.qr.generated').pipe(
       filter((data: AttendanceQrCodeGeneratedEvent) => data.deviceId === deviceId),
-      map((data: AttendanceQrCodeGeneratedEvent) => ({ data: toInstance(AttendanceQrCodeResponse, data) })),
+      map((data: AttendanceQrCodeGeneratedEvent) => ({ data: AttendanceQrCodeResponse.fromEvent(data) })),
     );
   }
 
@@ -40,6 +39,6 @@ export class AttendanceQrCodeController {
   @ApiOperation({ summary: '출퇴근 QR 코드 생성' })
   @ApiCreatedResponse({ type: CreateAttendanceQrCodeResponse })
   async createAttendanceQrCode(@Body() body: CreateAttendanceQrCodeRequest): Promise<CreateAttendanceQrCodeResponse> {
-    return toInstance(CreateAttendanceQrCodeResponse, await this.createAttendanceQrCodeCommandHandler.execute(body.toCommand(this.contextService.farmId)));
+    return CreateAttendanceQrCodeResponse.fromResult(await this.createAttendanceQrCodeCommandHandler.execute(body.toCommand(this.contextService.farmId)));
   }
 }

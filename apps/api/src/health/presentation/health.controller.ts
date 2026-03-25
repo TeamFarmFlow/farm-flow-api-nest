@@ -2,7 +2,6 @@ import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { Public } from '@libs/http';
-import { toInstance } from '@libs/http';
 
 import { GetHealthQueryHandler } from '../application';
 
@@ -17,6 +16,6 @@ export class HealthController {
   @Get()
   @ApiOkResponse({ type: HealthResponse })
   health(): HealthResponse {
-    return toInstance(HealthResponse, this.getHealthQueryHandler.execute());
+    return HealthResponse.fromHealth(this.getHealthQueryHandler.execute());
   }
 }

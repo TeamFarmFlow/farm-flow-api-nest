@@ -4,6 +4,8 @@ import { Expose } from 'class-transformer';
 
 import { AttendanceStatus } from '@libs/shared';
 
+import { Attendance } from '@apps/api/attendance/domain';
+
 export class AttendanceResponse {
   @ApiProperty({ type: String })
   @Expose()
@@ -28,4 +30,17 @@ export class AttendanceResponse {
   @ApiProperty({ type: Number })
   @Expose()
   seconds: number;
+
+  public static fromAttendance(attendance: Attendance) {
+    const response = new AttendanceResponse();
+
+    response.id = attendance.id;
+    response.workDate = attendance.workDate;
+    response.status = attendance.status;
+    response.checkedInAt = attendance.checkedInAt;
+    response.checkedOutAt = attendance.checkedOutAt;
+    response.seconds = attendance.seconds;
+
+    return response;
+  }
 }

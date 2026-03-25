@@ -2,6 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { Expose, Type } from 'class-transformer';
 
+import { GetAttendancesResult } from '@apps/api/attendance/application';
+
 import { AttendanceResponse } from './attendance.response';
 
 export class AttendancesResponse {
@@ -13,4 +15,13 @@ export class AttendancesResponse {
   @Type(() => AttendanceResponse)
   @Expose()
   rows: AttendanceResponse[];
+
+  public static fromResult(result: GetAttendancesResult) {
+    const response = new AttendancesResponse();
+
+    response.total = result.total;
+    response.rows = response.rows.map((row) => AttendanceResponse.fromAttendance(row));
+
+    return response;
+  }
 }

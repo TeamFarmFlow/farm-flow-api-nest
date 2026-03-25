@@ -2,7 +2,6 @@ import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { RequiredPermissions, SkipFarmAuth } from '@libs/http';
-import { toInstance } from '@libs/http';
 import { PermissionKey } from '@libs/shared';
 
 import { ContextService } from '@apps/api/context';
@@ -35,6 +34,6 @@ export class InvitationController {
   @ApiOperation({ summary: '초대장 사용' })
   @ApiOkResponse({ type: ValidateInvitationCodeResponse })
   async validateInvitationCode(@Body() body: ValidateInvitationCodeRequest): Promise<ValidateInvitationCodeResponse> {
-    return toInstance(ValidateInvitationCodeResponse, await this.validateInvitationCodeCommandHandler.execute(body.toCommand(this.contextService.userId)));
+    return ValidateInvitationCodeResponse.fromResult(await this.validateInvitationCodeCommandHandler.execute(body.toCommand(this.contextService.userId)));
   }
 }

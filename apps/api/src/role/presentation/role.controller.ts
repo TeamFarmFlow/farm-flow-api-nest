@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { ParseUuidStringPipe, RequiredPermissions, toInstance } from '@libs/http';
+import { ParseUuidStringPipe, RequiredPermissions } from '@libs/http';
 import { PermissionKey } from '@libs/shared';
 
 import { ContextService } from '@apps/api/context';
@@ -29,7 +29,7 @@ export class RoleController {
   @ApiOperation({ summary: '역할 상세 조회' })
   @ApiOkResponse({ type: RoleDetailsResponse })
   async getRoleDetails(@Param('id', new ParseUuidStringPipe()) id: string) {
-    return toInstance(RoleDetailsResponse, await this.getRoleDetailsQueryHandler.execute({ roleId: id }));
+    return RoleDetailsResponse.fromResult(await this.getRoleDetailsQueryHandler.execute({ roleId: id }));
   }
 
   @RequiredPermissions([PermissionKey.RoleRead])
@@ -37,7 +37,7 @@ export class RoleController {
   @ApiOperation({ summary: '역할 목록 조회' })
   @ApiOkResponse({ type: RolesResponse })
   async getRoles(): Promise<RolesResponse> {
-    return toInstance(RolesResponse, await this.getRolesQueryHandler.execute(new GetRolesRequest().toQuery(this.contextService.farmId)));
+    return RolesResponse.fromResult(await this.getRolesQueryHandler.execute(new GetRolesRequest().toQuery(this.contextService.farmId)));
   }
 
   @RequiredPermissions([PermissionKey.RoleCreate])
@@ -45,7 +45,7 @@ export class RoleController {
   @ApiOperation({ summary: '역할 생성' })
   @ApiCreatedResponse({ type: CreateRoleResponse })
   async createRole(@Body() body: CreateRoleRequest): Promise<CreateRoleResponse> {
-    return toInstance(CreateRoleResponse, await this.createRoleCommandHandler.execute(body.toCommand(this.contextService.farmId)));
+    return CreateRoleResponse.fromResult(await this.createRoleCommandHandler.execute(body.toCommand(this.contextService.farmId)));
   }
 
   @RequiredPermissions([PermissionKey.RoleUpdate])

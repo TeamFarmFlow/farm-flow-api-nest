@@ -3,7 +3,6 @@ import { ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nes
 
 import { ParseUuidStringPipe } from '@libs/http';
 import { RequiredPermissions } from '@libs/http';
-import { toInstance } from '@libs/http';
 import { PermissionKey } from '@libs/shared';
 
 import { ContextService } from '@apps/api/context';
@@ -29,7 +28,7 @@ export class PayrollController {
   @ApiOperation({ summary: '급여 정산 목록 조회' })
   @ApiOkResponse({ type: PayrollsResponse })
   async getPayrolls(@Query() query: GetPayrollsRequest): Promise<PayrollsResponse> {
-    return toInstance(PayrollsResponse, await this.getPayrollsQueryHandler.execute(query.toQuery(this.contextService.farmId)));
+    return PayrollsResponse.fromResult(await this.getPayrollsQueryHandler.execute(query.toQuery(this.contextService.farmId)));
   }
 
   @RequiredPermissions([PermissionKey.PayrollRead])
@@ -37,7 +36,7 @@ export class PayrollController {
   @ApiOperation({ summary: '급여 정산 대상 목록 조회' })
   @ApiOkResponse({ type: PayrollsByUserIdResponse })
   async getPayrollsByUserId(@Param('userId', new ParseUuidStringPipe()) userId: string, @Query() query: GetPayrollsByUserIdRequest) {
-    return toInstance(PayrollsByUserIdResponse, await this.getPayrollsByUserIdQueryHandler.execute(query.toQuery(userId, this.contextService.farmId)));
+    return PayrollsByUserIdResponse.fromResult(await this.getPayrollsByUserIdQueryHandler.execute(query.toQuery(userId, this.contextService.farmId)));
   }
 
   @RequiredPermissions([PermissionKey.PayrollAttendanceHistoryUpdate])

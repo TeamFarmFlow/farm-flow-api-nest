@@ -2,6 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { Expose, Type } from 'class-transformer';
 
+import { GetPayrollsByUserIdResult } from '@apps/api/payroll/application';
+
 import { PayrollByUserIdResponse } from './payroll-by-user-id.response';
 
 export class PayrollsByUserIdResponse {
@@ -21,4 +23,15 @@ export class PayrollsByUserIdResponse {
   @Type(() => PayrollByUserIdResponse)
   @Expose()
   rows: PayrollByUserIdResponse[];
+
+  public static fromResult(result: GetPayrollsByUserIdResult) {
+    const response = new PayrollsByUserIdResponse();
+
+    response.total = result.total;
+    response.payRatePerHour = result.payRatePerHour;
+    response.payDeductionAmount = result.payDeductionAmount;
+    response.rows = result.rows.map((row) => PayrollByUserIdResponse.fromPayrollAttendance(row));
+
+    return response;
+  }
 }

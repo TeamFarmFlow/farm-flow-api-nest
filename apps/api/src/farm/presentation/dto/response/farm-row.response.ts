@@ -1,6 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import { Expose, Type } from 'class-transformer';
+
+import { FarmUser } from '@apps/api/farm/domain';
 
 import { FarmResponse } from './farm.response';
 import { FarmRoleResponse } from './farm-role.response';
@@ -11,8 +13,17 @@ export class FarmRowResponse {
   @Expose()
   farm: FarmResponse;
 
-  @ApiProperty({ type: FarmRoleResponse })
+  @ApiPropertyOptional({ type: FarmRoleResponse })
   @Type(() => FarmRoleResponse)
   @Expose()
-  role: FarmRoleResponse;
+  role: FarmRoleResponse | null;
+
+  public static fromFarmUser(farmUser: FarmUser) {
+    const response = new FarmRowResponse();
+
+    response.farm = FarmResponse.fromFarm(farmUser.farm);
+    response.role = farmUser.role ? FarmRoleResponse.fromFarmRole(farmUser.role) : null;
+
+    return response;
+  }
 }

@@ -5,7 +5,6 @@ import { type Request, type Response } from 'express';
 
 import { COOKIE_SERVICE, CookieServicePort } from '@libs/cookie';
 import { Public, SkipFarmAuth } from '@libs/http';
-import { toInstance } from '@libs/http';
 
 import { ContextService } from '@apps/api/context';
 
@@ -39,7 +38,7 @@ export class AuthController {
 
     this.cookieService.setAuthSession(res, result.accessToken, result.refreshToken);
 
-    return toInstance(AuthResponse, result);
+    return AuthResponse.fromResult(result);
   }
 
   @Public()
@@ -53,7 +52,7 @@ export class AuthController {
 
     this.cookieService.setAuthSession(res, result.accessToken, result.refreshToken);
 
-    return toInstance(AuthResponse, result);
+    return AuthResponse.fromResult(result);
   }
 
   @Public()
@@ -67,7 +66,7 @@ export class AuthController {
 
     this.cookieService.setAuthSession(res, result.accessToken, result.refreshToken);
 
-    return toInstance(AuthResponse, result);
+    return AuthResponse.fromResult(result);
   }
 
   @SkipFarmAuth()
@@ -81,7 +80,7 @@ export class AuthController {
 
     this.cookieService.setAuthSession(res, result.accessToken, result.refreshToken);
 
-    return toInstance(AuthResponse, result);
+    return AuthResponse.fromResult(result);
   }
 
   @Public()

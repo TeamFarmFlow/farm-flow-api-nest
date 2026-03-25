@@ -2,6 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { Expose } from 'class-transformer';
 
+import { PayrollRole } from '@apps/api/payroll/domain';
+
 export class PayrollRoleResponse {
   @ApiProperty({ type: String })
   @Expose()
@@ -18,4 +20,15 @@ export class PayrollRoleResponse {
   @ApiProperty({ type: Boolean })
   @Expose()
   required: boolean;
+
+  public static fromPayrollRole(payrollRole: PayrollRole) {
+    const response = new PayrollRoleResponse();
+
+    response.id = payrollRole.id;
+    response.name = payrollRole.name;
+    response.super = payrollRole.super;
+    response.required = payrollRole.required;
+
+    return response;
+  }
 }
