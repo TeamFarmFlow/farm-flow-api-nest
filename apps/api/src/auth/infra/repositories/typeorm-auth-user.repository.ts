@@ -16,7 +16,7 @@ export class TypeOrmAuthUserRepository implements AuthUserRepositoryPort {
     return (em ?? this.dataSource).getRepository(UserEntity);
   }
 
-  hasOneByEmail(email: string): Promise<boolean> {
+  async hasOneByEmail(email: string): Promise<boolean> {
     return this.getRepository().existsBy({ email });
   }
 
