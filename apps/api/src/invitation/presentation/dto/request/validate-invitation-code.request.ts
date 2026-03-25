@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { IsNotEmpty } from 'class-validator';
 
+import { ContextUser } from '@apps/api/context';
 import { ValidateInvitationCodeCommand } from '@apps/api/invitation/application';
 
 export class ValidateInvitationCodeRequest {
@@ -9,9 +10,9 @@ export class ValidateInvitationCodeRequest {
   @IsNotEmpty()
   readonly code: string;
 
-  toCommand(userId: string): ValidateInvitationCodeCommand {
+  toCommand(contextUser: ContextUser): ValidateInvitationCodeCommand {
     return {
-      userId,
+      userId: contextUser.userId,
       code: this.code,
     };
   }

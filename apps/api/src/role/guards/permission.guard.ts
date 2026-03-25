@@ -4,7 +4,7 @@ import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY, REQUIRED_PERMISSIONS_KEY, RequiredPermissionMetadata } from '@libs/http';
 import { PermissionKey, PermissionKeyWildCard } from '@libs/shared';
 
-import { ContextService } from '@apps/api/context';
+import { CONTEXT_SERVICE, ContextServicePort } from '@apps/api/context';
 
 import { ROLE_FARM_USER_REPOSITORY, ROLE_PERMISSION_REPOSITORY, RoleFarmUserRepositoryPort, RolePermissionRepositoryPort } from '../application';
 import { ForbiddenPermissionException } from '../domain';
@@ -13,8 +13,8 @@ import { ForbiddenPermissionException } from '../domain';
 export class PermissionGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly contextService: ContextService,
-
+    @Inject(CONTEXT_SERVICE)
+    private readonly contextService: ContextServicePort,
     @Inject(ROLE_FARM_USER_REPOSITORY)
     private readonly farmUserRepository: RoleFarmUserRepositoryPort,
     @Inject(ROLE_PERMISSION_REPOSITORY)
@@ -22,6 +22,8 @@ export class PermissionGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    this.contextService.context = context;
+
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [context.getHandler(), context.getClass()]);
 
     if (isPublic) {
@@ -38,14 +40,13 @@ export class PermissionGuard implements CanActivate {
       return true;
     }
 
-    const userId = this.contextService.userId;
-    const farmId = this.contextService.farmId;
+    const contextUser = this.contextService.user;
 
-    if (!farmId) {
+    if (!contextUser.farmId) {
       throw new ForbiddenPermissionException();
     }
 
-    const role = await this.farmUserRepository.findRole(farmId, userId);
+    const role = await this.farmUserRepository.findRole(contextUser.farmId, contextUser.userId);
 
     if (!role?.id) {
       throw new ForbiddenPermissionException();

@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { IsInt, IsNotEmpty, Length } from 'class-validator';
 
+import { ContextUser } from '@apps/api/context';
 import { CreateFarmCommand } from '@apps/api/farm/application';
 
 export class CreateFarmRequest {
@@ -20,9 +21,9 @@ export class CreateFarmRequest {
   @IsNotEmpty()
   readonly payDeductionAmount: number;
 
-  toCommand(userId: string): CreateFarmCommand {
+  toCommand(contextUser: ContextUser): CreateFarmCommand {
     return {
-      userId,
+      userId: contextUser.userId,
       name: this.name,
       payRatePerHour: this.payRatePerHour,
       payDeductionAmount: this.payDeductionAmount,

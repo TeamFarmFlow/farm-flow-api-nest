@@ -7,6 +7,7 @@ import { v4 } from 'uuid';
 
 import { ContextService } from './context.service';
 import { ContextKey } from './enums';
+import { CONTEXT_SERVICE } from './ports';
 
 @Module({})
 export class ContextModule {
@@ -39,8 +40,14 @@ export class ContextModule {
           },
         }),
       ],
-      providers: [ContextService],
-      exports: [ContextService],
+      providers: [
+        {
+          provide: CONTEXT_SERVICE,
+          useExisting: ContextService,
+        },
+        ContextService,
+      ],
+      exports: [CONTEXT_SERVICE],
     };
   }
 }

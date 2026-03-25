@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { IsEmail, IsNotEmpty, IsUrl } from 'class-validator';
 
+import { ContextUser } from '@apps/api/context';
 import { CreateInvitationCommand } from '@apps/api/invitation/application';
 
 export class CreateInvitationRequest {
@@ -18,9 +19,9 @@ export class CreateInvitationRequest {
   @IsNotEmpty()
   readonly url: string;
 
-  toCommand(farmId: string): CreateInvitationCommand {
+  toCommand(contextUser: ContextUser): CreateInvitationCommand {
     return {
-      farmId,
+      farmId: contextUser.farmId,
       email: this.email,
       url: this.url,
     };

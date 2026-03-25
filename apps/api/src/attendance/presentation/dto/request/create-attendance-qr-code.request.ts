@@ -3,6 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 import { CreateAttendanceQrCodeCommand } from '@apps/api/attendance/application';
+import { ContextUser } from '@apps/api/context';
 
 export class CreateAttendanceQrCodeRequest {
   @ApiProperty({ type: String })
@@ -10,9 +11,9 @@ export class CreateAttendanceQrCodeRequest {
   @IsNotEmpty()
   readonly deviceId: string;
 
-  toCommand(farmId: string): CreateAttendanceQrCodeCommand {
+  toCommand(contextUser: ContextUser): CreateAttendanceQrCodeCommand {
     return {
-      farmId,
+      farmId: contextUser.farmId,
       deviceId: this.deviceId,
     };
   }

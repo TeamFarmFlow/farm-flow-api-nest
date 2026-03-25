@@ -6,7 +6,7 @@ import { type Request, type Response } from 'express';
 import { COOKIE_SERVICE, CookieServicePort } from '@libs/cookie';
 import { Public, SkipFarmAuth } from '@libs/http';
 
-import { ContextService } from '@apps/api/context';
+import { CONTEXT_SERVICE, ContextServicePort } from '@apps/api/context';
 
 import { CheckInCommandHandler, LoginCommandHandler, LogoutCommandHandler, RefreshCommandHandler, RegisterCommandHandler } from '../application';
 
@@ -19,7 +19,8 @@ import { ClearAuthSessionOnInvalidTokenInterceptor } from './interceptors';
 @UseInterceptors(ClearAuthSessionOnInvalidTokenInterceptor)
 export class AuthController {
   constructor(
-    private readonly contextService: ContextService,
+    @Inject(CONTEXT_SERVICE)
+    private readonly contextService: ContextServicePort,
     @Inject(COOKIE_SERVICE)
     private readonly cookieService: CookieServicePort,
     private readonly registerCommandHandler: RegisterCommandHandler,
@@ -76,7 +77,7 @@ export class AuthController {
   async checkIn(@Body() body: CheckInRequest, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     this.cookieService.setCacheControl(res);
 
-    const result = await this.checkInCommandHandler.execute(body.toCommand(this.contextService.userId, this.cookieService.parseRefreshToken(req)));
+    const result = await this.checkInCommandHandler.execute(body.toCommand(this.contextService.user, this.cookieService.parseRefreshToken(req)));
 
     this.cookieService.setAuthSession(res, result.accessToken, result.refreshToken);
 

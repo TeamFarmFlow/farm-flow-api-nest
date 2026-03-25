@@ -1,7 +1,7 @@
-import { Body, Controller, HttpCode, HttpStatus, Patch } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Inject, Patch } from '@nestjs/common';
 import { ApiNoContentResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { ContextService } from '@apps/api/context';
+import { CONTEXT_SERVICE, ContextServicePort } from '@apps/api/context';
 
 import { UpdateMyProfileCommandHandler } from '../application';
 
@@ -11,7 +11,8 @@ import { UpdateMyProfileRequest } from './dto/request';
 @Controller('me')
 export class MeController {
   constructor(
-    private readonly contextService: ContextService,
+    @Inject(CONTEXT_SERVICE)
+    private readonly contextService: ContextServicePort,
     private readonly updateMyProfileCommandHandler: UpdateMyProfileCommandHandler,
   ) {}
 
@@ -20,6 +21,6 @@ export class MeController {
   @ApiOperation({ summary: '내 프로필 수정' })
   @ApiNoContentResponse()
   async updateMyProfile(@Body() body: UpdateMyProfileRequest) {
-    return this.updateMyProfileCommandHandler.execute(body.toCommand(this.contextService.userId));
+    return this.updateMyProfileCommandHandler.execute(body.toCommand(this.contextService.user));
   }
 }

@@ -2,6 +2,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 
 import { IsInt, IsOptional, Length } from 'class-validator';
 
+import { ContextUser } from '@apps/api/context';
 import { UpdateFarmCommand } from '@apps/api/farm/application';
 
 export class UpdateFarmRequest {
@@ -20,10 +21,10 @@ export class UpdateFarmRequest {
   @IsOptional()
   readonly payDeductionAmount?: number;
 
-  toCommand(farmId: string, userId: string): UpdateFarmCommand {
+  toCommand(farmId: string, contextUser: ContextUser): UpdateFarmCommand {
     return {
       farmId,
-      userId,
+      userId: contextUser.userId,
       name: this.name,
       payRatePerHour: this.payRatePerHour,
       payDeductionAmount: this.payDeductionAmount,

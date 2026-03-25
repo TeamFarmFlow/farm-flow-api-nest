@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { IsNotEmpty } from 'class-validator';
 
+import { ContextUser } from '@apps/api/context';
 import { UpdateMyProfileCommand } from '@apps/api/me/application';
 
 export class UpdateMyProfileRequest {
@@ -9,9 +10,9 @@ export class UpdateMyProfileRequest {
   @IsNotEmpty()
   readonly name: string;
 
-  toCommand(userId: string): UpdateMyProfileCommand {
+  toCommand(contextUser: ContextUser): UpdateMyProfileCommand {
     return {
-      userId,
+      userId: contextUser.userId,
       name: this.name,
     };
   }

@@ -5,6 +5,7 @@ import { IsDate, IsOptional } from 'class-validator';
 import { datetime } from '@libs/datetime';
 
 import { GetAttendancesQuery } from '@apps/api/attendance/application';
+import { ContextUser } from '@apps/api/context';
 
 export class GetAttendancesRequest {
   @ApiPropertyOptional({ type: Date })
@@ -17,10 +18,10 @@ export class GetAttendancesRequest {
   @IsOptional()
   readonly endDate: Date = datetime().toDate();
 
-  toQuery(farmId: string, userId: string): GetAttendancesQuery {
+  toQuery(contextUser: ContextUser): GetAttendancesQuery {
     return {
-      farmId,
-      userId,
+      farmId: contextUser.farmId,
+      userId: contextUser.userId,
       startDate: datetime(this.startDate).format('YYYY-MM-DD'),
       endDate: datetime(this.endDate).format('YYYY-MM-DD'),
     };

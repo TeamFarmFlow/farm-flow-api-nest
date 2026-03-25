@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 
 import { IS_PUBLIC_KEY, IS_SKIP_FARM_AUTH } from '@libs/http';
 
-import { ContextService } from '@apps/api/context';
+import { CONTEXT_SERVICE, ContextServicePort } from '@apps/api/context';
 
 import { FARM_USER_REPOSITORY, FarmUserRepositoryPort } from '../application';
 import { ForbiddenFarmUserException } from '../domain';
@@ -12,12 +12,15 @@ import { ForbiddenFarmUserException } from '../domain';
 export class FarmAuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly contextService: ContextService,
+    @Inject(CONTEXT_SERVICE)
+    private readonly contextService: ContextServicePort,
     @Inject(FARM_USER_REPOSITORY)
     private readonly farmUserRepository: FarmUserRepositoryPort,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    this.contextService.context = context;
+
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [context.getHandler(), context.getClass()]);
 
     if (isPublic) {
@@ -30,14 +33,13 @@ export class FarmAuthGuard implements CanActivate {
       return true;
     }
 
-    const userId = this.contextService.userId;
-    const farmId = this.contextService.farmId;
+    const contextUser = this.contextService.user;
 
-    if (!farmId) {
+    if (!contextUser.farmId) {
       throw new ForbiddenFarmUserException();
     }
 
-    const hasfarmUser = await this.farmUserRepository.has(farmId, userId);
+    const hasfarmUser = await this.farmUserRepository.has(contextUser.farmId, contextUser.userId);
 
     if (!hasfarmUser) {
       throw new ForbiddenFarmUserException();

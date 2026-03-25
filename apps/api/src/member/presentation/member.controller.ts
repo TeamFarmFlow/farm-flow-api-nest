@@ -1,11 +1,11 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Param, Patch, Query } from '@nestjs/common';
 import { ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { ParseUuidStringPipe } from '@libs/http';
 import { RequiredPermissions } from '@libs/http';
 import { PermissionKey } from '@libs/shared';
 
-import { ContextService } from '@apps/api/context';
+import { CONTEXT_SERVICE, ContextServicePort } from '@apps/api/context';
 
 import { GetMembersQueryHandler, RemoveMemberCommandHandler, UpdateMemberRoleCommandHandler } from '../application';
 
@@ -16,7 +16,8 @@ import { MembersResponse } from './dto/response';
 @Controller('members')
 export class MemberController {
   constructor(
-    private readonly contextService: ContextService,
+    @Inject(CONTEXT_SERVICE)
+    private readonly contextService: ContextServicePort,
     private readonly getMembersQueryHandler: GetMembersQueryHandler,
     private readonly updateMemberRoleCommandHandler: UpdateMemberRoleCommandHandler,
     private readonly removeMemberCommandHandler: RemoveMemberCommandHandler,
@@ -27,7 +28,7 @@ export class MemberController {
   @ApiOperation({ summary: '농장 멤버 조회' })
   @ApiOkResponse({ type: MembersResponse })
   async getMembers(@Query() query: GetMembersRequest) {
-    return MembersResponse.fromResult(await this.getMembersQueryHandler.execute(query.toQuery(this.contextService.farmId)));
+    return MembersResponse.fromResult(await this.getMembersQueryHandler.execute(query.toQuery(this.contextService.user)));
   }
 
   @RequiredPermissions([PermissionKey.MemberRoleUpdate, PermissionKey.MemberPayUpdate])
@@ -36,7 +37,7 @@ export class MemberController {
   @ApiOperation({ summary: '농장 멤버 역할 수정' })
   @ApiNoContentResponse()
   async updateMemberRole(@Param('userId', new ParseUuidStringPipe()) userId: string, @Body() body: UpdateMemberRoleRequest) {
-    return this.updateMemberRoleCommandHandler.execute(body.toCommand(this.contextService.farmId, userId));
+    return this.updateMemberRoleCommandHandler.execute(body.toCommand(userId, this.contextService.user));
   }
 
   @RequiredPermissions([PermissionKey.MemberRemove])
@@ -45,6 +46,6 @@ export class MemberController {
   @ApiOperation({ summary: '농장 멤버 제거' })
   @ApiNoContentResponse()
   async removeMember(@Param('userId', new ParseUuidStringPipe()) userId: string) {
-    return this.removeMemberCommandHandler.execute({ userId, farmId: this.contextService.farmId });
+    return this.removeMemberCommandHandler.execute({ userId, farmId: this.contextService.user.farmId });
   }
 }

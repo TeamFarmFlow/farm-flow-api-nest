@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { IsDate, IsNotEmpty } from 'class-validator';
 
+import { ContextUser } from '@apps/api/context';
 import { UpdatePayrollAttendanceCommand } from '@apps/api/payroll/application';
 
 export class UpdatePayrollAttendanceRequest {
@@ -15,11 +16,11 @@ export class UpdatePayrollAttendanceRequest {
   @IsNotEmpty()
   readonly checkedOutAt: Date;
 
-  toCommand(id: string, userId: string, farmId: string): UpdatePayrollAttendanceCommand {
+  toCommand(id: string, contextUser: ContextUser): UpdatePayrollAttendanceCommand {
     return {
       id,
-      farmId,
-      userId,
+      farmId: contextUser.farmId,
+      userId: contextUser.userId,
       checkedInAt: this.checkedInAt,
       checkedOutAt: this.checkedOutAt,
     };

@@ -4,6 +4,7 @@ import { IsArray, IsEnum, IsNotEmpty } from 'class-validator';
 
 import { PermissionKey } from '@libs/shared';
 
+import { ContextUser } from '@apps/api/context';
 import { CreateRoleCommand } from '@apps/api/role/application';
 
 export class CreateRoleRequest {
@@ -17,9 +18,9 @@ export class CreateRoleRequest {
   @IsNotEmpty()
   readonly permissionKeys: PermissionKey[];
 
-  toCommand(farmId: string): CreateRoleCommand {
+  toCommand(contextUser: ContextUser): CreateRoleCommand {
     return {
-      farmId,
+      farmId: contextUser.farmId,
       name: this.name,
       permissionKeys: this.permissionKeys,
     };

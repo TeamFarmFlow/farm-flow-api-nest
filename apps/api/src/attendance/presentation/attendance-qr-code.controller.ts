@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, Sse } from '@nestjs/common';
+import { Body, Controller, Inject, Param, Post, Sse } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
@@ -7,7 +7,7 @@ import { filter, fromEvent, map, Observable } from 'rxjs';
 import { RequiredPermissions } from '@libs/http';
 import { PermissionKey } from '@libs/shared';
 
-import { ContextService } from '@apps/api/context';
+import { CONTEXT_SERVICE, ContextServicePort } from '@apps/api/context';
 
 import { CreateAttendanceQrCodeCommandHandler } from '../application';
 import { AttendanceQrCodeGeneratedEvent } from '../domain';
@@ -21,7 +21,8 @@ import { AttendanceQrCodeResponse, CreateAttendanceQrCodeResponse } from './dto/
 export class AttendanceQrCodeController {
   constructor(
     private readonly eventEmitter: EventEmitter2,
-    private readonly contextService: ContextService,
+    @Inject(CONTEXT_SERVICE)
+    private readonly contextService: ContextServicePort,
     private readonly createAttendanceQrCodeCommandHandler: CreateAttendanceQrCodeCommandHandler,
   ) {}
 
@@ -39,6 +40,6 @@ export class AttendanceQrCodeController {
   @ApiOperation({ summary: '출퇴근 QR 코드 생성' })
   @ApiCreatedResponse({ type: CreateAttendanceQrCodeResponse })
   async createAttendanceQrCode(@Body() body: CreateAttendanceQrCodeRequest): Promise<CreateAttendanceQrCodeResponse> {
-    return CreateAttendanceQrCodeResponse.fromResult(await this.createAttendanceQrCodeCommandHandler.execute(body.toCommand(this.contextService.farmId)));
+    return CreateAttendanceQrCodeResponse.fromResult(await this.createAttendanceQrCodeCommandHandler.execute(body.toCommand(this.contextService.user)));
   }
 }

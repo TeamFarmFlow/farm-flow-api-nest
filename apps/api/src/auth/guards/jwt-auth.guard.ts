@@ -1,4 +1,4 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { ExecutionContext, Inject, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { TokenExpiredError } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
@@ -6,7 +6,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '@libs/http';
 import { JwtClaims } from '@libs/shared';
 
-import { ContextService } from '@apps/api/context';
+import { CONTEXT_SERVICE, ContextServicePort, ContextUser } from '@apps/api/context';
 
 import { ExpiredTokenException, InvalidTokenException } from '../domain';
 
@@ -14,7 +14,8 @@ import { ExpiredTokenException, InvalidTokenException } from '../domain';
 export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(
     private readonly reflector: Reflector,
-    private readonly contextService: ContextService,
+    @Inject(CONTEXT_SERVICE)
+    private readonly contextService: ContextServicePort,
   ) {
     super();
   }
@@ -40,8 +41,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       throw new InvalidTokenException();
     }
 
-    this.contextService.userId = user?.id;
-    this.contextService.farmId = user?.farmId ?? '';
+    this.contextService.user = ContextUser.from(user?.id, user.farmId);
 
     return user ?? null;
   }

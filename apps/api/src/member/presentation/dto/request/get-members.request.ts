@@ -2,6 +2,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 
 import { IsOptional } from 'class-validator';
 
+import { ContextUser } from '@apps/api/context';
 import { GetMembersQuery } from '@apps/api/member/application';
 
 export class GetMembersRequest {
@@ -9,9 +10,9 @@ export class GetMembersRequest {
   @IsOptional()
   readonly keyword?: string;
 
-  toQuery(farmId: string): GetMembersQuery {
+  toQuery(contextUser: ContextUser): GetMembersQuery {
     return {
-      farmId,
+      farmId: contextUser.farmId,
     };
   }
 }
