@@ -1,6 +1,6 @@
 import { AttendanceEntity, FarmUserEntity } from '@libs/persistence/typeorm';
 
-import { Payroll, PayrollAttendance, PayrollFarmUser, PayrollRole, PayrollUser } from '../../domain';
+import { PayrollAttendance, PayrollFarmUser, PayrollTarget, PayrollTargetRole, PayrollUser } from '../../domain';
 
 type AttendancePayrollRawRow = {
   user_id: string;
@@ -16,28 +16,32 @@ type AttendancePayrollRawRow = {
 };
 
 export class PayrollTypeOrmMapper {
-  static toPayroll(raw: AttendancePayrollRawRow): Payroll {
-    const payroll = new Payroll();
+  static toPayrollTarget(raw: AttendancePayrollRawRow): PayrollTarget {
+    const payrollTarget = new PayrollTarget();
     const user = new PayrollUser();
 
     user.id = raw.user_id;
     user.name = raw.user_name;
 
-    payroll.user = user;
-    payroll.role = raw.role_id
-      ? Object.assign(new PayrollRole(), {
-          id: raw.role_id,
-          name: raw.role_name!,
-          super: raw.role_super!,
-          required: raw.role_required!,
-        })
-      : null;
-    payroll.payRatePerHour = raw.pay_rate_per_hour;
-    payroll.payDeductionAmount = raw.pay_deduction_amount;
-    payroll.seconds = Number(raw.seconds);
-    payroll.needCheck = raw.need_check;
+    payrollTarget.user = user;
+    payrollTarget.role = raw.role_id ? this.toPayrollTargetRole(raw) : null;
+    payrollTarget.payRatePerHour = raw.pay_rate_per_hour;
+    payrollTarget.payDeductionAmount = raw.pay_deduction_amount;
+    payrollTarget.seconds = Number(raw.seconds);
+    payrollTarget.needCheck = raw.need_check;
 
-    return payroll;
+    return payrollTarget;
+  }
+
+  static toPayrollTargetRole(raw: AttendancePayrollRawRow): PayrollTargetRole {
+    const payrollRole = new PayrollTargetRole();
+
+    payrollRole.id = raw.role_id!;
+    payrollRole.name = raw.role_name!;
+    payrollRole.super = raw.role_super!;
+    payrollRole.required = raw.role_required!;
+
+    return payrollRole;
   }
 
   static toPayrollAttendance(attendance: AttendanceEntity): PayrollAttendance {

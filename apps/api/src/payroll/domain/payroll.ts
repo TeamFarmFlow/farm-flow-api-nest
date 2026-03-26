@@ -1,11 +1,9 @@
-import { PayrollRole } from './payroll-role';
-import { PayrollUser } from './payroll-user';
-
 export class Payroll {
-  user: PayrollUser;
-  role: PayrollRole | null;
-  seconds: number;
-  payRatePerHour: number;
-  payDeductionAmount: number;
-  needCheck: boolean;
+  id: string;
+  startDate: string;
+  endDate: string;
+  totalSeconds: number;
+  totalPaymentAmount: number;
+  totalDeductionAmount: number;
+  createdAt: Date;
 }

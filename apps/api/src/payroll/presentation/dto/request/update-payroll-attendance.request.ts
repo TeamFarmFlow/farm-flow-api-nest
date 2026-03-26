@@ -16,11 +16,11 @@ export class UpdatePayrollAttendanceRequest {
   @IsNotEmpty()
   readonly checkedOutAt: Date;
 
-  toCommand(id: string, contextUser: ContextUser): UpdatePayrollAttendanceCommand {
+  toCommand(id: string, userId: string, contextUser: ContextUser): UpdatePayrollAttendanceCommand {
     return {
       id,
       farmId: contextUser.farmId,
-      userId: contextUser.userId,
+      userId,
       checkedInAt: this.checkedInAt,
       checkedOutAt: this.checkedOutAt,
     };

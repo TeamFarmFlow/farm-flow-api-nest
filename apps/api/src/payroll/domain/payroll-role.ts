@@ -1,4 +1,4 @@
-export class PayrollRole {
+export class PayrollTargetRole {
   id: string;
   name: string;
   super: boolean;

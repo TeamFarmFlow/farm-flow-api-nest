@@ -7,10 +7,16 @@ import { PermissionKey } from '@libs/shared';
 
 import { CONTEXT_SERVICE, ContextServicePort } from '@apps/api/context';
 
-import { DeletePayrollAttendanceCommandHandler, GetPayrollsByUserIdQueryHandler, GetPayrollsQueryHandler, UpdatePayrollAttendanceCommandHandler } from '../application';
+import {
+  CheckToPayrolledCommandHandler,
+  DeletePayrollAttendanceCommandHandler,
+  GetPayrollTargetsByUserIdQueryHandler,
+  GetPayrollTargetsQueryHandler,
+  UpdatePayrollAttendanceCommandHandler,
+} from '../application';
 
-import { GetPayrollsByUserIdRequest, GetPayrollsRequest, UpdatePayrollAttendanceRequest } from './dto/request';
-import { PayrollsByUserIdResponse, PayrollsResponse } from './dto/response';
+import { CheckToPayrolledRequest, GetPayrollTargetsByUserIdRequest, GetPayrollTargetsRequest, UpdatePayrollAttendanceRequest } from './dto/request';
+import { PayrollTargetsByUserIdResponse, PayrollTargetsResponse } from './dto/response';
 
 @ApiTags('급여 정산')
 @Controller('payrolls')
@@ -18,26 +24,27 @@ export class PayrollController {
   constructor(
     @Inject(CONTEXT_SERVICE)
     private readonly contextService: ContextServicePort,
-    private readonly getPayrollsQueryHandler: GetPayrollsQueryHandler,
-    private readonly getPayrollsByUserIdQueryHandler: GetPayrollsByUserIdQueryHandler,
+    private readonly getPayrollTargetsQueryHandler: GetPayrollTargetsQueryHandler,
+    private readonly getPayrollTargetsByUserIdQueryHandler: GetPayrollTargetsByUserIdQueryHandler,
     private readonly updatePayrollAttendanceCommandHandler: UpdatePayrollAttendanceCommandHandler,
     private readonly deletePayrollAttendanceCommandHandler: DeletePayrollAttendanceCommandHandler,
+    private readonly checkToPayrolledCommandHandler: CheckToPayrolledCommandHandler,
   ) {}
 
   @RequiredPermissions([PermissionKey.PayrollRead])
-  @Get()
+  @Get('targets')
   @ApiOperation({ summary: '급여 정산 목록 조회' })
-  @ApiOkResponse({ type: PayrollsResponse })
-  async getPayrolls(@Query() query: GetPayrollsRequest): Promise<PayrollsResponse> {
-    return PayrollsResponse.fromResult(await this.getPayrollsQueryHandler.execute(query.toQuery(this.contextService.user)));
+  @ApiOkResponse({ type: PayrollTargetsResponse })
+  async getPayrollTargets(@Query() query: GetPayrollTargetsRequest): Promise<PayrollTargetsResponse> {
+    return PayrollTargetsResponse.fromResult(await this.getPayrollTargetsQueryHandler.execute(query.toQuery(this.contextService.user)));
   }
 
   @RequiredPermissions([PermissionKey.PayrollRead])
-  @Get(':userId')
-  @ApiOperation({ summary: '급여 정산 대상 목록 조회' })
-  @ApiOkResponse({ type: PayrollsByUserIdResponse })
-  async getPayrollsByUserId(@Param('userId', new ParseUuidStringPipe()) userId: string, @Query() query: GetPayrollsByUserIdRequest) {
-    return PayrollsByUserIdResponse.fromResult(await this.getPayrollsByUserIdQueryHandler.execute(query.toQuery(userId, this.contextService.user)));
+  @Get('targets/:userId')
+  @ApiOperation({ summary: '급여 정산 대상 상세 조회' })
+  @ApiOkResponse({ type: PayrollTargetsByUserIdResponse })
+  async getPayrollTargetsByUserId(@Param('userId', new ParseUuidStringPipe()) userId: string, @Query() query: GetPayrollTargetsByUserIdRequest) {
+    return PayrollTargetsByUserIdResponse.fromResult(await this.getPayrollTargetsByUserIdQueryHandler.execute(query.toQuery(userId, this.contextService.user)));
   }
 
   @RequiredPermissions([PermissionKey.PayrollAttendanceHistoryUpdate])
@@ -50,7 +57,7 @@ export class PayrollController {
     @Param('id', new ParseUuidStringPipe()) id: string,
     @Body() body: UpdatePayrollAttendanceRequest,
   ) {
-    return this.updatePayrollAttendanceCommandHandler.execute(body.toCommand(id, this.contextService.user));
+    return this.updatePayrollAttendanceCommandHandler.execute(body.toCommand(id, userId, this.contextService.user));
   }
 
   @RequiredPermissions([PermissionKey.PayrollAttendanceHistoryDelete])
@@ -67,5 +74,7 @@ export class PayrollController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: '급여 정산 완료 처리' })
   @ApiNoContentResponse()
-  async checkToPayrolled() {}
+  async checkToPayrolled(@Param('userId', new ParseUuidStringPipe()) userId: string, @Body() body: CheckToPayrolledRequest) {
+    return this.checkToPayrolledCommandHandler.execute(body.toCommand(userId, this.contextService.user));
+  }
 }

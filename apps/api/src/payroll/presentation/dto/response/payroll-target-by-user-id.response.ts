@@ -6,7 +6,7 @@ import { AttendanceStatus } from '@libs/shared';
 
 import { PayrollAttendance } from '@apps/api/payroll/domain';
 
-export class PayrollByUserIdResponse {
+export class PayrollTargetByUserIdResponse {
   @ApiProperty({ type: String })
   @Expose()
   id: string;
@@ -32,7 +32,7 @@ export class PayrollByUserIdResponse {
   checkedOutAt: Date | null;
 
   public static fromPayrollAttendance(payrollAttendance: PayrollAttendance) {
-    const response = new PayrollByUserIdResponse();
+    const response = new PayrollTargetByUserIdResponse();
 
     response.id = payrollAttendance.id;
     response.workDate = payrollAttendance.workDate;

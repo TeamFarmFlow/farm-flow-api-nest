@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { And, DataSource, EntityManager, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { And, DataSource, EntityManager, LessThanOrEqual, MoreThanOrEqual, UpdateResult } from 'typeorm';
 
 import { AttendanceEntity, FarmUserEntity, RoleEntity, UserEntity } from '@libs/persistence/typeorm';
 import { AttendanceStatus } from '@libs/shared';
@@ -29,7 +29,7 @@ export class TypeOrmPayrollAttendanceRepository implements PayrollAttendanceRepo
     return (em ?? this.dataSource).getRepository(AttendanceEntity);
   }
 
-  async findPayrollsByFarmIdAndDateRange(farmId: string, startDate: string, endDate: string) {
+  async findPayrollTargetsByFarmIdAndDateRange(farmId: string, startDate: string, endDate: string) {
     const rows = await this.getRepository()
       .createQueryBuilder('a')
       .innerJoin(FarmUserEntity, 'fu', 'fu.farmId = a.farmId AND fu.userId = a.userId')
@@ -63,10 +63,10 @@ export class TypeOrmPayrollAttendanceRepository implements PayrollAttendanceRepo
       .orderBy('u.id', 'ASC')
       .getRawMany<AttendancePayrollRawRow>();
 
-    return rows.map((row) => PayrollTypeOrmMapper.toPayroll(row));
+    return rows.map((row) => PayrollTypeOrmMapper.toPayrollTarget(row));
   }
 
-  async findPayrollAttendancesByFarmIdAndUserIdAndDateRange(farmId: string, userId: string, startDate: string, endDate: string) {
+  async findPayrollTargetsByFarmIdAndUserIdAndDateRange(farmId: string, userId: string, startDate: string, endDate: string) {
     const rows = await this.getRepository().find({
       select: {
         id: true,
@@ -89,6 +89,26 @@ export class TypeOrmPayrollAttendanceRepository implements PayrollAttendanceRepo
     return rows.map((row) => PayrollTypeOrmMapper.toPayrollAttendance(row));
   }
 
+  async findUnpayrolledByFarmIdAndUserIdAndDateRange(farmId: string, userId: string, startDate: string, endDate: string) {
+    const rows = await this.getRepository().find({
+      select: {
+        id: true,
+        seconds: true,
+      },
+      where: {
+        farmId,
+        userId,
+        payrolled: false,
+        workDate: And(MoreThanOrEqual(startDate), LessThanOrEqual(endDate)),
+      },
+      order: {
+        workDate: 'ASC',
+      },
+    });
+
+    return rows.map((row) => PayrollTypeOrmMapper.toPayrollAttendance(row));
+  }
+
   async update(id: string, farmId: string, userId: string, checkedInAt: Date, checkedOutAt: Date): Promise<void> {
     await this.getRepository().update(
       { id, farmId, userId },
@@ -100,6 +120,22 @@ export class TypeOrmPayrollAttendanceRepository implements PayrollAttendanceRepo
         updatedAt: () => 'NOW()',
       },
     );
+  }
+
+  async updatePayrolled(id: string, em: EntityManager): Promise<{ seconds: number }> {
+    const { raw } = (await this.getRepository(em)
+      .createQueryBuilder()
+      .update(AttendanceEntity)
+      .set({
+        payrolled: true,
+        updatedAt: () => 'NOW()',
+      })
+      .where('id = :id', { id })
+      .andWhere('payrolled IS FALSE')
+      .returning('seconds')
+      .execute()) as Omit<UpdateResult, 'raw'> & { raw: Array<{ seconds: number | string }> };
+
+    return { seconds: Number(raw[0]?.seconds ?? 0) };
   }
 
   async delete(id: string, farmId: string, userId: string): Promise<void> {

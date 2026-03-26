@@ -1,2 +1,2 @@
-export * from './get-payrolls.result';
-export * from './get-payrolls-by-user-id.result';
+export * from './get-payroll-targets.result';
+export * from './get-payroll-targets-by-user-id.result';

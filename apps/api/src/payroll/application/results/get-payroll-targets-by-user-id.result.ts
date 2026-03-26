@@ -1,6 +1,6 @@
 import { PayrollAttendance } from '../../domain';
 
-export type GetPayrollsByUserIdResult = {
+export type GetPayrollTargetsByUserIdResult = {
   total: number;
   payRatePerHour: number;
   payDeductionAmount: number;

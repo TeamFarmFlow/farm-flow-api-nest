@@ -5,3 +5,4 @@ export * from './farm-user.entity';
 export * from './role.entity';
 export * from './role-permission.entity';
 export * from './attendance.entity';
+export * from './payroll.entity';

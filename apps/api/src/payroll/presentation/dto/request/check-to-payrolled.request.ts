@@ -5,9 +5,9 @@ import { IsDate, IsOptional } from 'class-validator';
 import { datetime } from '@libs/datetime';
 
 import { ContextUser } from '@apps/api/context';
-import { GetPayrollsByUserIdQuery } from '@apps/api/payroll/application';
+import { CheckToPayrolledCommand } from '@apps/api/payroll/application';
 
-export class GetPayrollsByUserIdRequest {
+export class CheckToPayrolledRequest {
   @ApiPropertyOptional({ type: Date })
   @IsDate()
   @IsOptional()
@@ -18,7 +18,7 @@ export class GetPayrollsByUserIdRequest {
   @IsOptional()
   readonly endDate: Date = datetime().toDate();
 
-  toQuery(userId: string, contextUser: ContextUser): GetPayrollsByUserIdQuery {
+  toCommand(userId: string, contextUser: ContextUser): CheckToPayrolledCommand {
     return {
       farmId: contextUser.farmId,
       userId,

@@ -1,4 +1,4 @@
-export type GetPayrollsByUserIdQuery = {
+export type CheckToPayrolledCommand = {
   farmId: string;
   userId: string;
   startDate: string;
