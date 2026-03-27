@@ -20,7 +20,7 @@ export class AttendancesResponse {
     const response = new AttendancesResponse();
 
     response.total = result.total;
-    response.rows = response.rows.map((row) => AttendanceResponse.fromAttendance(row));
+    response.rows = result.rows.map((row) => AttendanceResponse.fromAttendance(row));
 
     return response;
   }
