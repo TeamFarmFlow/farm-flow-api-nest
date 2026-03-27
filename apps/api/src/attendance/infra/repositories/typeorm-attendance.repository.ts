@@ -60,7 +60,7 @@ export class TypeOrmAttendanceRepository implements AttendanceRepositoryPort {
       {
         status: AttendanceStatus.CheckOut,
         checkedOutAt: () => 'NOW()',
-        seconds: () => 'EXTRACT(EPOCH FROM (:checkedOutAt::timestamptz - :checkedInAt::timestamptz))::int',
+        seconds: () => 'EXTRACT(EPOCH FROM (NOW() - "checked_in_at"))::int',
         updatedAt: () => 'NOW()',
       },
     );
