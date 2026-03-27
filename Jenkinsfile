@@ -16,15 +16,13 @@ pipeline {
       }
       steps {
         withCredentials([
-          string(credentialsId: 'farm-flow-server-root-env', variable: 'ROOT_ENV_TEXT'),
-          string(credentialsId: 'farm-flow-migration-env', variable: 'APP_ENV_TEXT'),
+          file(credentialsId: 'farm-flow-server-root-env', variable: 'ROOT_ENV_FILE'),
+          file(credentialsId: 'farm-flow-migration-env', variable: 'APP_ENV_FILE'),
         ]) {
           sh '''
-            printf '%s\n' "$ROOT_ENV_TEXT" > .env
-            printf '%s\n' "$APP_ENV_TEXT" > apps/migration/.env
+            cp "$ROOT_ENV_FILE" .env
+            cp "$APP_ENV_FILE" apps/migration/.env
             chmod 600 .env apps/migration/.env
-            cp .env /tmp/root-env.debug
-            cp apps/migration/.env /tmp/migration-env.debug
             sh apps/migration/deploy.sh
             rm -f .env apps/migration/.env
           '''
@@ -49,12 +47,12 @@ pipeline {
           }
           steps {
             withCredentials([
-              string(credentialsId: 'farm-flow-server-root-env', variable: 'ROOT_ENV_TEXT'),
-              string(credentialsId: 'farm-flow-worker-env', variable: 'APP_ENV_TEXT'),
+              file(credentialsId: 'farm-flow-server-root-env', variable: 'ROOT_ENV_FILE'),
+              file(credentialsId: 'farm-flow-worker-env', variable: 'APP_ENV_FILE'),
             ]) {
               sh '''
-                printf '%s\n' "$ROOT_ENV_TEXT" > .env
-                printf '%s\n' "$APP_ENV_TEXT" > apps/worker/.env
+                cp "$ROOT_ENV_FILE" .env
+                cp "$APP_ENV_FILE" apps/worker/.env
                 chmod 600 .env apps/worker/.env
                 sh apps/worker/deploy.sh
                 rm -f .env apps/worker/.env
@@ -78,12 +76,12 @@ pipeline {
           }
           steps {
             withCredentials([
-              string(credentialsId: 'farm-flow-server-root-env', variable: 'ROOT_ENV_TEXT'),
-              string(credentialsId: 'farm-flow-api-env', variable: 'APP_ENV_TEXT'),
+              file(credentialsId: 'farm-flow-server-root-env', variable: 'ROOT_ENV_FILE'),
+              file(credentialsId: 'farm-flow-api-env', variable: 'APP_ENV_FILE'),
             ]) {
               sh '''
-                printf '%s\n' "$ROOT_ENV_TEXT" > .env
-                printf '%s\n' "$APP_ENV_TEXT" > apps/api/.env
+                cp "$ROOT_ENV_FILE" .env
+                cp "$APP_ENV_FILE" apps/api/.env
                 chmod 600 .env apps/api/.env
                 sh apps/api/deploy.sh
                 rm -f .env apps/api/.env
