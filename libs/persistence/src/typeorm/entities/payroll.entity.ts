@@ -4,9 +4,9 @@ import { FarmEntity } from './farm.entity';
 import { UserEntity } from './user.entity';
 
 @Entity({ name: 'payrolls' })
-@Index('PAYROLLS_USER_ID_IDX', ['userId'])
+@Index('PAYROLLS_USER_ID_IDX', ['userId'], { where: 'payrolls.user_id IS NOT NULL' })
 @Index('PAYROLLS_FARM_ID_IDX', ['farmId'], { where: 'payrolls.farm_id IS NOT NULL' })
-@Index('PAYROLLS_FARM_USER_ID_IDX', ['farmId', 'userId'], { where: 'payrolls.farm_id IS NOT NULL' })
+@Index('PAYROLLS_FARM_USER_ID_IDX', ['farmId', 'userId'], { where: 'payrolls.farm_id IS NOT NULL AND payrolls.user_id IS NOT NULL' })
 export class PayrollEntity {
   @PrimaryGeneratedColumn('uuid', { primaryKeyConstraintName: 'PAYROLLS_PK' })
   id: string;
@@ -39,10 +39,10 @@ export class PayrollEntity {
   @JoinColumn({ foreignKeyConstraintName: 'PAYROLLS_FARM_FK' })
   farm: FarmEntity;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'uuid', nullable: true })
   userId: string | null;
 
-  @ManyToOne(() => UserEntity, (e) => e.farmUsers, { onDelete: 'CASCADE' })
+  @ManyToOne(() => UserEntity, (e) => e.farmUsers, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ foreignKeyConstraintName: 'PAYROLLS_USER_FK' })
   user: UserEntity;
 }
