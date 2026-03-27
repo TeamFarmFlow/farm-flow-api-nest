@@ -20,7 +20,7 @@ export class FarmsResponse {
     const response = new FarmsResponse();
 
     response.total = result.total;
-    response.rows = response.rows.map((row) => FarmRowResponse.fromFarmUser(row));
+    response.rows = result.rows.map((row) => FarmRowResponse.fromFarmUser(row));
 
     return response;
   }

@@ -11,6 +11,8 @@ export class DomainException extends Error {
     this.name = this.constructor.name;
     this.errorCode = errorCode;
     this.statusCode = statusCode;
+    this.clientErrorMessage = clientErrorMessage;
+    this.systemErrorMessage = systemErrorMessage;
     this.details = details;
   }
 }

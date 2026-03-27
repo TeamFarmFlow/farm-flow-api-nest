@@ -15,7 +15,7 @@ export class ExceptionResponse {
   ) {}
 
   public static fromDomainException(e: DomainException) {
-    return new ExceptionResponse(e.errorCode, e.statusCode, e.clientErrorMessage, e.systemErrorMessage, e.details);
+    return new ExceptionResponse(e.errorCode, e.statusCode, e.clientErrorMessage, e.systemErrorMessage, e.details, false);
   }
 
   public static fromHttpException(e: HttpException) {
