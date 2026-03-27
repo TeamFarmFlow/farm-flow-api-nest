@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   stages {
-    stage('Deploy API') {
+    stage('Deploy Migration') {
       when {
         beforeAgent true
         anyOf {
@@ -12,11 +12,11 @@ pipeline {
           changeset 'pnpm-lock.yaml'
           changeset 'tsconfig.json'
           changeset 'tsconfig.build.json'
-          changeset 'apps/api/**'
+          changeset 'apps/migration/**'
         }
       }
       steps {
-        sh 'sh apps/api/deploy.sh'
+        sh 'sh apps/migration/deploy.sh'
       }
     }
 
@@ -38,7 +38,7 @@ pipeline {
       }
     }
 
-    stage('Deploy Migration') {
+    stage('Deploy API') {
       when {
         beforeAgent true
         anyOf {
@@ -48,11 +48,11 @@ pipeline {
           changeset 'pnpm-lock.yaml'
           changeset 'tsconfig.json'
           changeset 'tsconfig.build.json'
-          changeset 'apps/migration/**'
+          changeset 'apps/api/**'
         }
       }
       steps {
-        sh 'sh apps/migration/deploy.sh'
+        sh 'sh apps/api/deploy.sh'
       }
     }
   }
