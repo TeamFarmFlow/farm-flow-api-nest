@@ -17,12 +17,12 @@ pipeline {
       }
       steps {
         withCredentials([
-          file(credentialsId: 'farm-flow-server-root-env', variable: 'ROOT_ENV'),
-          file(credentialsId: 'farm-flow-migration-env', variable: 'APP_ENV'),
+          string(credentialsId: 'farm-flow-server-root-env', variable: 'ROOT_ENV_TEXT'),
+          string(credentialsId: 'farm-flow-migration-env', variable: 'APP_ENV_TEXT'),
         ]) {
           sh '''
-            writeFile file: '.env', text: ROOT_ENV_TEXT
-            writeFile file: 'apps/migration/.env', text: APP_ENV_TEXT
+            printf '%s\n' "$ROOT_ENV_TEXT" > .env
+            printf '%s\n' "$APP_ENV_TEXT" > apps/migration/.env
             chmod 600 .env apps/migration/.env
             sh apps/migration/deploy.sh
             rm -f .env apps/migration/.env
@@ -46,12 +46,12 @@ pipeline {
       }
       steps {
         withCredentials([
-          file(credentialsId: 'farm-flow-server-root-env', variable: 'ROOT_ENV'),
-          file(credentialsId: 'farm-flow-worker-env', variable: 'APP_ENV'),
+          string(credentialsId: 'farm-flow-server-root-env', variable: 'ROOT_ENV_TEXT'),
+          string(credentialsId: 'farm-flow-worker-env', variable: 'APP_ENV_TEXT'),
         ]) {
           sh '''
-            writeFile file: '.env', text: ROOT_ENV_TEXT
-            writeFile file: 'apps/worker/.env', text: APP_ENV_TEXT
+            printf '%s\n' "$ROOT_ENV_TEXT" > .env
+            printf '%s\n' "$APP_ENV_TEXT" > apps/worker/.env
             chmod 600 .env apps/worker/.env
             sh apps/worker/deploy.sh
             rm -f .env apps/worker/.env
@@ -75,12 +75,12 @@ pipeline {
       }
       steps {
         withCredentials([
-          file(credentialsId: 'farm-flow-server-root-env', variable: 'ROOT_ENV'),
-          file(credentialsId: 'farm-flow-api-env', variable: 'APP_ENV'),
+          string(credentialsId: 'farm-flow-server-root-env', variable: 'ROOT_ENV_TEXT'),
+          string(credentialsId: 'farm-flow-api-env', variable: 'APP_ENV_TEXT'),
         ]) {
           sh '''
-            writeFile file: '.env', text: ROOT_ENV_TEXT
-            writeFile file: 'apps/api/.env', text: APP_ENV_TEXT
+            printf '%s\n' "$ROOT_ENV_TEXT" > .env
+            printf '%s\n' "$APP_ENV_TEXT" > apps/api/.env
             chmod 600 .env apps/api/.env
             sh apps/api/deploy.sh
             rm -f .env apps/api/.env
