@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthGuard } from '@nestjs/passport';
 
 import { Configuration } from '@libs/config';
 import { CookieModule } from '@libs/cookie';
@@ -22,7 +21,7 @@ import {
   RefreshCommandHandler,
   RegisterCommandHandler,
 } from './application';
-import { JwtStrategy } from './guards';
+import { JwtAuthGuard, JwtStrategy } from './guards';
 import {
   BcryptPasswordHasher,
   JwtAccessTokenIssuer,
@@ -51,7 +50,7 @@ const commandHandlers = [RegisterCommandHandler, LoginCommandHandler, RefreshCom
   providers: [
     {
       provide: APP_GUARD,
-      useFactory: AuthGuard,
+      useClass: JwtAuthGuard,
     },
     {
       provide: AUTH_USER_REPOSITORY,
