@@ -32,6 +32,6 @@ function flattenValidationErrors(errors: ValidationError[], parentPath = ''): Va
 
 export class ValidationException extends DomainException {
   constructor(errors: ValidationError[]) {
-    super('VALIDATION_FAILED', HttpStatus.BAD_REQUEST, 'Validation failed', flattenValidationErrors(errors));
+    super('VALIDATION_FAILED', HttpStatus.BAD_REQUEST, '올바르지 않은 요청 형식입니다.', 'Validation failed', flattenValidationErrors(errors));
   }
 }

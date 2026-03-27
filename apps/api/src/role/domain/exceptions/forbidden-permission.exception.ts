@@ -5,6 +5,6 @@ import { ErrorCode } from '@libs/shared';
 
 export class ForbiddenPermissionException extends DomainException {
   constructor() {
-    super(ErrorCode.ForbiddenPermission, HttpStatus.FORBIDDEN, 'Forbidden permission');
+    super(ErrorCode.ForbiddenPermission, HttpStatus.FORBIDDEN, '접근 권한이 없습니다.', 'Forbidden permission');
   }
 }
