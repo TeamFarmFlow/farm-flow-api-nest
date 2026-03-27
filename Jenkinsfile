@@ -6,6 +6,7 @@ pipeline {
       when {
         beforeAgent true
         anyOf {
+          changeset 'Jenkinsfile'
           changeset 'libs/**'
           changeset 'package.json'
           changeset 'pnpm-lock.yaml'
@@ -23,6 +24,7 @@ pipeline {
       when {
         beforeAgent true
         anyOf {
+          changeset 'Jenkinsfile'
           changeset 'libs/**'
           changeset 'package.json'
           changeset 'pnpm-lock.yaml'
@@ -40,6 +42,7 @@ pipeline {
       when {
         beforeAgent true
         anyOf {
+          changeset 'Jenkinsfile'
           changeset 'libs/**'
           changeset 'package.json'
           changeset 'pnpm-lock.yaml'
