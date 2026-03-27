@@ -5,7 +5,9 @@
     "build": "pnpm -C ../../ exec nest build migration",
     "create": "typeorm migration:create ../../apps/migration/src/migrations/migration",
     "generate": "env-cmd -f ../../.env typeorm migration:generate -d ../../dist/apps/migration/apps/migration/src/main.js ../../apps/migration/src/migrations/migration",
-    "run": "env-cmd -f ../../.env node ../../node_modules/typeorm/cli.js -d ../../dist/apps/migration/apps/migration/src/main.js migration:run",
-    "revert": "env-cmd -f ../../.env node ../../node_modules/typeorm/cli.js -d ../../dist/apps/migration/apps/migration/src/main.js migration:revert"
+    "run:dev": "env-cmd -f ../../.env node ../../node_modules/typeorm/cli.js -d ../../dist/apps/migration/apps/migration/src/main.js migration:run",
+    "revert:dev": "env-cmd -f ../../.env node ../../node_modules/typeorm/cli.js -d ../../dist/apps/migration/apps/migration/src/main.js migration:revert",
+    "run": "node ../../node_modules/typeorm/cli.js -d ../../dist/apps/migration/apps/migration/src/main.js migration:run",
+    "revert": "node ../../node_modules/typeorm/cli.js -d ../../dist/apps/migration/apps/migration/src/main.js migration:revert"
   }
 }

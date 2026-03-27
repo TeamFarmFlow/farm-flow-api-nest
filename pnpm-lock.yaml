@@ -56,9 +56,6 @@ importers:
       dayjs:
         specifier: ^1.11.19
         version: 1.11.19
-      env-cmd:
-        specifier: ^11.0.0
-        version: 11.0.0
       ioredis:
         specifier: ^5.10.0
         version: 5.10.0
@@ -147,6 +144,9 @@ importers:
       concurrently:
         specifier: ^9.2.1
         version: 9.2.1
+      env-cmd:
+        specifier: ^11.0.0
+        version: 11.0.0
       eslint:
         specifier: ^9.18.0
         version: 9.39.3
