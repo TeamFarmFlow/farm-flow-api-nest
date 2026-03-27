@@ -6,7 +6,6 @@ pipeline {
       when {
         beforeAgent true
         anyOf {
-          changeset "Jenkinsfile"
           changeset "package.json"
           changeset "pnpm-lock.yaml"
           changeset "tsconfig.json"
@@ -34,7 +33,6 @@ pipeline {
       when {
         beforeAgent true
         anyOf {
-          changeset "Jenkinsfile"
           changeset "package.json"
           changeset "pnpm-lock.yaml"
           changeset "tsconfig.json"
@@ -151,7 +149,6 @@ pipeline {
           when {
             beforeAgent true
             anyOf {
-              changeset "Jenkinsfile"
               changeset "package.json"
               changeset "pnpm-lock.yaml"
               changeset "tsconfig.json"
@@ -286,7 +283,6 @@ pipeline {
           when {
             beforeAgent true
             anyOf {
-              changeset "Jenkinsfile"
               changeset "package.json"
               changeset "pnpm-lock.yaml"
               changeset "tsconfig.json"
