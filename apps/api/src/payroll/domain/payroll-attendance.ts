@@ -7,4 +7,5 @@ export class PayrollAttendance {
   status: AttendanceStatus;
   checkedInAt: Date;
   checkedOutAt: Date | null;
+  payrolled: boolean;
 }

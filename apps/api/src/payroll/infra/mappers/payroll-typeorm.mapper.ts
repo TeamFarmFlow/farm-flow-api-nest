@@ -51,6 +51,7 @@ export class PayrollTypeOrmMapper {
     payrollAttendance.workDate = attendance.workDate;
     payrollAttendance.seconds = attendance.seconds;
     payrollAttendance.status = attendance.status;
+    payrollAttendance.payrolled = attendance.payrolled;
     payrollAttendance.checkedInAt = attendance.checkedInAt;
     payrollAttendance.checkedOutAt = attendance.checkedOutAt;
 

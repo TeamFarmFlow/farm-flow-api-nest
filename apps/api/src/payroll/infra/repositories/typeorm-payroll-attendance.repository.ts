@@ -75,6 +75,7 @@ export class TypeOrmPayrollAttendanceRepository implements PayrollAttendanceRepo
         checkedInAt: true,
         checkedOutAt: true,
         seconds: true,
+        payrolled: true,
       },
       where: {
         farmId,
@@ -110,16 +111,21 @@ export class TypeOrmPayrollAttendanceRepository implements PayrollAttendanceRepo
   }
 
   async update(id: string, farmId: string, userId: string, checkedInAt: Date, checkedOutAt: Date): Promise<void> {
-    await this.getRepository().update(
-      { id, farmId, userId },
-      {
+    await this.getRepository()
+      .createQueryBuilder()
+      .update(AttendanceEntity)
+      .set({
         status: AttendanceStatus.CheckOut,
         checkedInAt,
         checkedOutAt,
-        seconds: () => 'EXTRACT(EPOCH FROM (NOW() - "checked_in_at"))::int',
+        seconds: () => 'EXTRACT(EPOCH FROM (:checkedOutAt::timestamptz - :checkedInAt::timestamptz))::int',
         updatedAt: () => 'NOW()',
-      },
-    );
+      })
+      .where('id = :id', { id })
+      .andWhere('farm_id = :farmId', { farmId })
+      .andWhere('user_id = :userId', { userId })
+      .setParameters({ checkedInAt, checkedOutAt })
+      .execute();
   }
 
   async updatePayrolled(id: string, em: EntityManager): Promise<{ seconds: number }> {
