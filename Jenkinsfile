@@ -6,7 +6,6 @@ pipeline {
       when {
         beforeAgent true
         anyOf {
-          changeset "Jenkinsfile"
           changeset "package.json"
           changeset "pnpm-lock.yaml"
           changeset "tsconfig.json"
@@ -34,7 +33,6 @@ pipeline {
       when {
         beforeAgent true
         anyOf {
-          changeset "Jenkinsfile"
           changeset "package.json"
           changeset "pnpm-lock.yaml"
           changeset "tsconfig.json"
@@ -69,7 +67,6 @@ pipeline {
           when {
             beforeAgent true
             anyOf {
-              changeset "Jenkinsfile"
               changeset "package.json"
               changeset "pnpm-lock.yaml"
               changeset "tsconfig.json"
@@ -103,7 +100,6 @@ pipeline {
           when {
             beforeAgent true
             anyOf {
-              changeset "Jenkinsfile"
               changeset "package.json"
               changeset "pnpm-lock.yaml"
               changeset "tsconfig.json"
@@ -135,28 +131,6 @@ pipeline {
       }
     }
 
-    stage('Cleanup Root Env') {
-      when {
-        beforeAgent true
-        anyOf {
-          changeset "Jenkinsfile"
-          changeset "package.json"
-          changeset "pnpm-lock.yaml"
-          changeset "tsconfig.json"
-          changeset "tsconfig.build.json"
-          changeset "apps/migration/**"
-          changeset "apps/worker/**"
-          changeset "apps/api/**"
-          changeset "libs/**"
-        }
-      }
-      steps {
-        sh '''
-          ROOT_ENV_FILE=.env
-          rm -f "$ROOT_ENV_FILE"
-        '''
-      }
-    }
   }
 
   post {
