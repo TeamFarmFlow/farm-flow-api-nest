@@ -31,60 +31,64 @@ pipeline {
       }
     }
 
-    stage('Deploy Worker') {
-      when {
-        beforeAgent true
-        anyOf {
-          changeset "Jenkinsfile"
-          changeset "libs/**"
-          changeset "package.json"
-          changeset "pnpm-lock.yaml"
-          changeset "tsconfig.json"
-          changeset "tsconfig.build.json"
-          changeset "apps/worker/**"
+    stage('Deploy Services') {
+      parallel {
+        stage('Deploy Worker') {
+          when {
+            beforeAgent true
+            anyOf {
+              changeset "Jenkinsfile"
+              changeset "libs/**"
+              changeset "package.json"
+              changeset "pnpm-lock.yaml"
+              changeset "tsconfig.json"
+              changeset "tsconfig.build.json"
+              changeset "apps/worker/**"
+            }
+          }
+          steps {
+            withCredentials([
+              string(credentialsId: 'farm-flow-server-root-env', variable: 'ROOT_ENV_TEXT'),
+              string(credentialsId: 'farm-flow-worker-env', variable: 'APP_ENV_TEXT'),
+            ]) {
+              sh '''
+                printf '%s\n' "$ROOT_ENV_TEXT" > .env
+                printf '%s\n' "$APP_ENV_TEXT" > apps/worker/.env
+                chmod 600 .env apps/worker/.env
+                sh apps/worker/deploy.sh
+                rm -f .env apps/worker/.env
+              '''
+            }
+          }
         }
-      }
-      steps {
-        withCredentials([
-          string(credentialsId: 'farm-flow-server-root-env', variable: 'ROOT_ENV_TEXT'),
-          string(credentialsId: 'farm-flow-worker-env', variable: 'APP_ENV_TEXT'),
-        ]) {
-          sh '''
-            printf '%s\n' "$ROOT_ENV_TEXT" > .env
-            printf '%s\n' "$APP_ENV_TEXT" > apps/worker/.env
-            chmod 600 .env apps/worker/.env
-            sh apps/worker/deploy.sh
-            rm -f .env apps/worker/.env
-          '''
-        }
-      }
-    }
 
-    stage('Deploy API') {
-      when {
-        beforeAgent true
-        anyOf {
-          changeset "Jenkinsfile"
-          changeset "libs/**"
-          changeset "package.json"
-          changeset "pnpm-lock.yaml"
-          changeset "tsconfig.json"
-          changeset "tsconfig.build.json"
-          changeset "apps/api/**"
-        }
-      }
-      steps {
-        withCredentials([
-          string(credentialsId: 'farm-flow-server-root-env', variable: 'ROOT_ENV_TEXT'),
-          string(credentialsId: 'farm-flow-api-env', variable: 'APP_ENV_TEXT'),
-        ]) {
-          sh '''
-            printf '%s\n' "$ROOT_ENV_TEXT" > .env
-            printf '%s\n' "$APP_ENV_TEXT" > apps/api/.env
-            chmod 600 .env apps/api/.env
-            sh apps/api/deploy.sh
-            rm -f .env apps/api/.env
-          '''
+        stage('Deploy API') {
+          when {
+            beforeAgent true
+            anyOf {
+              changeset "Jenkinsfile"
+              changeset "libs/**"
+              changeset "package.json"
+              changeset "pnpm-lock.yaml"
+              changeset "tsconfig.json"
+              changeset "tsconfig.build.json"
+              changeset "apps/api/**"
+            }
+          }
+          steps {
+            withCredentials([
+              string(credentialsId: 'farm-flow-server-root-env', variable: 'ROOT_ENV_TEXT'),
+              string(credentialsId: 'farm-flow-api-env', variable: 'APP_ENV_TEXT'),
+            ]) {
+              sh '''
+                printf '%s\n' "$ROOT_ENV_TEXT" > .env
+                printf '%s\n' "$APP_ENV_TEXT" > apps/api/.env
+                chmod 600 .env apps/api/.env
+                sh apps/api/deploy.sh
+                rm -f .env apps/api/.env
+              '''
+            }
+          }
         }
       }
     }

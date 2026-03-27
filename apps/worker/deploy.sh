@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -eu
+
 APP_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 
 sh $APP_DIR/build.sh
