@@ -18,7 +18,7 @@ pipeline {
       }
       steps {
         withCredentials([
-          file(credentialsId: 'farm-flow-server-root-env', variable: 'ROOT_ENV_CREDENTIAL_FILE'),
+          file(credentialsId: 'FARM_FLOW_SERVER_ROOT_ENV', variable: 'ROOT_ENV_CREDENTIAL_FILE'),
         ]) {
           sh '''
             ROOT_ENV_FILE=.env
@@ -42,7 +42,7 @@ pipeline {
       }
       steps {
         withCredentials([
-          file(credentialsId: 'farm-flow-migration-env', variable: 'APP_ENV_CREDENTIAL_FILE'),
+          file(credentialsId: 'FARM_FLOW_SERVER_APPS_MIGRATION_ENV', variable: 'APP_ENV_CREDENTIAL_FILE'),
         ]) {
           sh '''
             set -eu
@@ -55,7 +55,7 @@ pipeline {
             APP_DOCKER_ENV_FILE=""
             IMAGE_NAME="farm-flow-migration:latest"
             CONTAINER_NAME="farm-flow-migration-run"
-            NETWORK_NAME="farm-flow_farm-flow"
+            NETWORK_NAME="home_farm-flow"
 
             cleanup() {
               rm -f "$APP_ENV_FILE"
@@ -159,7 +159,7 @@ pipeline {
           }
           steps {
             withCredentials([
-              file(credentialsId: 'farm-flow-worker-env', variable: 'APP_ENV_CREDENTIAL_FILE'),
+              file(credentialsId: 'FARM_FLOW_SERVER_APPS_WORKER_ENV', variable: 'APP_ENV_CREDENTIAL_FILE'),
             ]) {
               sh '''
                 set -eu
@@ -171,7 +171,7 @@ pipeline {
                 ROOT_DOCKER_ENV_FILE=""
                 APP_DOCKER_ENV_FILE=""
                 IMAGE_NAME="farm-flow-worker:latest"
-                NETWORK_NAME="farm-flow_farm-flow"
+                NETWORK_NAME="home_farm-flow"
                 SERVICE_ALIAS="farm-flow-worker"
                 CONTAINER_NAME="$SERVICE_ALIAS"
 
@@ -293,7 +293,7 @@ pipeline {
           }
           steps {
             withCredentials([
-              file(credentialsId: 'farm-flow-api-env', variable: 'APP_ENV_CREDENTIAL_FILE'),
+              file(credentialsId: 'FARM_FLOW_SERVER_APPS_API_ENV', variable: 'APP_ENV_CREDENTIAL_FILE'),
             ]) {
               sh '''
                 set -eu
@@ -305,7 +305,7 @@ pipeline {
                 ROOT_DOCKER_ENV_FILE=""
                 APP_DOCKER_ENV_FILE=""
                 IMAGE_NAME="farm-flow-api:latest"
-                NETWORK_NAME="farm-flow_farm-flow"
+                NETWORK_NAME="home_farm-flow"
                 SERVICE_ALIAS="farm-flow-api"
                 CONTAINER_BLUE="${SERVICE_ALIAS}-blue"
                 CONTAINER_GREEN="${SERVICE_ALIAS}-green"
