@@ -1,6 +1,6 @@
 {
   "name": "@farm-flow/api",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "scripts": {
     "dev": "env-cmd -f ../../.env -f .env pnpm -C ../../ exec nest start api --watch",
     "build": "pnpm -C ../../ exec nest build api",
