@@ -6,7 +6,7 @@ export class MemberTypeOrmMapper {
   static toMember(farmUser: FarmUserEntity): Member {
     const member = new Member();
 
-    member.user = MemberTypeOrmMapper.toMemberUser(farmUser.user);
+    member.user = MemberTypeOrmMapper.toMemberUser(farmUser.user ?? { id: farmUser?.userId });
     member.role = farmUser.role ? MemberTypeOrmMapper.toMemberRole(farmUser.role) : null;
     member.payRatePerHour = farmUser.payRatePerHour;
     member.payDeductionAmount = farmUser.payDeductionAmount;
